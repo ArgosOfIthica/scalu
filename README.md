@@ -14,6 +14,7 @@ but this might vary per game or Source build.
 
 This project also contains Python scripts for help in automating the creation of registers and constants. These should be run with arguments at the command line; run them for more specific options and documentation.
 
+Documentation: https://github.com/ArgosOfIthica/scalu/wiki
 
 ## Examples
 
