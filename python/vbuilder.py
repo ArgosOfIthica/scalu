@@ -1,7 +1,26 @@
-import sys
 
-version = "07082019"
+"""vbuilder.py is a code writing utility for the scalu framework
+
+Usage:
+	vbuilder.py register <name> <word_size> [--value=<v>]
+	vbuilder.py constant <name> <word_size> [--value=<v>]
+	vbuilder.py batch <name> <word_size> ( -r | -c ) <size>
+	vbuilder.py constants <word_size>
+	vbuilder.py (-h | --help)
+	vbuilder.py --version
+
+Options:
+	-h --help			Show usage
+	--version			Show version
+	--value=<v>			Value a variable will be generated with [default: 0]
+	-r					Use the register subtype
+	-c					Use the constant subtype
+"""
+
+from docopt import docopt
+
 types = list()
+version = "07142019"
 
 class vartype():
 	short_form = ""
@@ -29,22 +48,8 @@ def build_types():
 	types.append(all_constants)
 
 
-def argcheck():
-	build_types()
-	if len(sys.argv) < 4:
-		print("=" * 20)
-		print("Corresponding SCALU build: " + version + "\n")
-		print("vbuilder always expects at least 3 positional arguments: type, name, word_size\n")
-		print("If type is register or constant, vbuilder expects 1 additional argument: value (e.g. vbuilder.py r myvariablename 8 42)\n")
-		print("If type is batch, vbuilder expects 2 additional arguments: subtype (r,c), size (e.g. vbuilder.py b myvariablename 8 r 6)\n")
-		print("Valid types: ")
-		for type in types:
-			print(type.short_form + " : " + type.long_form)
-		print("=" * 20)
-	else:
-		process_arguments()
-
 def verify_word_size(word):
+	word = int(word)
 	assert(word > 2), "invalid word size"
 	return word
 
@@ -61,11 +66,13 @@ def verify_type(input):
 	assert(result is not ""), "type could not be validated"
 	return result
 
-def verify_batch_size(size, word_size):
+def verify_batch_size(size):
+	size = int(size)
 	assert(size > 0), "size must be positive integer"
 	return size
 
 def verify_value(value, word_size):
+	value = int(value)
 	max_int = int((2**word_size) / 2)
 	assert(value < max_int ), "value is higher than maximum value"
 	assert(value >= -max_int ), "value is lower than minimum value"
@@ -74,30 +81,47 @@ def verify_value(value, word_size):
 get_bin = lambda x, n: format(x, 'b').zfill(n)
 
 
-def process_arguments():
-	type = verify_type(sys.argv[1])
-	varname = sys.argv[2]
-	word_size =  verify_word_size(int(sys.argv[3]))
-	if type.long_form is "batch":
-		generate_batch(varname, type, word_size)
-	elif type.long_form is "all_constants":
+def argcheck(args):
+	build_types()
+	if args.get("register"):
+		type = verify_type("register")
+		name = args.get("<name>")
+		word_size = verify_word_size(args.get("<word_size>"))
+		value = 0
+		if args.get("--value") is not None:
+			value = verify_value(args.get("--value"), word_size)
+		generate_variable(name, type, word_size, value)
+	elif args.get("constant"):
+		type = verify_type("constant")
+		name = args.get("<name>")
+		word_size = verify_word_size(args.get("<word_size>"))
+		value = 0
+		if args.get("--value") is not None:
+			value = verify_value(args.get("--value"), word_size)
+		generate_variable(name, type, word_size, value)
+	elif args.get("constants"):
+		word_size = verify_word_size(args.get("<word_size>"))
 		generate_all_constants(word_size)
-	else:
-		value = verify_value(int(sys.argv[4]), word_size)
-		generate_variable(varname, type, word_size, value)
+	elif args.get("batch"):
+		name = args.get("<name>")
+		word_size = verify_word_size(args.get("<word_size>"))
+		size = verify_batch_size(args.get("<size>"))
+		if args.get("-c"):
+			subtype = verify_type("constant")
+			generate_batch(name, subtype, word_size, size)
+		if args.get("-r"):
+			subtype = verify_type("register")
+			generate_batch(name, subtype, word_size, size)
 
 def generate_all_constants(word_size):
 	max_int = int((2 ** word_size) / 2)
-	constant_type = types[1]
+	constant_type = verify_type("constant")
 	for var in range( - max_int, max_int):
 		varname = str(var)
 		generate_variable(varname, constant_type, word_size, var)
 
 
-def generate_batch(varname, type, word_size):
-	subtype = verify_type(sys.argv[4])
-	size = verify_batch_size(int(sys.argv[5]), word_size)
-	assert(subtype.long_form is "register" or "constant"), "unsupported batch type"
+def generate_batch(varname, subtype, word_size, size):
 	for var in range(0, size):
 		bname = varname + str(var)
 		generate_variable(bname, subtype, word_size)
@@ -106,6 +130,8 @@ def generate_batch(varname, type, word_size):
 
 def generate_variable(varname, type, word_size, value = 0):
 	prefix = type.short_form + varname
+
+
 	#head
 	out = "// ---" + type.long_form.upper() + " " + varname.upper() + " ( " + str(word_size) + " BIT; ver: " + version + " )\n\n"
 	out += "alias " + prefix + "cb " + prefix + "b1\n"
@@ -139,8 +165,8 @@ def generate_variable(varname, type, word_size, value = 0):
 		else:
 			out += "alias " + prefix + "b" + str(x) + " btrue\n"
 	out += "\n"
-	
-	
+
+
 
 	#main rotary
 	if type.is_writable:
@@ -170,4 +196,6 @@ def generate_variable(varname, type, word_size, value = 0):
 		out += '\n'
 	print(out)
 
-argcheck()
+if __name__ == '__main__':
+	args = docopt(__doc__, version=version)
+	argcheck(args)
