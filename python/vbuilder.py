@@ -1,24 +1,5 @@
-
-"""vbuilder.py is a code writing utility for the scalu framework
-
-Usage:
-	vbuilder.py variable <name> <word_size> [--value=<v>]
-	vbuilder.py batch <name> <word_size> <size>
-	vbuilder.py array <name> <word_size> <size>
-	vbuilder.py constants <word_size>
-	vbuilder.py (-h | --help)
-	vbuilder.py --version
-
-Options:
-	-h --help			Show usage
-	--version			Show version
-	--value=<v>			Value a variable will be generated with [default: 0]
-"""
-
-from docopt import docopt
-
 types = list()
-version = "08292019"
+version = "08302019"
 
 
 #global types
@@ -88,8 +69,11 @@ def verify_array_list(size, lst):
 
 def verify_int_array(word_size, lst):
 	for x in range(0,len(lst)):
+		assert(lst[x] == int(lst[x])), "elements in imported list must be of type int"
 		assert(lst[x] <= get_max_int(word_size)), "imported integer list has value greater than maximum integer"
 		assert(lst[x] >= get_min_int(word_size)), "imported integer list has value less than minimum integer"
+
+#utility functions
 
 def get_bin(value, bit_size):
 	return format(value, 'b').zfill(bit_size)
@@ -100,35 +84,7 @@ def get_max_int(word_size):
 def get_min_int(word_size):
 	return int(2**(word_size - 1) * -1)
 
-
-def argcheck(args):
-	if args.get("variable"):
-		name = verify_varname(args.get("<name>"))
-		word_size = verify_word_size(args.get("<word_size>"))
-		value = 0
-		if args.get("--value") is not None:
-			value = verify_value(args.get("--value"), word_size)
-		generate_variable(name, word_size, value)
-	elif args.get("constants"):
-		word_size = verify_word_size(args.get("<word_size>"))
-		generate_all_constants(word_size)
-	elif args.get("batch"):
-		name = verify_varname(args.get("<name>"))
-		word_size = verify_word_size(args.get("<word_size>"))
-		size = verify_batch_size(args.get("<size>"))
-		generate_batch(name, word_size, size)
-	elif args.get("array"):
-		name = verify_varname(args.get("<name>"))
-		word_size = verify_word_size(args.get("<word_size>"))
-		size = verify_array_size(args.get("<size>"), args.get("<word_size>"))
-		generate_array(name, word_size, size)
-
-def generate_all_constants(word_size):
-	max_int = int(2 ** (word_size - 1))
-	for var in range( - max_int, max_int):
-		varname = str(var)
-		generate_variable(varname, word_size, var)
-
+#generation functions
 
 def generate_array(varname, word_size, size, type = 'int', incoming_list = None):
 	alpha_register = 'ga'
@@ -202,38 +158,40 @@ def generate_variable(varname, word_size, value = 0):
 		else:
 			out += alias + prefix + "b" + str(x - 1) + " btrue\n"
 	out += "\n"
-	
+
 	for x in range(0, word_size):
 		out += alias + prefix + 'tr' + str(x) + ' "' + alias + prefix + 'b' + str(x) + true +'"\n'
 	out += '\n'
-	
+
 	for x in range(0, word_size):
 		out += alias + prefix + 'fr' + str(x) + ' "' + alias + prefix + 'b' + str(x) + false +'"\n'
-	
+
 	print(out)
 
-#lookup tables
 
-def validate_true_branch(prefix, var, p, size):
-	new_branch = int(2**p) + var
-	if new_branch > size:
-		return prefix + 'fail'
-	else:
-		return prefix + '1' + get_bin(var, p)
+
 
 
 def generate_lookup_table(prefix, word_size, size, custom_function):
+
+	def validate_true_branch(prefix, var, p, size):
+		new_branch = int(2**p) + var
+		if new_branch > size:
+			return prefix + 'fail'
+		else:
+			return prefix + '1' + get_bin(var, p)
+
 	global_register = 'ga'
-	true = 'btrue'
-	false = 'bfalse'
+	true = 'btrue '
+	false = 'bfalse '
 	out = ""
 	word_increment = 1
 	out += alias + prefix + '_ret_alpha\n'
 	out += alias + prefix + '_ret_beta\n'
-	out += alias + prefix + ' "' + alias + 'btrue ' + prefix + '1; alias bfalse ' + prefix + '0; ' + global_register + '0' + '"\n\n'
+	out += alias + prefix + ' "' + alias + true + prefix + '1' + next + alias + false + prefix + '0; ' + global_register + '0' + '"\n\n'
 	while word_increment != word_size:
 		for var in range(0, min(size, int(2**word_increment))):
-			out += alias + prefix + get_bin(var, word_increment) + ' "' + alias + 'btrue ' + validate_true_branch(prefix, var, word_increment, size) + '; alias bfalse ' + prefix + '0' + get_bin(var, word_increment) + '; ' + global_register + str(word_increment) + '"\n'
+			out += alias + prefix + get_bin(var, word_increment) + ' "' + alias + true + validate_true_branch(prefix, var, word_increment, size) + next + alias + false + prefix + '0' + get_bin(var, word_increment) + next + global_register + str(word_increment) + '"\n'
 		word_increment += 1
 		out += '\n'
 	for var in range(0, size):
