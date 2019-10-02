@@ -14,20 +14,27 @@ next = '; '
 
 #externalize functions
 
-def generate_variable_external(varname, word_size, value):
+def build_variable(varname, word_size, value):
 	varname = verify_varname(varname)
 	word_size = verify_word_size(word_size)
 	value = verify_value(value, word_size)
-	generate_variable(varname, word_size, value)
+	return generate_variable(varname, word_size, value)
 
-def generate_array_external(varname, word_size, size, type = 'int', import_list = None):
+def build_array(varname, word_size, size, type = 'int', import_list = None):
 	varname = verify_varname(varname)
 	word_size = verify_word_size(word_size)
-	size = verify_array_size(size, word_size)
+	size = verify_size(size, word_size)
 	type = verify_array_type(type)
 	if import_list is not None:
 		import_list = verify_array_list(size, import_list)
-	generate_array(varname, word_size, size, type, import_list)
+	return generate_array(varname, word_size, size, type, import_list)
+
+
+def build_lookup(varname, word_size, size, operation, register_modifier = lambda x: str(x)):
+	varname = verify_varname(varname)
+	word_size = verify_word_size(word_size)
+	size = verify_size(size, word_size)
+	return generate_lookup_table(varname, word_size, size, operation, register_modifier)
 
 #verification functions
 
@@ -46,7 +53,7 @@ def verify_batch_size(size):
 	assert(size > 0), "size must be positive integer"
 	return size
 
-def verify_array_size(size, word_size):
+def verify_size(size, word_size):
 	size = int(size)
 	word_size = int(word_size)
 	assert(size <= int(2**word_size)), "size must be representable by word_size"
@@ -86,33 +93,41 @@ def get_min_int(word_size):
 
 #generation functions
 
-def generate_array(varname, word_size, size, type = 'int', incoming_list = None):
+def generate_array(varname, word_size, size, type, incoming_list):
 	alpha_register = 'ga'
 	beta_register = 'gb'
 	array_varname = 'a' + varname
 	if type == 'int':
-		verify_int_array(word_size, incoming_list)
-		generate_batch(varname, word_size, size, incoming_list)
+		if incoming_list is not None:
+			verify_int_array(word_size, incoming_list)
+		out = generate_batch(varname, word_size, size, incoming_list)
+		
 
 		def get_endpoint_string(var):
 			return alias + array_varname + '_ret_alpha ' + varname + str(var) + '_is_a' + next + alias + array_varname + '_ret_beta ' + varname + str(var) + '_is_b'
+		
+		out +=	alias + array_varname + '_ret_alpha\n'
+		out += alias + array_varname + '_ret_beta\n'
+		out += generate_lookup_table(array_varname, word_size, size, get_endpoint_string)
+		return out
 
-		generate_lookup_table('a' + varname, word_size, size, get_endpoint_string)
-
-def generate_batch(varname, word_size, size, incoming_list = None):
+def generate_batch(varname, word_size, size, incoming_list):
+	out = ''
 	if incoming_list is not None:
 		for var in range(0, size):
 			bname = varname + str(var)
 			if len(incoming_list) >= var:
-				generate_variable(bname, word_size, incoming_list[var])
+				out += generate_variable(bname, word_size, incoming_list[var])
 			else:
-				generate_variable(bname, word_size)
+				out += generate_variable(bname, word_size)
 	else:
 		for var in range(0, size):
 			bname = varname + str(var)
-			generate_variable(bname, word_size)
+			out += generate_variable(bname, word_size)
+	out += '\n'
+	return out
 
-def generate_variable(varname, word_size, value = 0):
+def generate_variable(varname, word_size, value):
 	prefix = varname
 	alpha_register = 'ga'
 	beta_register = 'gb'
@@ -122,34 +137,22 @@ def generate_variable(varname, word_size, value = 0):
 	false = ' bfalse'
 
 
+	def generate_binder(bind_string, register, binding_prefix):
+		out = alias + prefix + bind_string + ' "'
+		for x in range(0, word_size - 1):
+			out += alias + register + str(x) + ' ' + prefix + binding_prefix + str(x) + next
+		out += alias + register + str(word_size - 1) + ' ' + prefix + binding_prefix + str(word_size - 1) + '"\n\n'
+		return out
+
+
 	out = '// ---VARIABLE ' + varname + ' ( ' + str(word_size) + ' BIT, ver: ' + version + ' )\n'
 	out += alias + prefix + '_is_a "' + prefix + '_bind_val_a' + next + prefix + '_bind_true' + next + prefix + '_bind_false"\n'
 	out += alias + prefix + '_is_b ' + prefix + '_bind_val_b\n\n'
 
-
-	out += alias + prefix + '_bind_val_a "'
-	for x in range(0, word_size - 1):
-		out += alias + alpha_register + str(x) + ' ' + prefix + 'b' + str(x) + next
-	out += alias + alpha_register + str(word_size - 1) + ' ' + prefix + 'b' + str(word_size - 1) + '"\n\n'
-
-
-	out += alias + prefix + '_bind_val_b "'
-	for x in range(0, word_size - 1):
-		out += alias + beta_register + str(x) + ' ' + prefix + 'b' + str(x) + next
-	out += alias + beta_register + str(word_size - 1) + ' ' + prefix + 'b' + str(word_size - 1) + '"\n\n'
-
-
-	out += alias + prefix + '_bind_true "'
-	for x in range(0, word_size - 1):
-		out += alias + return_true + str(x) + ' ' + prefix + 'tr' + str(x) + next
-	out += alias + return_true + str(word_size - 1) + ' ' + prefix + 'tr' + str(word_size - 1) + '"\n\n'
-
-
-	out += alias + prefix + '_bind_false "'
-	for x in range(0, word_size - 1):
-		out += alias + return_false + str(x) + ' ' + prefix + 'fr' + str(x) + next
-	out += alias + return_false + str(word_size - 1) + ' ' + prefix + 'fr' + str(word_size - 1) + '"\n\n'
-
+	out += generate_binder('_bind_val_a', alpha_register, 'b')
+	out += generate_binder('_bind_val_b', beta_register, 'b')
+	out += generate_binder('_bind_true', return_true, 'tr')
+	out += generate_binder('_bind_false', return_false, 'fr')
 
 	bool_string = get_bin(value, word_size)
 	for x in range(1, word_size + 1):
@@ -166,36 +169,40 @@ def generate_variable(varname, word_size, value = 0):
 	for x in range(0, word_size):
 		out += alias + prefix + 'fr' + str(x) + ' "' + alias + prefix + 'b' + str(x) + false +'"\n'
 
-	print(out)
+	return out
 
 
-
-
-
-def generate_lookup_table(prefix, word_size, size, custom_function):
-
-	def validate_true_branch(prefix, var, p, size):
-		new_branch = int(2**p) + var
-		if new_branch > size:
-			return prefix + 'fail'
-		else:
-			return prefix + '1' + get_bin(var, p)
-
+def generate_lookup_table(prefix, word_size, size, custom_function, modifier):
 	global_register = 'ga'
 	true = 'btrue '
 	false = 'bfalse '
 	out = ""
-	word_increment = 1
-	out += alias + prefix + '_ret_alpha\n'
-	out += alias + prefix + '_ret_beta\n'
-	out += alias + prefix + ' "' + alias + true + prefix + '1' + next + alias + false + prefix + '0; ' + global_register + '0' + '"\n\n'
-	while word_increment != word_size:
+	word_increment = 0
+
+
+	def validate_true_branch(prefix, var, p, size):
+		new_branch = int(2**p) + var
+		if new_branch >= size:
+			return prefix + 'fail'
+		else:
+			return prefix + '1' + get_bin(var, p)
+
+
+	def generate_layer():
+		nonlocal word_increment
+		out = ''
 		for var in range(0, min(size, int(2**word_increment))):
-			out += alias + prefix + get_bin(var, word_increment) + ' "' + alias + true + validate_true_branch(prefix, var, word_increment, size) + next + alias + false + prefix + '0' + get_bin(var, word_increment) + next + global_register + str(word_increment) + '"\n'
+			out += alias + prefix + get_bin(var, word_increment) + ' "' + alias + true + validate_true_branch(prefix, var, word_increment, size) + next + alias + false + prefix + '0' + get_bin(var, word_increment) + next + global_register + modifier(word_increment) + '"\n'
 		word_increment += 1
 		out += '\n'
+		return out
+
+	out += alias + prefix + ' "' + alias + true + prefix + '1' + next + alias + false + prefix + '0' + next + global_register + modifier(word_increment) + '"\n\n'
+	word_increment += 1
+	while word_increment != word_size and int(2**word_increment) < size:
+		out += generate_layer()
 	for var in range(0, size):
 		out += alias + prefix + get_bin(var, word_increment) + ' "' + custom_function(var) + '"\n'
 
-	out += alias + prefix + 'fail'
-	print(out)
+	out += alias + prefix + 'fail\n'
+	return out
