@@ -71,3 +71,16 @@ def ibitwise_or(word_size):
 			out += next
 	out += '"'
 	return out
+
+def ibitwise_and(word_size):
+	out = ''
+	for x in range(0, word_size):
+		out += alias + 'band_true_branch' + str(x) + ' "' + alias + true + true_return + str(x) + next + alias + false + false_return + str(x) + next + beta_bit + str(x) + '"' + new
+	out += new + alias + 'band "'
+	for x in range(0, word_size):
+		out += alias + true + 'band_true_branch' + str(x) + next + alias + false + false_return + str(x) + next + alpha_bit + str(x)
+		if x != word_size - 1:
+			out += next
+	out += '"'
+	return out
+
