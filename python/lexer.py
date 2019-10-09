@@ -1,3 +1,5 @@
+import re
+
 class token():
 	value = ''
 	line = -1
