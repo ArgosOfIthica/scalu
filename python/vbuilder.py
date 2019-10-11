@@ -1,5 +1,5 @@
 types = list()
-version = "08302019"
+version = "10102019"
 
 
 #global types
@@ -106,7 +106,7 @@ def generate_array(varname, word_size, size, type, incoming_list):
 		def get_endpoint_string(var):
 			return alias + array_varname + '_ret_alpha ' + varname + str(var) + '_is_a' + next + alias + array_varname + '_ret_beta ' + varname + str(var) + '_is_b'
 		
-		out +=	alias + array_varname + '_ret_alpha\n'
+		out += alias + array_varname + '_ret_alpha\n'
 		out += alias + array_varname + '_ret_beta\n'
 		out += generate_lookup_table(array_varname, word_size, size, get_endpoint_string)
 		return out
