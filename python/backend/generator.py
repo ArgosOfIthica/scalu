@@ -1,3 +1,5 @@
 
 def generator(parsed_program):
-	pass
+	out = ''
+		def generate_block(block):
+			pass

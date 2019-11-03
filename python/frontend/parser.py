@@ -14,18 +14,22 @@ def parsing(tokens):
 #parsing structures
 
 	class block():
+		identity = 'block'
 		scope = list()
 		sequence = list()
 
-
 	class variable():
+		identity = 'variable'
 		name = ''
 		type = ''
 		value = ''
+		is_literal = False
 
 	class assignment():
+		identity = 'assignment'
 		source = ''
 		destination = ''
+		is_literal = False
 
 #token handling
 
@@ -45,6 +49,10 @@ def parsing(tokens):
 
 	def token_is_name(token):
 		return token[0].isalpha()
+
+	def token_is_numeric(token):
+		return token.isnumeric()
+
 
 #parser logic
 
@@ -78,6 +86,8 @@ def parsing(tokens):
 			new_assignment.destination = current_token()
 			consume_token()
 			consume_token() #we know this is '='
+			if token_is_numeric(current_token()):
+				new_assignment.is_literal = True
 			new_assignment.value = current_token()
 			consume_token()
 		else:
@@ -93,6 +103,8 @@ def parsing(tokens):
 				new_variable.name = current_token()
 				consume_token()
 				consume_token() #we know this is '='
+				if token_is_numeric(current_token()):
+					new_variable.is_literal = True
 				new_variable.value = current_token()
 				consume_token()
 			else:
