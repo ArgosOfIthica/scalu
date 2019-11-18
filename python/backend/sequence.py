@@ -1,3 +1,4 @@
 
 
-def generate_sequence(
+def generate_sequence():
+	pass
