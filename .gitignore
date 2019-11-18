@@ -1,3 +1,4 @@
 compiler.py
 tokenize_prebuild.py
+visualize.py
 __pycache__/

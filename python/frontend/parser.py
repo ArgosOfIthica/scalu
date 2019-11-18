@@ -1,14 +1,17 @@
 """
 EBNF
 
+
+
 access = ( 'private' | 'public' )
-new_var = type vname '=' value
+new_var = type vname '=' literal
 new_assign = vname '=' value
 block = { new_var | new_assign }
 """
 
+import re
 
-def parsing(tokens):
+def parse(tokens):
 
 
 #parsing structures
@@ -23,7 +26,7 @@ def parsing(tokens):
 		name = ''
 		type = ''
 		value = ''
-		is_literal = False
+		word_size = ''
 
 	class assignment():
 		identity = 'assignment'
@@ -53,6 +56,10 @@ def parsing(tokens):
 	def token_is_numeric(token):
 		return token.isnumeric()
 
+	def add_type(variable_declaration, type):
+		parsed_type = list(filter(lambda x: x != '', re.split('(\d)', type)))
+		variable_declaration.type = parsed_type[0]
+		variable_declaration.word_size = parsed_type[1]
 
 #parser logic
 
@@ -88,7 +95,7 @@ def parsing(tokens):
 			consume_token() #we know this is '='
 			if token_is_numeric(current_token()):
 				new_assignment.is_literal = True
-			new_assignment.value = current_token()
+			new_assignment.source = current_token()
 			consume_token()
 		else:
 			parsing_error()
@@ -97,14 +104,14 @@ def parsing(tokens):
 	def new_var():
 		new_variable = variable()
 		if token_is_name(current_token()):
-			new_variable.type = current_token()
+			add_type(new_variable, current_token())
 			consume_token()
 			if token_is_name(current_token()):
 				new_variable.name = current_token()
 				consume_token()
 				consume_token() #we know this is '='
-				if token_is_numeric(current_token()):
-					new_variable.is_literal = True
+				if not(token_is_numeric(current_token())):
+					parsing_error()
 				new_variable.value = current_token()
 				consume_token()
 			else:
