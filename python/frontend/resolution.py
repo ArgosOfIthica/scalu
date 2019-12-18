@@ -20,16 +20,16 @@ def validate_block(block, res):
 	for ele in block.sequence:
 		if ele.identity == "variable":
 			validate_variable(res, ele)
-		elif ele.identity == "assignment":
-			validate_assignment(res, ele)
+		elif ele.family == "binary":
+			validate_binary(res, ele)
 		else:
 			resolution_error()
 
 
 def resolve_block(block, res):
 	for ele in block.sequence:
-		if ele.identity == "assignment":
-			resolve_assignment(res, ele)
+		if ele.family == "binary":
+			resolve_binary(res, ele)
 
 
 def validate_variable(res, ele):
@@ -39,7 +39,7 @@ def validate_variable(res, ele):
 		resolution_error()
 
 
-def validate_assignment(res, ele):
+def validate_binary(res, ele):
 	if ele.is_literal and (ele.destination in res.variable_lookup):
 		res.constant_lookup.add((res.variable_lookup[ele.destination].type, ele.source))
 	elif ele.source in res.variable_lookup and ele.destination in res.variable_lookup:
@@ -48,7 +48,7 @@ def validate_assignment(res, ele):
 		resolution_error()
 
 
-def resolve_assignment(res, ele):
+def resolve_binary(res, ele):
 	if ele.is_literal:
 		ele.destination = res.variable_lookup[ele.destination]
 		literal = copy.deepcopy(ele.destination)

@@ -18,7 +18,7 @@ def generate_block_header(resolved_program):
 	seq = list(filter(lambda x: x.identity != 'variable' , seq))
 	out = ''
 	for ele in seq:
-		if ele.identity == 'assignment':
+		if ele.family == 'binary':
 			used_variables.add(ele.source)
 			used_variables.add(ele.destination)
 			used_instructions.add((ele.identity, ele.destination.word_size))

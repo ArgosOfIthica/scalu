@@ -6,7 +6,9 @@ next = '; '
 def request(op, var1='', var2='', word_size='', entropy='42', optimize=''):
 	seq_map = {
 		'origin': gen_origin(entropy),
-		'assignment': arg2_optimize('copy', var1, var2, word_size, optimize)
+		'assignment': arg2_optimize('copy', var1, var2, word_size, optimize),
+		'bitwise_or': arg2_optimize('bor', var1, var2, word_size, optimize),
+		'bitwise_and': arg2_optimize('band', var1, var2, word_size, optimize)
 		}
 	return seq_map[op]
 

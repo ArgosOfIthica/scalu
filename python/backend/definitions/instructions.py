@@ -13,7 +13,9 @@ new = '\n'
 
 def generate_instructions(instruction_set):
 	instr_map = {
-		'assignment': icopy 
+		'assignment': icopy,
+		'bitwise_or': ibitwise_or,
+		'bitwise_and': ibitwise_and
 		}
 	
 	out = ''

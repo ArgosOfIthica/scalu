@@ -1,34 +1,46 @@
 """
 EBNF
 
-
-type = core_type word_size
+block = { variable | binop_statement }
+type = core_type , word_size
 access = ( 'private' | 'public' )
-new_var = type vname '=' literal
-new_assign = vname '=' value
-block = { new_var | new_assign }
+variable = type vname '=' literal
+binop_statement = vname binop value
+binop = '=' | '|' | '&' 
+
 """
 
 import re
 
 
 class block():
+	family = 'block'
 	identity = 'block'
 	scope = list()
 	sequence = list()
 
 class variable():
+	family = 'variable'
 	identity = 'variable'
 	name = ''
 	type = ''
 	value = ''
 	word_size = ''
 
-class assignment():
-	identity = 'assignment'
+class binary_operator():
+	family = 'binary'
 	source = ''
 	destination = ''
 	is_literal = False
+
+class assignment(binary_operator):
+	identity = 'assignment'
+
+class bitwise_or(binary_operator):
+	identity = 'bitwise_or'
+
+class bitwise_and(binary_operator):
+	identity = 'bitwise_and'
 
 class parser_obj():
 
@@ -77,6 +89,10 @@ def expect_block(parser):
 		return parser.token() != '}'
 	def is_variable_assignment():
 		return parser.token(1) == '='
+	def is_bitwise_or():
+		return parser.token(1) == '|'
+	def is_bitwise_and():
+		return parser.token(1) == '&'
 
 	new_block = block()
 	while is_not_end_block():
@@ -84,18 +100,25 @@ def expect_block(parser):
 			new_variable = expect_variable(parser)
 			block.sequence.append(new_variable)
 		elif is_variable_assignment():
-			new_assignment = expect_assignment(parser)
+			new_assignment = expect_binary_operator(parser, assignment)
 			block.sequence.append(new_assignment)
+		elif is_bitwise_or():
+			new_bitwise_or = expect_binary_operator(parser, bitwise_or)
+			block.sequence.append(new_bitwise_or)
+		elif is_bitwise_and():
+			new_bitwise_and = expect_binary_operator(parser, bitwise_and)
+			block.sequence.append(new_bitwise_and)
 		else:
 			parsing_error()
 	parser.consume_token()
 	return new_block
 
-def expect_assignment(parser):
-	new_assignment = assignment()
-	new_assignment.destination = expect_destination(parser)
-	new_assignment.is_literal, new_assignment.source = expect_source(parser)
-	return new_assignment
+
+def expect_binary_operator(parser, op):
+	new_operator = op()
+	new_operator.destination = expect_destination(parser)
+	new_operator.is_literal, new_operator.source = expect_source(parser)
+	return new_operator
 
 def expect_variable(parser):
 	new_variable = variable()
@@ -127,7 +150,7 @@ def expect_destination(parser):
 		parsing_error()
 
 def expect_source(parser):
-	parser.consume_token() #we know this is '='
+	parser.consume_token() #we know this is the identifier token
 	if parser.token_is_numeric():
 		is_literal = True
 		source = parser.token()
@@ -142,7 +165,7 @@ def expect_source(parser):
 		parsing_error()
 
 def expect_literal_source(parser):
-	parser.consume_token() #we know this is '='
+	parser.consume_token() #we know this is the identifier token
 	if parser.token_is_numeric():
 		is_literal = True
 		source = parser.token()

@@ -15,7 +15,7 @@ def generate_sequence(sequence, alias_set):
 	optimize_string = ''
 	out = new_origin
 	for ele in sequence:
-		if ele.identity == 'assignment':
+		if ele.family == 'binary':
 			if (register_a == ele.destination.name) and (register_b == ele.source.name):
 				optimize_string = 'ab'
 			elif (register_a == ele.destination.name):
