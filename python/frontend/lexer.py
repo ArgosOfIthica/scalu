@@ -7,11 +7,8 @@ def tokenize(program):
 	tokens = list(filter(lambda x: (not(x.value.isspace())) and x.value != '', tokens))
 	tokens = fuse_negative_numbers(tokens)
 	tokens = reform_subtraction(tokens)
-	for token in range(0, len(tokens)):
-		tokens[token].value.lower()
+	[token.value.lower() for token in tokens]
 	return tokens
-
-
 
 class token():
 	value = ''
@@ -20,9 +17,9 @@ class token():
 def to_tokens(tokens):
 	tokens_list = list()
 	newline_count = 1
-	for token_string in range(0, len(tokens)):
+	for token_string in tokens:
 		new_token = token()
-		new_token.value = tokens[token_string]
+		new_token.value = token_string
 		new_token.line = newline_count
 		if new_token.value == '\n':
 			newline_count += 1
