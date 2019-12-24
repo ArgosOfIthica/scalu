@@ -15,7 +15,8 @@ def generate_instructions(instruction_set):
 	instr_map = {
 		'assignment': icopy,
 		'bitwise_or': ibitwise_or,
-		'bitwise_and': ibitwise_and
+		'bitwise_and': ibitwise_and,
+		'bitwise_neg': ibitwise_neg
 		}
 	
 	out = ''
@@ -73,6 +74,16 @@ def ihexdump(word_size):
 	for x in range(0, int(word_size / 4)):
 		out += build_lookup(hd_label(x), word_size, 16, hex, hex_bootstrap(x))
 	out += alias + hd_label(int(word_size/4)) 
+	return out
+
+
+def ibitwise_neg(word_size):
+	out = 'alias bneg' + str(word_size) + ' "'
+	for word in range(0, word_size):
+		out += alias + true + false_return + str(word) + next + alias + false + true_return + str(word) + next + beta_bit + str(word)
+		if word != word_size - 1:
+			out += next
+	out += '"'
 	return out
 
 def ibitwise_or(word_size):

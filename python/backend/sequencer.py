@@ -26,7 +26,14 @@ def generate_sequence(sequence, alias_set):
 				optimize_string = ''
 			out += request(op = ele.identity, var1 = ele.destination.name, var2 = ele.source.name, word_size = ele.destination.word_size, optimize = optimize_string) + next
 			register_a = ele.destination.name
-			register_b = ele.source.name
+		elif ele.family == 'unary':
+			if (register_a == ele.destination.name):
+				optimize_string = 'a'
+			else:
+				optimize_string = ''
+			out += request(op = ele.identity, var1 = ele.destination.name, word_size = ele.destination.word_size, optimize = optimize_string) + next
+			register_a = ele.destination.name
+
 	out += '"'
 	return out
 

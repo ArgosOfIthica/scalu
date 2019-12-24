@@ -22,6 +22,8 @@ def validate_block(block, res):
 			validate_variable(res, ele)
 		elif ele.family == "binary":
 			validate_binary(res, ele)
+		elif ele.family == "unary":
+			validate_unary(res, ele)
 		else:
 			resolution_error()
 
@@ -30,6 +32,8 @@ def resolve_block(block, res):
 	for ele in block.sequence:
 		if ele.family == "binary":
 			resolve_binary(res, ele)
+		elif ele.family == "unary":
+			resolve_unary(res, ele)
 
 
 def validate_variable(res, ele):
@@ -39,14 +43,18 @@ def validate_variable(res, ele):
 		resolution_error()
 
 
+def validate_unary(res, ele):
+	if ele.destination not in res.variable_lookup:
+		resolution_error()
+
 def validate_binary(res, ele):
 	if ele.is_literal and (ele.destination in res.variable_lookup):
 		res.constant_lookup.add((res.variable_lookup[ele.destination].type, ele.source))
-	elif ele.source in res.variable_lookup and ele.destination in res.variable_lookup:
-		pass
-	else:
+	elif ele.source not in res.variable_lookup or ele.destination not in res.variable_lookup:
 		resolution_error()
 
+def resolve_unary(res, ele):
+	ele.destination = res.variable_lookup[ele.destination]
 
 def resolve_binary(res, ele):
 	if ele.is_literal:

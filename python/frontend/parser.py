@@ -5,8 +5,10 @@ block = { variable | binop_statement }
 type = core_type , word_size
 access = ( 'private' | 'public' )
 variable = type vname '=' literal
+unop_statement = unop value
 binop_statement = vname binop value
 binop = '=' | '|' | '&' 
+unop = '~'
 
 """
 
@@ -26,6 +28,13 @@ class variable():
 	type = ''
 	value = ''
 	word_size = ''
+
+class unary_operator():
+	family = 'unary'
+	destination = ''
+
+class bitwise_neg(unary_operator):
+	identity = 'bitwise_neg'
 
 class binary_operator():
 	family = 'binary'
@@ -55,7 +64,7 @@ class parser_obj():
 			return self.tokens[self.count + lookahead].value
 
 	def current_line(self):
-		return self.tokens[count].line
+		return self.tokens[self.count].line
 	
 	def consume_token(self):
 		self.count += 1
@@ -93,6 +102,8 @@ def expect_block(parser):
 		return parser.token(1) == '|'
 	def is_bitwise_and():
 		return parser.token(1) == '&'
+	def is_bitwise_neg():
+		return parser.token() == '~'
 
 	new_block = block()
 	while is_not_end_block():
@@ -108,22 +119,30 @@ def expect_block(parser):
 		elif is_bitwise_and():
 			new_bitwise_and = expect_binary_operator(parser, bitwise_and)
 			block.sequence.append(new_bitwise_and)
+		elif is_bitwise_neg():
+			new_bitwise_neg = expect_unary_operator(parser, bitwise_neg)
+			block.sequence.append(new_bitwise_neg)
 		else:
-			parsing_error()
+			parsing_error(parser)
 	parser.consume_token()
 	return new_block
 
 
 def expect_binary_operator(parser, op):
 	new_operator = op()
-	new_operator.destination = expect_destination(parser)
+	new_operator.destination = expect_binary_destination(parser)
 	new_operator.is_literal, new_operator.source = expect_source(parser)
+	return new_operator
+
+def expect_unary_operator(parser, op):
+	new_operator = op()
+	new_operator.destination = expect_unary_destination(parser)
 	return new_operator
 
 def expect_variable(parser):
 	new_variable = variable()
 	new_variable.type, new_variable.word_size = expect_type(parser)
-	new_variable.name = expect_destination(parser)
+	new_variable.name = expect_binary_destination(parser)
 	new_variable.value = expect_literal_source(parser)
 	return new_variable
 
@@ -137,17 +156,26 @@ def expect_type(parser):
 			parser.consume_token()
 			return type, word_size
 		else:
-			parsing_error()
+			parsing_error(parser)
 	else:
-		parsing_error()
+		parsing_error(parser)
 
-def expect_destination(parser):
+def expect_binary_destination(parser):
 	if parser.token_is_name():
 		destination = parser.token()
 		parser.consume_token()
 		return destination
 	else:
-		parsing_error()
+		parsing_error(parser)
+
+def expect_unary_destination(parser):
+	parser.consume_token() #we know this is the identifier token
+	if parser.token_is_name():
+		destination = parser.token()
+		parser.consume_token()
+		return destination
+	else:
+		parsing_error(parser)
 
 def expect_source(parser):
 	parser.consume_token() #we know this is the identifier token
@@ -162,7 +190,7 @@ def expect_source(parser):
 		parser.consume_token()
 		return is_literal, source
 	else:
-		parsing_error()
+		parsing_error(parser)
 
 def expect_literal_source(parser):
 	parser.consume_token() #we know this is the identifier token
@@ -172,4 +200,4 @@ def expect_literal_source(parser):
 		parser.consume_token()
 		return source
 	else:
-		parsing_error()
+		parsing_error(parser)

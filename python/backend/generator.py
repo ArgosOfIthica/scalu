@@ -10,6 +10,8 @@ def generate(resolved_program):
 	out += generate_block(resolved_program, alias_set)
 	return out
 	
+def generation_error():
+	print("generation error")
 	
 def generate_block_header(resolved_program):
 	seq = resolved_program.sequence
@@ -22,6 +24,11 @@ def generate_block_header(resolved_program):
 			used_variables.add(ele.source)
 			used_variables.add(ele.destination)
 			used_instructions.add((ele.identity, ele.destination.word_size))
+		elif ele.family == 'unary':
+			used_variables.add(ele.destination)
+			used_instructions.add((ele.identity, ele.destination.word_size))
+		else:
+			generation_error()
 	out += generate_instructions(used_instructions)
 	for var in used_variables: #TODO replace this with a dedicated handler for vbuilder
 		if var.type == 'int':
