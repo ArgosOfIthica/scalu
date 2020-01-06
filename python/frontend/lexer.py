@@ -7,7 +7,8 @@ def tokenize(program):
 	tokens = list(filter(lambda x: (not(x.value.isspace())) and x.value != '', tokens))
 	tokens = fuse_negative_numbers(tokens)
 	tokens = reform_subtraction(tokens)
-	[token.value.lower() for token in tokens] #does this work
+	for token in tokens:
+		token.value = token.value.lower()
 	return tokens
 
 class token():
