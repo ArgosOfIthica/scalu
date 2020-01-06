@@ -15,7 +15,6 @@ def generation_error():
 	
 def generate_block_header(resolved_program):
 	seq = resolved_program.sequence
-	used_instructions = set()
 	used_variables = set()
 	seq = list(filter(lambda x: x.identity != 'variable' , seq))
 	out = ''
@@ -23,13 +22,11 @@ def generate_block_header(resolved_program):
 		if ele.family == 'binary':
 			used_variables.add(ele.source)
 			used_variables.add(ele.destination)
-			used_instructions.add((ele.identity, ele.destination.word_size))
 		elif ele.family == 'unary':
 			used_variables.add(ele.destination)
-			used_instructions.add((ele.identity, ele.destination.word_size))
 		else:
 			generation_error()
-	out += generate_instructions(used_instructions)
+	out += generate_instructions(seq)
 	for var in used_variables: #TODO replace this with a dedicated handler for vbuilder
 		if var.type == 'int':
 			out += build_variable(var.name, var.word_size, var.value)

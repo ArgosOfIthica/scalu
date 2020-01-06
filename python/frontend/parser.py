@@ -73,7 +73,7 @@ class parser_obj():
 		return self.token()[0].isalpha()
 
 	def token_is_numeric(self):
-		if self.token()[0] == '-': #TODO: NOT TESTED
+		if self.token()[0] == '-':
 			return self.token()[1:].isnumeric()
 		else:
 			return self.token().isnumeric()

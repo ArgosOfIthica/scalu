@@ -7,7 +7,7 @@ def tokenize(program):
 	tokens = list(filter(lambda x: (not(x.value.isspace())) and x.value != '', tokens))
 	tokens = fuse_negative_numbers(tokens)
 	tokens = reform_subtraction(tokens)
-	[token.value.lower() for token in tokens]
+	[token.value.lower() for token in tokens] #does this work
 	return tokens
 
 class token():
@@ -27,7 +27,7 @@ def to_tokens(tokens):
 	return tokens_list
 
 def disambiguate_subtraction(source):
-	return re.sub('\w+\s*(-)', "$", source) # replace all subtraction operations with "$" token
+	return re.sub('\w+\s*(-)', "$", source) # replaces all subtraction operations with "$" token
 
 def fuse_negative_numbers(tokens):
 	for token in range(0, len(tokens) - 1):

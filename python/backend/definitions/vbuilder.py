@@ -137,23 +137,7 @@ def generate_variable(varname, word_size, value):
 	false = ' bfalse'
 
 
-	def generate_binder(bind_string, register, binding_prefix):
-		out = alias + prefix + bind_string + ' "'
-		for x in range(0, word_size - 1):
-			out += alias + register + str(x) + ' ' + prefix + binding_prefix + str(x) + next
-		out += alias + register + str(word_size - 1) + ' ' + prefix + binding_prefix + str(word_size - 1) + '"\n\n'
-		return out
-
-
 	out = '// ---VARIABLE ' + varname + ' ( ' + str(word_size) + ' BIT, ver: ' + version + ' )\n'
-	out += alias + prefix + '_is_a "' + prefix + '_bind_val_a' + next + prefix + '_bind_true' + next + prefix + '_bind_false"\n'
-	out += alias + prefix + '_is_b ' + prefix + '_bind_val_b\n\n'
-
-	out += generate_binder('_bind_val_a', alpha_register, 'b')
-	out += generate_binder('_bind_val_b', beta_register, 'b')
-	out += generate_binder('_bind_true', return_true, 'tr')
-	out += generate_binder('_bind_false', return_false, 'fr')
-
 	bool_string = get_bin(value, word_size)
 	for x in range(1, word_size + 1):
 		if bool_string[len(bool_string) - x: len(bool_string) - x + 1] is "0":

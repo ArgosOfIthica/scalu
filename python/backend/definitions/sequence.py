@@ -3,13 +3,13 @@ alias = 'alias '
 next = '; '
 
 
-def request(op, var1='', var2='', word_size='', entropy='42', optimize=''):
+def request(op, var1='', var2='', word_size='', entropy='42'):
 	seq_map = {
 		'origin': gen_origin(entropy),
-		'assignment': bin_optimize('copy', var1, var2, word_size, optimize),
-		'bitwise_or': bin_optimize('bor', var1, var2, word_size, optimize),
-		'bitwise_and': bin_optimize('band', var1, var2, word_size, optimize),
-		'bitwise_neg': un_optimize('bneg', var1, word_size, optimize)
+		'assignment': bin_gen('copy', var1, var2, word_size),
+		'bitwise_or': bin_gen('bor', var1, var2, word_size),
+		'bitwise_and': bin_gen('band', var1, var2, word_size),
+		'bitwise_neg': un_gen('bneg', var1, word_size)
 		}
 	return seq_map[op]
 
@@ -18,18 +18,8 @@ def gen_origin(tail):
 	origin_declaration = alias + origin_name + ' "'
 	return origin_declaration, origin_name
 
-def bin_optimize(op, var1, var2, word_size, optimize):
-	if optimize == 'ab':
-		return op + word_size
-	elif optimize == 'a':
-		return var2 + '_is_b' + next + op + word_size
-	elif optimize == 'b':
-		return var1 + '_is_a' + next + op + word_size
-	else:
-		return var1 + '_is_a' + next + var2 + '_is_b' + next + op + word_size
+def bin_gen(op, var1, var2, word_size):
+	return var1 + var2 + op + word_size
 
-def un_optimize(op, var1, word_size, optimize):
-	if optimize == 'a':
-		return op + word_size
-	else:
-		return var1 + '_is_a' + next + op + word_size
+def un_gen(op, var1, word_size):
+	return var1 + op + word_size
