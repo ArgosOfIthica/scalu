@@ -36,7 +36,7 @@ def resolve_variable(res, ele):
 
 def resolve_assignment(res, ele):
 	ele.write = resolve_assignment_write(res, ele.write)
-	ele.evaluate = resolve_assignment_evaluate(res, ele.evaluate, ele.write)
+	resolve_assignment_evaluate(res, ele)
 
 def resolve_assignment_write(res, write):
 	if write in res.variable_lookup:
@@ -44,13 +44,15 @@ def resolve_assignment_write(res, write):
 	else:
 		resolution_error()
 
-def resolve_assignment_evaluate(res, evaluate, write):
+def resolve_assignment_evaluate(res, ele):
+	write = ele.write
+	evaluate = ele.evaluate
 	if type(evaluate) is str:
-		return resolve_value(res, evaluate, write)
+		ele.evaluate = resolve_value(res, ele.evaluate, write)
 	elif evaluate.family == 'binary':
-		return resolve_binary(res, evaluate, write)
+		resolve_binary(res, evaluate, write)
 	elif evaluate.family == 'unary':
-		return resolve_unary(res, evaluate, write)
+		resolve_unary(res, evaluate, write)
 	else:
 		resolution_error()
 

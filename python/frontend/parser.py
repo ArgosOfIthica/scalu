@@ -19,8 +19,10 @@ import re
 class block():
 	family = 'block'
 	identity = 'block'
-	scope = list()
-	sequence = list()
+
+	def __init__(self):
+		self.scope = list()
+		self.sequence = list()
 
 class variable():
 	family = 'variable'
