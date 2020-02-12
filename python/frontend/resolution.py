@@ -24,14 +24,11 @@ def resolve_block(block, res):
 			resolve_assignment(res, ele)
 
 
-
 def resolve_variable(res, ele):
 	if ele.name not in res.variable_lookup:
 		res.variable_lookup[ele.name] = ele
 	else:
 		resolution_error()
-
-
 
 
 def resolve_assignment(res, ele):

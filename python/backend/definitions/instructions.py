@@ -4,97 +4,60 @@ from backend.definitions.vbuilder import build_lookup
 alias = 'alias '
 true = 'btrue '
 false = 'bfalse '
-true_return = "gt"
-false_return = "gf"
-alpha_bit = "ga"
-beta_bit = "gb"
 next = '; '
 new = '\n'
 
-class target():
-	true_return = 'gt'
-	false_return = 'gf'
-	alpha_bit = 'ga'
-	beta_bit = 'gb'
+class atom():
+	ele = None
 
-class atomic_instruction():
-	id = 0
-	identity = ''
-	destination = ''
-	source = ''
+	def __init__(self, ele):
+		self.ele = ele
 
 	def get_word_size(self):
-		return int(self.destination.word_size)
+		return int(self.ele.output.word_size)
 
 	def get_true_return(self):
-		return self.destination.name + 'tr'
+		return self.ele.output.name + 'tr'
 
 	def get_false_return(self):
-		return self.destination.name + 'fr'
+		return self.ele.output.name + 'fr'
 
 	def get_alpha_bit(self):
-		return self.destination.name + 'b'
+		return self.ele.arg1.name + 'b'
 
 	def get_beta_bit(self):
-		return self.source.name + 'b'
+		return self.ele.arg2.name + 'b'
 
-def generate_instructions(instruction_set):
-	instruction_set = minimize_instructions(instruction_set)
+	def get_hash(self):
+		if self.ele.family== 'unary':
+			return str(hash(self.ele.identity + self.ele.arg1.name + self.ele.output.name))
+		elif self.ele.family == 'binary':
+			return str(hash(self.ele.identity + self.ele.arg1.name + self.ele.arg2.name + self.ele.output.name))
+		else:
+			Exception('failure')
+
+def build_instruction(ele):
 	instr_map = {
-		'assignment': icopy,
+		'copy': icopy,
 		'bitwise_or': ibitwise_or,
 		'bitwise_and': ibitwise_and,
 		'bitwise_neg': ibitwise_neg
 		}
-	out = ''
-	for instr in instruction_set:
-		instr_function = instr_map[instr.identity]
-		out += instr_function(instr)
-		out += new
-	return out
+	instr = atom(ele)
+	instr_function = instr_map[ele.identity]
+	return instr_function(instr)
 
-
-def minimize_instructions(instruction_set):
-	instructions = set()
-	atomized_instructions = set()
-	for ele in instruction_set:
-		if ele.family == 'binary':
-			instructions.add((ele.identity, ele.destination, ele.source))
-		if ele.family == 'unary':
-			instructions.add((ele.identity, ele.destination, None))
-	for instr in instructions:
-		new_instr = atomic_instruction()
-		if instr[2] is not None:
-			new_instr.id = instr[1].name + instr[2].name
-		else:
-			new_instr.id = instr[1].name
-		new_instr.identity = instr[0]
-		new_instr.destination = instr[1]
-		new_instr.source = instr[2]
-		atomized_instructions.add(new_instr)
-	return atomized_instructions
-
-def sandboxed_ascii(var):
-	if (var >= 33 and var <= 37) or (var >= 39 and var <= 57) or (var >= 60 and var <= 127):
-		return chr(var)
-	else:
-		return 'ascii' + str(var)
 
 def icopy(atom):
 	word_size = atom.get_word_size()
 	true_return = atom.get_true_return()
 	false_return = atom.get_false_return()
 	alpha_bit = atom.get_alpha_bit()
-	beta_bit = atom.get_beta_bit()
-	identity = atom.id + 'copy'
-
-	out =  alias + identity + str(word_size) + ' "'
-	for word in range(0, word_size):
-		out += alias + true + true_return + str(word) + next + alias + false + false_return + str(word) + next + beta_bit + str(word)
-		if word != word_size - 1:
-			out += next
-	out += '"'
-	return out
+	sequence = ''
+	header = ''
+	for bit in range(0, word_size):
+		sequence += alias + true + true_return + str(bit) + next + alias + false + false_return + str(bit) + next + alpha_bit + str(bit) + next
+	return header, sequence
 
 
 def idump(atom):
@@ -102,46 +65,15 @@ def idump(atom):
 	true_return = atom.get_true_return()
 	false_return = atom.get_false_return()
 	alpha_bit = atom.get_alpha_bit()
-	identity = atom.id + 'dump'
+	sequence = ''
+	header = ''
 
-	out = alias  + identity + str(word_size) + ' "'
-	out += alias + true + 'echo 1' + next + alias + false + 'echo 0' + next
-	for word in range(0, word_size):
-		out += alpha_bit + str(word)
-		if word != word_size - 1:
-			out += next
-	out += '"'
-	return out
+	sequence += alias + true + 'echo 1' + next + alias + false + 'echo 0' + next
+	for bit in range(0, word_size):
+		sequence += alpha_bit + str(bit) + next
+	return header, sequence
 
 
-#hex instruction is not generated if word size < 4
-def ihexdump(atom):
-	word_size = atom.get_word_size()
-	true_return = atom.get_true_return()
-	false_return = atom.get_false_return()
-	alpha_bit = atom.get_alpha_bit()
-	
-
-
-	def hd_label(num):
-		if num > 0:
-			return atom.id + 'hdc' + str(word_size) + str(num) + '_'
-		else:
-			return atom.id + 'hd' + str(word_size)
-	
-	def hex_bootstrap(x):
-		def hex_modifier(z):
-			if z == 0:
-				return str(z + 4 * x) + next + hd_label(x + 1)
-			else:
-				return str(z + 4 * x)
-		return hex_modifier
-
-	out = ''
-	for x in range(0, int(word_size / 4)):
-		out += build_lookup(hd_label(x), word_size, 16, hex, hex_bootstrap(x))
-	out += alias + hd_label(int(word_size/4)) 
-	return out
 
 
 def ibitwise_neg(atom):
@@ -149,14 +81,11 @@ def ibitwise_neg(atom):
 	true_return = atom.get_true_return()
 	false_return = atom.get_false_return()
 	alpha_bit = atom.get_alpha_bit()
-
-	out = alias  + atom.id + 'bneg' + str(word_size) + ' "'
-	for word in range(0, word_size):
-		out += alias + true + false_return + str(word) + next + alias + false + true_return + str(word) + next + beta_bit + str(word)
-		if word != word_size - 1:
-			out += next
-	out += '"'
-	return out
+	sequence = ''
+	header = ''
+	for bit in range(0, word_size):
+		sequence += alias + true + false_return + str(bit) + next + alias + false + true_return + str(bit) + next + alpha_bit + str(bit) + next
+	return header, sequence
 
 def ibitwise_or(atom):
 	word_size = atom.get_word_size()
@@ -164,19 +93,15 @@ def ibitwise_or(atom):
 	false_return = atom.get_false_return()
 	alpha_bit = atom.get_alpha_bit()
 	beta_bit = atom.get_beta_bit()
-	identity = atom.id + 'bor'
-	false_branch = identity + '_false_branch'
+	false_branch = atom.get_hash() + '_false_branch'
+	sequence = ''
+	header = ''
 
-	out = ''
-	for x in range(0, word_size):
-		out += alias + false_branch + str(x) + ' "' + alias + true + true_return + str(x) + next + alias + false + false_return + str(x) + next + beta_bit + str(x) + '"' + new
-	out += new + alias  + identity + str(word_size) + ' "'
-	for x in range(0, word_size):
-		out += alias + true + true_return + str(x) + next + alias + false + false_branch + str(x) + next + alpha_bit + str(x)
-		if x != word_size - 1:
-			out += next
-	out += '"'
-	return out
+	for bit in range(0, word_size):
+		header += alias + false_branch + str(bit) + ' "' + alias + true + true_return + str(bit) + next + alias + false + false_return + str(bit) + next + beta_bit + str(bit) + '"' + new
+	for bit in range(0, word_size):
+		sequence += alias + true + true_return + str(bit) + next + alias + false + false_branch + str(bit) + next + alpha_bit + str(bit) + next
+	return header, sequence
 
 def ibitwise_and(atom):
 	word_size = atom.get_word_size()
@@ -184,15 +109,14 @@ def ibitwise_and(atom):
 	false_return = atom.get_false_return()
 	alpha_bit = atom.get_alpha_bit()
 	beta_bit = atom.get_beta_bit()
+	true_branch = atom.get_hash() + '_true_branch'
+	sequence = ''
+	header = ''
 
-	out = ''
-	for x in range(0, word_size):
-		out += alias + 'band_true_branch' + str(x) + ' "' + alias + true + true_return + str(x) + next + alias + false + false_return + str(x) + next + beta_bit + str(x) + '"' + new
-	out += new + alias  + atom.id +  'band' + str(word_size) + ' "'
-	for x in range(0, word_size):
-		out += alias + true + 'band_true_branch' + str(x) + next + alias + false + false_return + str(x) + next + alpha_bit + str(x)
-		if x != word_size - 1:
-			out += next
-	out += '"'
-	return out
+	for bit in range(0, word_size):
+		header += alias + true_branch + str(bit) + ' "' + alias + true + true_return + str(bit) + next + alias + false + false_return + str(bit) + next + beta_bit + str(bit) + '"' + new
+	for bit in range(0, word_size):
+		sequence += alias + true + true_branch + str(bit) + next + alias + false + false_return + str(bit) + next + alpha_bit + str(bit) + next
+	return header, sequence
+
 
