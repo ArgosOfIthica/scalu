@@ -1,6 +1,6 @@
 
 from backend.definitions.vbuilder import build_variable
-from frontend.parser import unary_operator
+from frontend.parser.structure import unary_operator
 import copy
 
 class header_generator():
