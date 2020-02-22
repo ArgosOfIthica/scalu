@@ -2,9 +2,6 @@
 EBNF
 
 block = { variable | assignment | service_call }
-type = core_type , word_size
-access = ( 'private' | 'public' )
-variable = type vname '=' literal
 service_call = ename '(' { vname [,]} ')'
 assignment = vname '=' exp
 exp = ( p_exp | exp binop exp | unop exp | value)
@@ -32,9 +29,6 @@ def global_context(parser):
 def expect_block(parser):
 	new_block = block()
 	while parser.is_not_end_block():
-		if parser.is_variable_declaration():
-			new_variable = expect_variable(parser)
-			new_block.sequence.append(new_variable)
 		elif parser.is_variable_assignment():
 			new_assignment = expect_assignment(parser)
 			new_block.sequence.append(new_assignment)
@@ -135,36 +129,5 @@ def expect_binop(parser, chain=None):
 		parsing_error(parser)
 	new_binop.arg[1] = expect_argument(parser)
 	return new_binop
-
-
-def expect_variable(parser):
-	new_variable = variable()
-	new_variable.type, new_variable.word_size = expect_type(parser)
-	new_variable.name = parser.use_if_name()
-	new_variable.value = expect_declaration_literal(parser)
-	return new_variable
-
-
-def expect_type(parser):
-	if parser.token_is_name():
-		parsed_type = list(filter(lambda x: x != '', re.split('(\d)', parser.token())))
-		if len(parsed_type) == 2:
-			ptype = parsed_type[0]
-			word_size = parsed_type[1]
-			parser.consume()
-			return ptype, word_size
-		else:
-			parsing_error(parser)
-	else:
-		parsing_error(parser)
-
-def expect_declaration_literal(parser):
-	parser.consume('=')
-	if parser.token_is_numeric():
-		literal = parser.token()
-		parser.consume()
-		return literal
-	else:
-		parsing_error(parser)
 
 

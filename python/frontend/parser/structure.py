@@ -18,9 +18,9 @@ class variable():
 	family = 'variable'
 	identity = 'variable'
 	name = ''
-	type = ''
-	value = ''
-	word_size = ''
+	type = 'int'
+	value = '0'
+	word_size = '8'
 
 class service_call():
 	family = 'service_call'
@@ -102,9 +102,6 @@ class parser_obj():
 			parsing_error(self)
 
 	#statement lookaheads
-
-	def is_variable_declaration(self):
-		return self.token(2) == '='
 
 	def is_variable_assignment(self):
 		return self.token(1) == '='
