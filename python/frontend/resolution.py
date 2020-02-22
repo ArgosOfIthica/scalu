@@ -38,8 +38,19 @@ def resolve_variable(res, ele):
 
 def resolve_service_call(res, ele):
 	core_services = ( 'bprint')
-	print(ele.service)
+	for arg in range(0, len(ele.arg)):
+		resolve_operator(res, ele, write, arg)
 	if ele.service not in core_services:
+		resolution_error()
+
+def resolve_service_call_arg(res, ele):
+	if type(ele.evaluate) is str:
+		ele.evaluate = resolve_value(res, ele.evaluate, ele.write)
+	elif ele.evaluate.family == 'binary':
+		resolve_binary(res, ele.evaluate, ele.write)
+	elif ele.evaluate.family == 'unary':
+		resolve_unary(res, ele.evaluate, ele.write)
+	else:
 		resolution_error()
 
 def resolve_assignment(res, ele):
@@ -64,14 +75,12 @@ def resolve_operator(res, this, write, arg_index):
 		resolution_error()
 
 def resolve_assignment_evaluate(res, ele):
-	write = ele.write
-	evaluate = ele.evaluate
-	if type(evaluate) is str:
-		ele.evaluate = resolve_value(res, ele.evaluate, write)
-	elif evaluate.family == 'binary':
-		resolve_binary(res, evaluate, write)
-	elif evaluate.family == 'unary':
-		resolve_unary(res, evaluate, write)
+	if type(ele.evaluate) is str:
+		ele.evaluate = resolve_value(res, ele.evaluate, ele.write)
+	elif ele.evaluate.family == 'binary':
+		resolve_binary(res, ele.evaluate, ele.write)
+	elif ele.evaluate.family == 'unary':
+		resolve_unary(res, ele.evaluate, ele.write)
 	else:
 		resolution_error()
 

@@ -23,10 +23,11 @@ class atom():
 		return self.ele.output.name + 'fr'
 
 	def get_alpha_bit(self):
-		return self.ele.arg1.name + 'b'
+		print(self.ele)
+		return self.ele.arg[0].name + 'b'
 
 	def get_beta_bit(self):
-		return self.ele.arg2.name + 'b'
+		return self.ele.arg[1].name + 'b'
 
 	def get_hash(self):
 		if self.ele.family== 'unary':
@@ -39,6 +40,7 @@ class atom():
 def build_instruction(ele):
 	instr_map = {
 		'copy': icopy,
+		'bprint': ibprint,
 		'bitwise_or': ibitwise_or,
 		'bitwise_and': ibitwise_and,
 		'bitwise_neg': ibitwise_neg
@@ -60,10 +62,8 @@ def icopy(atom):
 	return header, sequence
 
 
-def idump(atom):
+def ibprint(atom):
 	word_size = atom.get_word_size()
-	true_return = atom.get_true_return()
-	false_return = atom.get_false_return()
 	alpha_bit = atom.get_alpha_bit()
 	sequence = ''
 	header = ''
