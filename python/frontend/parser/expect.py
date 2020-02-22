@@ -15,7 +15,8 @@ unop = '~'
 """
 from frontend.parser.structure import *
 import re
-#parser logic
+
+
 
 def parse(tokens):
 	parser = parser_obj(tokens)
@@ -27,8 +28,6 @@ def global_context(parser):
 	global_object = expect_block(parser)
 	return global_object
 
-
-#definitions
 
 def expect_block(parser):
 	new_block = block()
@@ -53,7 +52,7 @@ def expect_service_call(parser):
 	parser.consume('(')
 	while parser.is_not_end_service_call():
 		arg = expect_expression(parser)
-		new_service_call.args.append(arg)
+		new_service_call.arg.append(arg)
 		if parser.is_not_end_service_call():
 			parser.consume(',')
 	parser.consume(')')
@@ -120,21 +119,21 @@ def expect_unop(parser):
 	new_unop = unary_operator()
 	new_unop.identity = parser.retrieve_identity()
 	parser.consume()
-	new_unop.arg1 = expect_argument(parser)
+	new_unop.arg[0] = expect_argument(parser)
 	return new_unop
 
 def expect_binop(parser, chain=None):
 	new_binop = binary_operator()
 	if chain is None:
-		new_binop.arg1 = expect_argument(parser)
+		new_binop.arg[0] = expect_argument(parser)
 	else:
-		new_binop.arg1 = chain
+		new_binop.arg[0] = chain
 	if parser.is_binop():
 		new_binop.identity = parser.retrieve_identity()
 		parser.consume()
 	else:
 		parsing_error(parser)
-	new_binop.arg2 = expect_argument(parser)
+	new_binop.arg[1] = expect_argument(parser)
 	return new_binop
 
 

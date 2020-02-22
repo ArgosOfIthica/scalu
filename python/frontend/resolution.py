@@ -3,6 +3,7 @@ import copy
 
 class resolution_block():
 	variable_lookup = dict()
+	service_lookup = dict()
 	constant_lookup = dict()
 
 
@@ -22,6 +23,10 @@ def resolve_block(block, res):
 			resolve_variable(res, ele)
 		elif ele.identity == 'assignment':
 			resolve_assignment(res, ele)
+		elif ele.identity == 'service_call':
+			resolve_service_call(res, ele)
+		else:
+			resolution_error()
 
 
 def resolve_variable(res, ele):
@@ -31,6 +36,12 @@ def resolve_variable(res, ele):
 		resolution_error()
 
 
+def resolve_service_call(res, ele):
+	core_services = ( 'bprint')
+	print(ele.service)
+	if ele.service not in core_services:
+		resolution_error()
+
 def resolve_assignment(res, ele):
 	ele.write = resolve_assignment_write(res, ele.write)
 	resolve_assignment_evaluate(res, ele)
@@ -38,6 +49,17 @@ def resolve_assignment(res, ele):
 def resolve_assignment_write(res, write):
 	if write in res.variable_lookup:
 		return res.variable_lookup[write]
+	else:
+		resolution_error()
+
+
+def resolve_operator(res, this, write, arg_index):
+	if type(this.arg[arg_index]) is str:
+		this.arg[arg_index] = resolve_value(res, this.arg[arg_index], write)
+	elif this.arg[arg_index].family == 'binary':
+		resolve_binary(res, this.arg[arg_index], write)
+	elif this.arg[arg_index].family == 'unary':
+		resolve_unary(res, this.arg[arg_index], write)
 	else:
 		resolution_error()
 
@@ -54,39 +76,16 @@ def resolve_assignment_evaluate(res, ele):
 		resolution_error()
 
 def resolve_unary(res, this, write):
-	if type(this.arg1) is str:
-		resolution = resolve_value(res, this.arg1, write)
-		this.arg1 = resolution
-	elif this.arg1.family == 'binary':
-		resolve_binary(res, this.arg1, write)
-	elif this.arg1.family == 'unary':
-		resolve_unary(res, this.arg1, write)
-	else:
-		resolution_error()
+	resolve_operator(res, this, write, 0)
 
 def resolve_binary(res, this, write):
-	if type(this.arg1) is str:
-		resolution = resolve_value(res, this.arg1, write)
-		this.arg1 = resolution
-	elif this.arg1.family == 'binary':
-		resolve_binary(res, this.arg1, write)
-	elif this.arg1.family == 'unary':
-		resolve_unary(res, this.arg1, write)
-	else:
-		resolution_error()
-	if type(this.arg2) is str:
-		resolution = resolve_value(res, this.arg2, write)
-		this.arg2 = resolution
-	elif this.arg2.family == 'binary':
-		resolve_binary(res, this.arg2, write)
-	elif this.arg2.family == 'unary':
-		resolve_unary(res, this.arg2, write)
-	else:
-		resolution_error()
+	resolve_operator(res, this, write, 0)
+	resolve_operator(res, this, write, 1)
 
 
 
 def resolve_value(res, token_string, write):
+
 	def token_is_name(token):
 		return token[0].isalpha()
 

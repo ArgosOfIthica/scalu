@@ -28,21 +28,26 @@ class service_call():
 	service = ''
 
 	def __init__(self):
-		self.args = list()
+		self.arg = list()
 
 
 class unary_operator():
 	family = 'unary'
 	identity = ''
-	arg1 = ''
 	output = ''
+	arg = list()
+
+	def __init__(self):
+		self.arg = [None]
 
 class binary_operator():
 	family = 'binary'
 	identity = ''
-	arg1 = ''
-	arg2 = ''
 	output = ''
+	arg = list()
+
+	def __init__(self):
+		self.arg =  [None] * 2
 
 class assignment():
 	family = 'assignment'

@@ -23,7 +23,7 @@ class header_generator():
 			if item.type == 'int':
 				self.header_out += build_variable(item.name, item.word_size, item.value)
 			else:
-				engine_error()
+				header_error()
 		elif item.family == 'assignment':
 			unwrapper = unwrapped_assignment(item)
 			unwrapped_assignment_object, temp_headers = unwrapper.unwrap_assignment()
@@ -43,6 +43,19 @@ class unwrapped_assignment():
 		self.var_counter = 0
 
 
+	def unwrap(self, item, output_variable, arg_index):
+		item.output = output_variable
+		if not item.arg[arg_index].family == 'variable':
+			new_output_variable = self.generate_temporary_variable()
+			if item.arg[arg_index].family == 'unary':
+				self.unwrap_unary(item.arg[arg_index], new_output_variable)
+			elif item.arg[arg_index].family == 'binary':
+				self.unwrap_binary(item.arg[arg_index], new_output_variable)
+			else:
+				header_error()
+			item.arg[arg_index] = new_output_variable
+
+
 	def unwrap_assignment(self):
 		item = self.assignment
 		variable_headers = ''
@@ -60,51 +73,14 @@ class unwrapped_assignment():
 		return self.instr_order, self.new_headers
 
 	def unwrap_unary(self, item, output_variable):
-		item.output = output_variable
-		if item.arg1.family == 'variable':
-			pass
-		elif item.arg1.family == 'unary':
-			new_output_variable = self.generate_temporary_variable()
-			self.unwrap_unary(item.arg1, new_output_variable)
-			item.arg1 = new_output_variable
-
-		elif item.arg1.family == 'binary':
-			new_output_variable = generate_temporary_variable()
-			self.unwrap_binary(item.arg1, new_output_variable)
-			item.arg1 = new_output_variable
-		else:
-			engine_error()
+		self.unwrap(item, output_variable, 0)
 		self.instr_order.append(item)
 
 
 
 	def unwrap_binary(self, item, output_variable):
-		item.output = output_variable
-		if item.arg1.family == 'variable':
-			pass
-		elif item.arg1.family == 'unary':
-			new_output_variable = self.generate_temporary_variable()
-			self.unwrap_unary(item.arg1, new_output_variable)
-			item.arg1 = new_output_variable
-		elif item.arg1.family == 'binary':
-			new_output_variable = self.generate_temporary_variable()
-			self.unwrap_binary(item.arg1, new_output_variable)
-			item.arg1 = new_output_variable
-		else:
-			engine_error()
-
-		if item.arg2.family == 'variable':
-			pass
-		elif item.arg2.family == 'unary':
-			new_output_variable = self.generate_temporary_variable()
-			self.unwrap_unary(item.arg2, new_output_variable)
-			item.arg2 = new_output_variable
-		elif item.arg2.family == 'binary':
-			new_output_variable = self.generate_temporary_variable()
-			self.unwrap_binary(item.arg2, new_output_variable)
-			item.arg2 = new_output_variable
-		else:
-			engine_error()
+		self.unwrap(item, output_variable, 0)
+		self.unwrap(item, output_variable, 1)
 		self.instr_order.append(item)
 
 
