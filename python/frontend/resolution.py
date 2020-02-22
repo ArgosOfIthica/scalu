@@ -1,5 +1,6 @@
 
 import copy
+from frontend.parser.structure import variable
 
 class resolution_block():
 	variable_lookup = dict()
@@ -19,9 +20,7 @@ def resolution_error():
 
 def resolve_block(block, res):
 	for ele in block.sequence:
-		if ele.identity == 'variable':
-			resolve_variable(res, ele)
-		elif ele.identity == 'assignment':
+		if ele.identity == 'assignment':
 			resolve_assignment(res, ele)
 		elif ele.identity == 'service_call':
 			resolve_service_call(res, ele)
@@ -29,27 +28,20 @@ def resolve_block(block, res):
 			resolution_error()
 
 
-def resolve_variable(res, ele):
-	if ele.name not in res.variable_lookup:
-		res.variable_lookup[ele.name] = ele
-	else:
-		resolution_error()
-
-
 def resolve_service_call(res, ele):
 	core_services = ( 'bprint')
 	for arg in range(0, len(ele.arg)):
-		resolve_operator(res, ele, write, arg)
+		resolve_operator(res, ele, arg)
 	if ele.service not in core_services:
 		resolution_error()
 
 def resolve_service_call_arg(res, ele):
 	if type(ele.evaluate) is str:
-		ele.evaluate = resolve_value(res, ele.evaluate, ele.write)
+		ele.evaluate = resolve_value(res, ele.evaluate)
 	elif ele.evaluate.family == 'binary':
-		resolve_binary(res, ele.evaluate, ele.write)
+		resolve_binary(res, ele.evaluate)
 	elif ele.evaluate.family == 'unary':
-		resolve_unary(res, ele.evaluate, ele.write)
+		resolve_unary(res, ele.evaluate)
 	else:
 		resolution_error()
 
@@ -61,39 +53,41 @@ def resolve_assignment_write(res, write):
 	if write in res.variable_lookup:
 		return res.variable_lookup[write]
 	else:
-		resolution_error()
+		new_variable = variable()
+		new_variable.name = write
+		res.variable_lookup[write] = new_variable
 
 
-def resolve_operator(res, this, write, arg_index):
+def resolve_operator(res, this, arg_index):
 	if type(this.arg[arg_index]) is str:
-		this.arg[arg_index] = resolve_value(res, this.arg[arg_index], write)
+		this.arg[arg_index] = resolve_value(res, this.arg[arg_index])
 	elif this.arg[arg_index].family == 'binary':
-		resolve_binary(res, this.arg[arg_index], write)
+		resolve_binary(res, this.arg[arg_index])
 	elif this.arg[arg_index].family == 'unary':
-		resolve_unary(res, this.arg[arg_index], write)
+		resolve_unary(res, this.arg[arg_index])
 	else:
 		resolution_error()
 
 def resolve_assignment_evaluate(res, ele):
 	if type(ele.evaluate) is str:
-		ele.evaluate = resolve_value(res, ele.evaluate, ele.write)
+		ele.evaluate = resolve_value(res, ele.evaluate)
 	elif ele.evaluate.family == 'binary':
-		resolve_binary(res, ele.evaluate, ele.write)
+		resolve_binary(res, ele.evaluate)
 	elif ele.evaluate.family == 'unary':
-		resolve_unary(res, ele.evaluate, ele.write)
+		resolve_unary(res, ele.evaluate)
 	else:
 		resolution_error()
 
-def resolve_unary(res, this, write):
-	resolve_operator(res, this, write, 0)
+def resolve_unary(res, this):
+	resolve_operator(res, this, 0)
 
-def resolve_binary(res, this, write):
-	resolve_operator(res, this, write, 0)
-	resolve_operator(res, this, write, 1)
+def resolve_binary(res, this):
+	resolve_operator(res, this, 0)
+	resolve_operator(res, this, 1)
 
 
 
-def resolve_value(res, token_string, write):
+def resolve_value(res, token_string):
 
 	def token_is_name(token):
 		return token[0].isalpha()
@@ -107,17 +101,16 @@ def resolve_value(res, token_string, write):
 	if token_is_name(token_string):
 		return res.variable_lookup[token_string]
 	elif token_is_numeric(token_string):
-		constant_trace = (token_string, write.word_size)
-		if constant_trace in res.constant_lookup:
-			return res.constant_lookup[constant_trace]
+		if token_string in res.constant_lookup:
+			return res.constant_lookup[token_string]
 		else:
-			new_constant = generate_constant(token_string, write)
-			res.constant_lookup[constant_trace] = new_constant
+			new_constant = generate_constant(token_string)
+			res.constant_lookup[token_string] = new_constant
 			return new_constant
 
 
-def generate_constant(value, template):
-	constant = copy.deepcopy(template)
+def generate_constant(value):
+	constant = variable()
 	constant.identity = 'constant'
 	constant.name = value
 	constant.value = value

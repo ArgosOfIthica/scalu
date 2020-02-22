@@ -29,7 +29,7 @@ def global_context(parser):
 def expect_block(parser):
 	new_block = block()
 	while parser.is_not_end_block():
-		elif parser.is_variable_assignment():
+		if parser.is_variable_assignment():
 			new_assignment = expect_assignment(parser)
 			new_block.sequence.append(new_assignment)
 		elif parser.is_service_call():
