@@ -14,7 +14,12 @@ class atom():
 		self.ele = ele
 
 	def get_word_size(self):
-		return int(self.ele.output.word_size)
+		try:
+			return int(self.ele.output.word_size)
+		except:
+			print(self.ele.identity)
+			print(self.ele.arg[0])
+			return int(self.ele.arg[0].word_size)
 
 	def get_true_return(self):
 		return self.ele.output.name + 'tr'
@@ -23,7 +28,6 @@ class atom():
 		return self.ele.output.name + 'fr'
 
 	def get_alpha_bit(self):
-		print(self.ele)
 		return self.ele.arg[0].name + 'b'
 
 	def get_beta_bit(self):

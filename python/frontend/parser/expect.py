@@ -1,7 +1,8 @@
 """
 EBNF
 
-block = { variable | assignment | service_call }
+block = { statement }
+statement = assignment | service_call
 service_call = ename '(' { vname [,]} ')'
 assignment = vname '=' exp
 exp = ( p_exp | exp binop exp | unop exp | value)
