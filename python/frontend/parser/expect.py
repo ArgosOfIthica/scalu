@@ -15,120 +15,125 @@ from frontend.parser.structure import *
 import re
 
 
-
-def parse(tokens):
-	parser = parser_obj(tokens)
-	return global_context(parser)
+class recursive_descent():
 
 
-
-def global_context(parser):
-	global_object = expect_block(parser)
-	return global_object
+	def __init__(self, tokens):
+		self.consumer = consumer(tokens)
 
 
-def expect_block(parser):
-	new_block = block()
-	while parser.is_not_end_block():
-		if parser.is_variable_assignment():
-			new_assignment = expect_assignment(parser)
-			new_block.sequence.append(new_assignment)
-		elif parser.is_service_call():
-			new_service_call = expect_service_call(parser)
-			new_block.sequence.append(new_service_call)
+	def parse(self):
+		return self.global_context()
+
+
+
+	def global_context(self):
+		global_object = self.expect_block()
+		return global_object
+
+
+	def expect_block(self):
+		new_block = block()
+		while self.consumer.is_not_end_block():
+			if self.consumer.is_variable_assignment():
+				new_assignment = self.expect_assignment()
+				new_block.sequence.append(new_assignment)
+			elif self.consumer.is_service_call():
+				new_service_call = self.expect_service_call()
+				new_block.sequence.append(new_service_call)
+			else:
+				parsing_error(self.consumer)
+		return new_block
+
+
+	def expect_service_call(self):
+		new_service_call = service_call()
+		new_service_call.service = self.consumer.use_if_name()
+		self.consumer.consume('(')
+		while self.consumer.is_not_end_service_call():
+			arg = self.expect_expression()
+			new_service_call.arg.append(arg)
+			if self.consumer.is_not_end_service_call():
+				self.consumer.consume(',')
+		self.consumer.consume(')')
+		return new_service_call
+
+
+
+	def expect_assignment(self):
+		new_assignment = assignment()
+		new_assignment.write = self.expect_assignment_write()
+		new_assignment.evaluate = self.expect_expression()
+		return new_assignment
+
+	def expect_assignment_write(self):
+		write = self.consumer.use_if_name()
+		self.consumer.consume('=')
+		return write
+
+
+	def expect_p_expression(self):
+		self.consumer.consume('(')
+		new_expression = self.expect_expression()
+		self.consumer.consume(')')
+		return new_expression
+
+	def expect_expression(self):
+		new_expression = ''
+
+		if self.consumer.is_unop():
+			new_expression = self.expect_unop()
+
+		elif self.consumer.is_subexpression():
+			new_expression = self.expect_p_expression()
+
+		elif self.consumer.is_unchained_value():
+			new_expression = self.consumer.token()
+			self.consumer.consume()
+
+		else:
+			new_expression = self.expect_binop()
+
+		while self.consumer.is_binop():
+			new_expression = self.expect_binop(new_expression)
+			#this handles the case of binary "chaining" where order of operations is ambiguous.
+			#the expression is nested into the first argument of a binary operation object.
+			#this nesting produces left-to-right evaluation without operator precedence.
+
+
+		return new_expression
+
+
+	def expect_argument(self):
+		arg = ''
+		if self.consumer.is_subexpression():
+			arg = self.expect_p_expression()
+		elif self.consumer.token_is_value():
+			arg = self.consumer.token()
+			self.consumer.consume()
+		else:
+			parsing_error(self.consumer)
+		return arg
+
+	def expect_unop(self):
+		new_unop = unary_operator()
+		new_unop.identity = self.consumer.retrieve_identity()
+		self.consumer.consume()
+		new_unop.arg[0] = self.expect_argument()
+		return new_unop
+
+	def expect_binop(self, chain=None):
+		new_binop = binary_operator()
+		if chain is None:
+			new_binop.arg[0] = self.expect_argument()
+		else:
+			new_binop.arg[0] = chain
+		if self.consumer.is_binop():
+			new_binop.identity = self.consumer.retrieve_identity()
+			self.consumer.consume()
 		else:
 			parsing_error(parser)
-	return new_block
-
-
-def expect_service_call(parser):
-	new_service_call = service_call()
-	new_service_call.service = parser.use_if_name()
-	parser.consume('(')
-	while parser.is_not_end_service_call():
-		arg = expect_expression(parser)
-		new_service_call.arg.append(arg)
-		if parser.is_not_end_service_call():
-			parser.consume(',')
-	parser.consume(')')
-	return new_service_call
-
-
-
-def expect_assignment(parser):
-	new_assignment = assignment()
-	new_assignment.write = expect_assignment_write(parser)
-	new_assignment.evaluate = expect_expression(parser)
-	return new_assignment
-
-def expect_assignment_write(parser):
-	write = parser.use_if_name()
-	parser.consume('=')
-	return write
-
-
-def expect_p_expression(parser):
-	parser.consume('(')
-	new_expression = expect_expression(parser)
-	parser.consume(')')
-	return new_expression
-
-def expect_expression(parser):
-	new_expression = ''
-
-	if parser.is_unop():
-		new_expression = expect_unop(parser)
-
-	elif parser.is_subexpression():
-		new_expression = expect_p_expression(parser)
-
-	elif parser.is_unchained_value():
-		new_expression = parser.token()
-		parser.consume()
-
-	else:
-		new_expression = expect_binop(parser)
-
-	while parser.is_binop():
-		new_expression = expect_binop(parser, new_expression)
-		#this handles the case of binary "chaining" where order of operations is ambiguous.
-		#the expression is nested into the first argument of a binary operation object.
-		#this nesting produces left-to-right evaluation without operator precedence.
-
-
-	return new_expression
-
-
-def expect_argument(parser):
-	arg = ''
-	if parser.is_subexpression():
-		arg = expect_p_expression(parser)
-	elif parser.token_is_value():
-		arg = parser.token()
-		parser.consume()
-	else:
-		parsing_error(parser)
-	return arg
-
-def expect_unop(parser):
-	new_unop = unary_operator()
-	new_unop.identity = parser.retrieve_identity()
-	parser.consume()
-	new_unop.arg[0] = expect_argument(parser)
-	return new_unop
-
-def expect_binop(parser, chain=None):
-	new_binop = binary_operator()
-	if chain is None:
-		new_binop.arg[0] = expect_argument(parser)
-	else:
-		new_binop.arg[0] = chain
-	if parser.is_binop():
-		new_binop.identity = parser.retrieve_identity()
-		parser.consume()
-	else:
-		parsing_error(parser)
-	new_binop.arg[1] = expect_argument(parser)
-	return new_binop
+		new_binop.arg[1] = self.expect_argument()
+		return new_binop
 
 

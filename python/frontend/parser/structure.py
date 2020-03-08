@@ -55,7 +55,7 @@ class assignment():
 	write = ''
 	evaluate = ''
 
-class parser_obj():
+class consumer():
 
 	def __init__(self, tokens):
 		self.tokens = tokens

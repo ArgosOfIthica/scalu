@@ -1,6 +1,6 @@
 from frontend.lexer import lexer
-from frontend.parser.expect import parse
-from frontend.resolution import resolve
+from frontend.parser.parser import parser
+#from frontend.resolution import resolver
 
 
 
