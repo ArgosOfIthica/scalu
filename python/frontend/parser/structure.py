@@ -1,59 +1,70 @@
 
-
+from frontend.utility.utility import *
 
 def parsing_error(parser):
 	raise Exception('did not expect token # ' + str(parser.count) + ' : """' + parser.token() + '""" at line ' + str(parser.current_line()))
 
 
 
+class structure():
+
+	def is_assignment(self, arg):
+		return isinstance(arg, assignment)
+
+	def is_service_call(self, arg):
+		return isinstance(arg, service_call)
+
+	def is_operator(self, arg):
+		return isinstance(arg, operator)
+
 class block():
-	family = 'block'
-	identity = 'block'
 
 	def __init__(self):
 		self.scope = list()
 		self.sequence = list()
 
 class variable():
-	family = 'variable'
-	identity = 'variable'
 	name = ''
 	type = 'int'
 	value = '0'
 	word_size = '8'
 
-class service_call():
-	family = 'service_call'
-	identity = 'service_call'
-	service = ''
+class constant(variable):
+	pass
+
+class statement():
+	identifier = ''
 
 	def __init__(self):
 		self.arg = list()
 
 
-class unary_operator():
-	family = 'unary'
-	identity = ''
-	output = ''
-	arg = list()
+
+class assignment(statement):
 
 	def __init__(self):
 		self.arg = [None]
 
-class binary_operator():
-	family = 'binary'
+class service_call(statement):
+	pass
+
+
+class operator():
 	identity = ''
 	output = ''
 	arg = list()
 
+class unary_operator(operator):
+
+	def __init__(self):
+		self.arg = [None]
+
+class binary_operator(operator):
+
 	def __init__(self):
 		self.arg =  [None] * 2
 
-class assignment():
-	family = 'assignment'
-	identity = 'assignment'
-	write = ''
-	evaluate = ''
+
 
 class consumer():
 
@@ -82,13 +93,10 @@ class consumer():
 			self.count += 1
 
 	def token_is_name(self):
-		return self.token()[0].isalpha()
+		return token_is_name(self.token())
 
 	def token_is_numeric(self):
-		if self.token()[0] == '-':
-			return self.token()[1:].isnumeric()
-		else:
-			return self.token().isnumeric()
+		return token_is_numeric(self.token())
 
 	def token_is_value(self):
 		return self.token_is_name() or self.token_is_numeric()

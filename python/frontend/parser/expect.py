@@ -48,7 +48,7 @@ class recursive_descent():
 
 	def expect_service_call(self):
 		new_service_call = service_call()
-		new_service_call.service = self.consumer.use_if_name()
+		new_service_call.identifier = self.consumer.use_if_name()
 		self.consumer.consume('(')
 		while self.consumer.is_not_end_service_call():
 			arg = self.expect_expression()
@@ -62,8 +62,8 @@ class recursive_descent():
 
 	def expect_assignment(self):
 		new_assignment = assignment()
-		new_assignment.write = self.expect_assignment_write()
-		new_assignment.evaluate = self.expect_expression()
+		new_assignment.identifier = self.expect_assignment_write()
+		new_assignment.arg[0] = self.expect_expression()
 		return new_assignment
 
 	def expect_assignment_write(self):

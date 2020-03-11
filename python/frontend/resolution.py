@@ -1,6 +1,8 @@
 
 import copy
+from frontend.utility.utility import *
 from frontend.parser.structure import variable
+from frontend.parser.structure import structure
 
 class resolution_block():
 	variable_lookup = dict()
@@ -12,6 +14,7 @@ class resolver():
 
 	def __init__(self):
 		self.res = resolution_block()
+		self.s = structure()
 
 	def resolve(self, shallow_ast):
 		self.resolve_block(shallow_ast)
@@ -24,24 +27,22 @@ class resolver():
 
 	def resolve_block(self, block):
 		for ele in block.sequence:
-			if ele.identity == 'assignment':
+			if self.s.is_assignment(ele):
 				self.resolve_assignment(ele)
-			elif ele.identity == 'service_call':
+			elif self.s.is_service_call(ele):
 				self.resolve_service_call(ele)
 			else:
 				self.resolution_error()
 
-
 	def resolve_service_call(self, ele):
 		core_services = ( 'bprint')
-		for arg in range(0, len(ele.arg)):
-			self.resolve_operator(ele, arg)
+		self.resolve_operator(ele, ele)
 		if ele.service not in core_services:
 			self.resolution_error()
 
 	def resolve_assignment(self, ele):
-		ele.write = self.resolve_assignment_write(ele.write)
-		self.resolve_assignment_evaluate(ele)
+		ele.identifier = self.resolve_assignment_write(ele.identifier)
+		self.resolve_operator(ele)
 
 	def resolve_assignment_write(self, write):
 		if write in self.res.variable_lookup:
@@ -54,38 +55,18 @@ class resolver():
 		else:
 			self.resolution_error()
 
-
 	def resolve_operator(self, ele):
 		ele.arg = [self.resolve_operator_transform(arg) for arg in ele.arg]
 
-#combine rot and rae
 	def resolve_operator_transform(self, arg):
 		if type(arg) is str:
 			return self.resolve_value(arg)
-		elif arg.family == 'binary' or arg.family == 'unary':
+		elif self.s.is_operator(arg):
 			self.resolve_operator(arg)
 		else:
 			self.resolution_error()
 
-	def resolve_assignment_evaluate(self, ele):
-		if type(ele.evaluate) is str:
-			ele.evaluate = self.resolve_value(ele.evaluate)
-		elif ele.evaluate.family == 'binary' or arg.family == 'unary':
-			self.resolve_operator(ele.evaluate)
-		else:
-			self.resolution_error()
-
 	def resolve_value(self, token_string):
-
-		def token_is_name(token):
-			return token[0].isalpha()
-
-		def token_is_numeric(token):
-			if token[0] == '-':
-				return token[1:].isnumeric()
-			else:
-				return token.isnumeric()
-
 		if token_is_name(token_string):
 			return self.res.variable_lookup[token_string]
 		elif token_is_numeric(token_string):
