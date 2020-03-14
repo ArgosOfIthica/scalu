@@ -17,6 +17,18 @@ class structure():
 	def is_operator(self, arg):
 		return isinstance(arg, operator)
 
+	def is_unary_operator(self, arg):
+		return isinstance(arg, unary_operator)
+
+	def is_binary_operator(self, arg):
+		return isinstance(arg, binary_operator)
+
+	def is_variable(self, arg):
+		return isinstance(arg, variable)
+
+	def is_constant(self, arg):
+		return isinstance(arg, constant)
+
 class block():
 
 	def __init__(self):
@@ -29,6 +41,14 @@ class variable():
 	value = '0'
 	word_size = '8'
 
+
+
+class service():
+	name = ''
+
+	def __init__(self):
+		self.arg = list()
+
 class constant(variable):
 	pass
 
@@ -37,8 +57,6 @@ class statement():
 
 	def __init__(self):
 		self.arg = list()
-
-
 
 class assignment(statement):
 

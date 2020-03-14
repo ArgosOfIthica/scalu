@@ -1,16 +1,21 @@
 
 from frontend.parser.structure import unary_operator
-
-def core_service_list():
-	return ('bprint')
+from frontend.parser.structure import service
 
 
-def get_service_object(self, identity):
-	service_map = {
-		'bprint': sbprint
-	}
+class core_service_resolver():
 
-def sbprint(self):
-	bprint = unary_operator()
-	bprint.identity = 'bprint'
+	def core_service_list(self):
+		return ('bprint')
+
+
+	def get_service_object(self, identity):
+		service_map = {
+			'bprint': self.bprint
+		}
+		return service_map[identity]
+
+	class bprint(service):
+		name = 'bprint'
+		arg = ['target']
 

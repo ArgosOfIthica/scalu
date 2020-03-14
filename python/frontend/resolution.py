@@ -1,8 +1,10 @@
 
 import copy
 from frontend.utility.utility import *
+from frontend.parser.structure import constant
 from frontend.parser.structure import variable
 from frontend.parser.structure import structure
+from frontend.service_definitions.service import core_service_resolver
 
 class resolution_block():
 	variable_lookup = dict()
@@ -15,6 +17,7 @@ class resolver():
 	def __init__(self):
 		self.res = resolution_block()
 		self.s = structure()
+		self.core = core_service_resolver()
 
 	def resolve(self, shallow_ast):
 		self.resolve_block(shallow_ast)
@@ -35,9 +38,13 @@ class resolver():
 				self.resolution_error()
 
 	def resolve_service_call(self, ele):
-		core_services = ( 'bprint')
-		self.resolve_operator(ele, ele)
-		if ele.service not in core_services:
+		ele.identifier = self.resolve_service_call_write(ele.identifier)
+		self.resolve_operator(ele)
+
+	def resolve_service_call_write(self, write):
+		if write in self.core.core_service_list():
+			return self.core.get_service_object(write)
+		else:
 			self.resolution_error()
 
 	def resolve_assignment(self, ele):
@@ -63,6 +70,7 @@ class resolver():
 			return self.resolve_value(arg)
 		elif self.s.is_operator(arg):
 			self.resolve_operator(arg)
+			return arg
 		else:
 			self.resolution_error()
 
@@ -79,8 +87,8 @@ class resolver():
 
 
 	def generate_constant(self, value):
-		constant = variable()
-		constant.identity = 'constant'
-		constant.name = value
-		constant.value = value
-		return constant
+		constant_val = constant()
+		constant_val.identity = 'constant'
+		constant_val.name = value
+		constant_val.value = value
+		return constant_val
