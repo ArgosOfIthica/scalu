@@ -21,6 +21,7 @@ class resolver():
 
 	def resolve(self, shallow_ast):
 		self.resolve_block(shallow_ast)
+		shallow_ast.resolution = self.res
 		return shallow_ast
 
 

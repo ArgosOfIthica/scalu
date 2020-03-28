@@ -32,7 +32,7 @@ class structure():
 class block():
 
 	def __init__(self):
-		self.scope = list()
+		self.resolution = None
 		self.sequence = list()
 
 class variable():
