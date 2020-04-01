@@ -10,10 +10,10 @@ class unwrapper():
 		self.s = structure()
 		self.sequence_out = list()
 
-	def compile(self, block):
+	def unwrap(self, block):
 		for item in block.sequence:
 			if self.s.is_assignment(item):
-				unwrapped = unwrapped_assignment()
+				unwrapped = unwrapped_assignment(block.resolution)
 				new_sequencing = unwrapped.unwrap_assignment(item)
 				self.sequence_out = self.sequence_out + new_sequencing
 		block.sequence = self.sequence_out
@@ -26,8 +26,9 @@ class unwrapper():
 
 class unwrapped_assignment():
 
-	def __init__(self):
+	def __init__(self, res):
 		self.instr_order = list()
+		self.res = res
 		self.var_counter = 0
 		self.s = structure()
 
@@ -61,6 +62,7 @@ class unwrapped_assignment():
 	def generate_temporary_variable(self):
 		temp = variable()
 		temp.name = 'temp' + str(self.var_counter)
+		self.res.variable_lookup[temp.name] = temp
 		self.var_counter += 1
 		return temp
 
