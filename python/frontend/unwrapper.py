@@ -1,7 +1,5 @@
 
-from frontend.parser.structure import unary_operator
-from frontend.parser.structure import variable
-from frontend.parser.structure import structure
+from frontend.parser.structure import *
 import copy
 
 class unwrapper():
@@ -12,10 +10,12 @@ class unwrapper():
 
 	def unwrap(self, block):
 		for item in block.sequence:
+			unwrapped = unwrapped_element(block.resolution)
 			if self.s.is_assignment(item):
-				unwrapped = unwrapped_assignment(block.resolution)
 				new_sequencing = unwrapped.unwrap_assignment(item)
-				self.sequence_out = self.sequence_out + new_sequencing
+			elif self.s.is_service_call(item):
+				new_sequencing = unwrapped.unwrap_service_call(item)
+			self.sequence_out = self.sequence_out + new_sequencing
 		block.sequence = self.sequence_out
 		return block
 	def header_error(self):
@@ -24,7 +24,7 @@ class unwrapper():
 
 
 
-class unwrapped_assignment():
+class unwrapped_element():
 
 	def __init__(self, res):
 		self.instr_order = list()
@@ -32,9 +32,21 @@ class unwrapped_assignment():
 		self.var_counter = 0
 		self.s = structure()
 
+	def unwrap_service_call(self, call):
+		call.arg = [self.unwrap_service_call_transform(arg) for arg in call.arg]
+		self.instr_order.append(call.identifier.definition(call.arg))
+		return self.instr_order
+
+	def unwrap_service_call_transform(self, arg):
+			new_output_variable = self.generate_temporary_variable()
+			new_assignment = assignment()
+			new_assignment.identifier = new_output_variable
+			new_assignment.arg[0] = arg
+			self.unwrap_assignment(new_assignment)
+			return new_assignment
+
+
 	def unwrap_assignment(self, assignment):
-		variable_headers = ''
-		out = ''
 		if self.s.is_variable(assignment.arg[0]):
 			icopy = unary_operator()
 			icopy.identity = 'copy'
@@ -60,9 +72,14 @@ class unwrapped_assignment():
 
 
 	def generate_temporary_variable(self):
-		temp = variable()
-		temp.name = 'temp' + str(self.var_counter)
-		self.res.variable_lookup[temp.name] = temp
-		self.var_counter += 1
-		return temp
+		name = 'temp' + str(self.var_counter)
+		if name in self.res.variable_lookup:
+			self.var_counter += 1
+			return self.res.variable_lookup[name]
+		else:
+			temp = variable()
+			temp.name = name
+			self.res.variable_lookup[temp.name] = temp
+			self.var_counter += 1
+			return temp
 
