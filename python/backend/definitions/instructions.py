@@ -1,5 +1,7 @@
 
 from backend.definitions.vbuilder import build_lookup
+from frontend.parser.structure import structure
+
 
 alias = 'alias '
 true = 'btrue '
@@ -12,6 +14,7 @@ class atom():
 
 	def __init__(self, ele):
 		self.ele = ele
+		self.s = structure()
 
 	def get_word_size(self):
 		try:
@@ -34,10 +37,10 @@ class atom():
 		return self.ele.arg[1].name + 'b'
 
 	def get_hash(self):
-		if self.ele.family== 'unary':
-			return str(hash(self.ele.identity + self.ele.arg1.name + self.ele.output.name))
-		elif self.ele.family == 'binary':
-			return str(hash(self.ele.identity + self.ele.arg1.name + self.ele.arg2.name + self.ele.output.name))
+		if self.s.is_unary_operator(self.ele):
+			return str(hash(self.ele.identity + self.ele.arg[0].name + self.ele.output.name))
+		elif self.s.is_binary_operator(self.ele):
+			return str(hash(self.ele.identity + self.ele.arg[0].name + self.ele.arg[1].name + self.ele.output.name))
 		else:
 			Exception('failure')
 

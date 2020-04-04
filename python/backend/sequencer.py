@@ -19,6 +19,7 @@ class sequence_generator():
 			self.header += new_header
 			self.sequence += new_sequence
 		self.sequence += '"'
+		return self.sequence
 
 
 	def origin(self, alias_set):
