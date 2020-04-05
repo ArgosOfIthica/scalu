@@ -44,6 +44,12 @@ class atom():
 		else:
 			Exception('failure')
 
+
+class instruction_bundle():
+		header = ''
+		sequence = ''
+
+
 def build_instruction(ele):
 	instr_map = {
 		'copy': icopy,
@@ -62,23 +68,21 @@ def icopy(atom):
 	true_return = atom.get_true_return()
 	false_return = atom.get_false_return()
 	alpha_bit = atom.get_alpha_bit()
-	sequence = ''
-	header = ''
+	bundle = instruction_bundle()
 	for bit in range(0, word_size):
-		sequence += alias + true + true_return + str(bit) + next + alias + false + false_return + str(bit) + next + alpha_bit + str(bit) + next
-	return header, sequence
+		bundle.sequence += alias + true + true_return + str(bit) + next + alias + false + false_return + str(bit) + next + alpha_bit + str(bit) + next
+	return bundle
 
 
 def ibprint(atom):
 	word_size = atom.get_word_size()
 	alpha_bit = atom.get_alpha_bit()
-	sequence = ''
-	header = ''
+	bundle = instruction_bundle()
 
-	sequence += alias + true + 'echo 1' + next + alias + false + 'echo 0' + next
+	bundle.sequence += alias + true + 'echo 1' + next + alias + false + 'echo 0' + next
 	for bit in range(0, word_size):
-		sequence += alpha_bit + str(bit) + next
-	return header, sequence
+		bundle.sequence += alpha_bit + str(bit) + next
+	return bundle
 
 
 
@@ -88,11 +92,10 @@ def ibitwise_neg(atom):
 	true_return = atom.get_true_return()
 	false_return = atom.get_false_return()
 	alpha_bit = atom.get_alpha_bit()
-	sequence = ''
-	header = ''
+	bundle = instruction_bundle()
 	for bit in range(0, word_size):
-		sequence += alias + true + false_return + str(bit) + next + alias + false + true_return + str(bit) + next + alpha_bit + str(bit) + next
-	return header, sequence
+		bundle.sequence += alias + true + false_return + str(bit) + next + alias + false + true_return + str(bit) + next + alpha_bit + str(bit) + next
+	return bundle
 
 def ibitwise_or(atom):
 	word_size = atom.get_word_size()
@@ -101,14 +104,13 @@ def ibitwise_or(atom):
 	alpha_bit = atom.get_alpha_bit()
 	beta_bit = atom.get_beta_bit()
 	false_branch = atom.get_hash() + '_false_branch'
-	sequence = ''
-	header = ''
+	bundle = instruction_bundle()
 
 	for bit in range(0, word_size):
-		header += alias + false_branch + str(bit) + ' "' + alias + true + true_return + str(bit) + next + alias + false + false_return + str(bit) + next + beta_bit + str(bit) + '"' + new
+		bundle.header += alias + false_branch + str(bit) + ' "' + alias + true + true_return + str(bit) + next + alias + false + false_return + str(bit) + next + beta_bit + str(bit) + '"' + new
 	for bit in range(0, word_size):
-		sequence += alias + true + true_return + str(bit) + next + alias + false + false_branch + str(bit) + next + alpha_bit + str(bit) + next
-	return header, sequence
+		bundle.sequence += alias + true + true_return + str(bit) + next + alias + false + false_branch + str(bit) + next + alpha_bit + str(bit) + next
+	return bundle
 
 def ibitwise_and(atom):
 	word_size = atom.get_word_size()
@@ -117,13 +119,12 @@ def ibitwise_and(atom):
 	alpha_bit = atom.get_alpha_bit()
 	beta_bit = atom.get_beta_bit()
 	true_branch = atom.get_hash() + '_true_branch'
-	sequence = ''
-	header = ''
+	bundle = instruction_bundle()
 
 	for bit in range(0, word_size):
-		header += alias + true_branch + str(bit) + ' "' + alias + true + true_return + str(bit) + next + alias + false + false_return + str(bit) + next + beta_bit + str(bit) + '"' + new
+		bundle.header += alias + true_branch + str(bit) + ' "' + alias + true + true_return + str(bit) + next + alias + false + false_return + str(bit) + next + beta_bit + str(bit) + '"' + new
 	for bit in range(0, word_size):
-		sequence += alias + true + true_branch + str(bit) + next + alias + false + false_return + str(bit) + next + alpha_bit + str(bit) + next
-	return header, sequence
+		bundle.sequence += alias + true + true_branch + str(bit) + next + alias + false + false_return + str(bit) + next + alpha_bit + str(bit) + next
+	return bundle
 
 

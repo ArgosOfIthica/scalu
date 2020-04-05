@@ -3,8 +3,6 @@ from backend.definitions.instructions import build_instruction
 import random
 
 class sequence_generator():
-	sequence = ''
-	header = ''
 	alias_name_length = 31
 	console_max_buffer = 510
 	random_max = 9223372036854775806
@@ -13,13 +11,14 @@ class sequence_generator():
 	def generate_sequence(self, raw_sequence, alias_set):
 
 		random.seed(42)
-		self.sequence = self.origin(alias_set)
+		bundle = self.sequence_bundle()
+		bundle.sequence = self.origin(alias_set)
 		for ele in raw_sequence:
-			new_header, new_sequence = build_instruction(ele)
-			self.header += new_header
-			self.sequence += new_sequence
-		self.sequence += '"'
-		return self.sequence
+			instr_bundle = build_instruction(ele)
+			bundle.header += instr_bundle.header
+			bundle.sequence += instr_bundle.sequence
+		bundle.sequence += '"'
+		return bundle
 
 
 	def origin(self, alias_set):
@@ -30,6 +29,10 @@ class sequence_generator():
 			new_origin, new_origin_name = gen_origin(seq_seed)
 		alias_set.add(new_origin_name)
 		return new_origin
+
+	class sequence_bundle():
+		header = ''
+		sequence = ''
 
 
 
