@@ -1,5 +1,5 @@
 
-from backend.definitions.instructions import build_instruction
+from backend.definitions.instructions import instruction_constructor
 import random
 
 class sequence_generator():
@@ -11,10 +11,11 @@ class sequence_generator():
 	def generate_sequence(self, raw_sequence, alias_set):
 
 		random.seed(42)
+		instr_constr = instruction_constructor()
 		bundle = self.sequence_bundle()
 		bundle.sequence = self.origin(alias_set)
 		for ele in raw_sequence:
-			instr_bundle = build_instruction(ele)
+			instr_bundle = instr_constr.build_instruction(ele)
 			bundle.header += instr_bundle.header
 			bundle.sequence += instr_bundle.sequence
 		bundle.sequence += '"'
