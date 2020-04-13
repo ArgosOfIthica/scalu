@@ -9,7 +9,8 @@ class backend_manager():
 		self.sequence_pass = sequence_generator()
 
 	def compile(self, ast):
-		header = self.static_pass.compile(ast.resolution)
+		header = 'alias btrue btrue\nalias bfalse bfalse\n'
+		header += self.static_pass.compile(ast.resolution)
 		bundle = self.sequence_pass.generate_sequence(ast.sequence, set())
 		header += bundle.header
 		sequence = bundle.sequence
