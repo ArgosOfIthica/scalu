@@ -42,9 +42,9 @@ class atom():
 
 	def get_hash(self):
 		if self.s.is_unary_operator(self.ele):
-			return str(hash(self.ele.identity + self.ele.arg[0].name + self.ele.output.name))
+			return str(abs(hash(self.ele.identity + self.ele.arg[0].name + self.ele.output.name)))
 		elif self.s.is_binary_operator(self.ele):
-			return str(hash(self.ele.identity + self.ele.arg[0].name + self.ele.arg[1].name + self.ele.output.name))
+			return str(abs(hash(self.ele.identity + self.ele.arg[0].name + self.ele.arg[1].name + self.ele.output.name)))
 		else:
 			Exception('failure')
 
