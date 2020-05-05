@@ -11,6 +11,9 @@ class minifier():
 		output_text = re.sub(';(\s+)', ';', output_text)
 		output_text = re.sub(';(\s*)\"', '"', output_text)
 		output_text = self.reallocate(output_text, blob)
+		output_text = re.sub(';(\s+)', ';', output_text)
+		output_text = re.sub(';(\s*)\"', '"', output_text)
+		output_text = re.sub('\";', '"', output_text)
 		return output_text
 
 	def minify_names(self, blob):
@@ -70,11 +73,6 @@ class minifier():
 		return lines
 
 
-
-
-
-#TODO: continue from here
-
 	def sanitize_list(self, aliases):
 		return [tuple(filter(lambda x:  x != '', alias)) for alias in aliases]
 
@@ -90,7 +88,7 @@ class minifier():
 class alias_blob():
 
 	def __init__(self):
-		self.CONSOLE_MAX_BUFFER = 512 -2
+		self.CONSOLE_MAX_BUFFER = 436 - 2
 		self.alias_tuples = tuple()
 		self.alias_new = dict()
 		self.alias_convert = dict()
@@ -122,7 +120,7 @@ class picker():
 			selected = int((self.current_use / int((len(self.symbols) ** x)) % len(self.symbols)))
 			new_alias = [self.symbols[selected]] + new_alias
 		new_alias = ''.join(new_alias)
-		new_alias = 'π' + new_alias
+		new_alias = '%' + new_alias  #using π here causes strange behavior
 		self.current_use += 1
 		return new_alias
 
