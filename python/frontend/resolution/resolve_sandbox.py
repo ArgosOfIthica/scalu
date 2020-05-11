@@ -1,5 +1,4 @@
 
-import copy
 from frontend.utility.utility import *
 from frontend.parser.structure import constant
 from frontend.parser.structure import variable
@@ -19,10 +18,11 @@ class resolver():
 		self.s = structure()
 		self.core = core_service_resolver()
 
-	def resolve(self, shallow_ast):
-		self.resolve_block(shallow_ast)
-		shallow_ast.resolution = self.res
-		return shallow_ast
+	def resolve(self, sandbox):
+		for init in sandbox.init:
+			self.resolve_block(init)
+			sandbox.resolution = self.res
+		return sandbox
 
 
 	def resolution_error(self):

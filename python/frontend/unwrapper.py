@@ -6,18 +6,22 @@ class unwrapper():
 
 	def __init__(self):
 		self.s = structure()
-		self.sequence_out = list()
 
-	def unwrap(self, block):
-		for item in block.sequence:
-			unwrapped = unwrapped_element(block.resolution)
-			if self.s.is_assignment(item):
-				new_sequencing = unwrapped.unwrap_assignment(item)
-			elif self.s.is_service_call(item):
-				new_sequencing = unwrapped.unwrap_service_call(item)
-			self.sequence_out = self.sequence_out + new_sequencing
-		block.sequence = self.sequence_out
-		return block
+	def unwrap(self, global_object):
+		for sandbox in global_object.sandbox:
+			for init in sandbox.init:
+				sequence_out = list()
+				for statement in init.sequence:
+					unwrapped = unwrapped_element(init.resolution)
+					if self.s.is_assignment(statement):
+						new_sequencing = unwrapped.unwrap_assignment(statement)
+					elif self.s.is_service_call(statement):
+						new_sequencing = unwrapped.unwrap_service_call(statement)
+					sequence_out = sequence_out + new_sequencing
+				init.sequence = sequence_out
+		return global_object
+
+
 	def header_error(self):
 		Exception('header error')
 

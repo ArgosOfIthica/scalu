@@ -1,18 +1,19 @@
 from frontend.lexer import lexer
 from frontend.parser.parser import parser
 from visualize import visualizer
-from frontend.resolution import resolver
+from frontend.resolution.resolution import resolution
 from frontend.unwrapper import unwrapper
 
 
 
 class frontend_manager():
-	debug = True
+
 
 	def __init__(self):
+		self.debug = False
 		self.lexer = lexer()
 		self.parser = parser()
-		self.resolver = resolver()
+		self.resolver = resolution()
 		self.visualizer = visualizer()
 		self.unwrapper = unwrapper()
 

@@ -1,7 +1,8 @@
 """
 EBNF
 
-block = { statement }
+sandbox = 'sandbox ' sname { init_block }
+init_block = { statement }
 statement = assignment | service_call
 service_call = ename '(' { vname [,]} ')'
 assignment = vname '=' exp
@@ -20,20 +21,43 @@ class recursive_descent():
 
 	def __init__(self, tokens):
 		self.consumer = consumer(tokens)
+		self.s = structure()
 
 
 	def parse(self):
 		return self.global_context()
 
 
-
 	def global_context(self):
-		global_object = self.expect_block()
-		return global_object
+		new_global_object = global_object()
+		while self.consumer.is_sandbox():
+			new_sandbox = self.expect_sandbox()
+			new_global_object.sandbox.append(new_sandbox)
+		if self.consumer.token() == '':
+			return new_global_object
+		else:
+			parsing_error(self.consumer)
+
+	def expect_sandbox(self):
+		new_sandbox = sandbox()
+		self.consumer.consume('sandbox')
+		new_sandbox.name = self.consumer.use_if_name()
+		while self.consumer.is_block():
+			block_type = self.consumer.token()
+			if block_type == 'init':
+				self.consumer.consume('init')
+				self.consumer.consume('{')
+				new_block = self.expect_script_block()
+				new_sandbox.init.append(new_block)
+				self.consumer.consume('}')
+			else:
+				parsing_error(self.consumer)
+		return new_sandbox
 
 
-	def expect_block(self):
-		new_block = block()
+
+	def expect_script_block(self):
+		new_block = script_block()
 		while self.consumer.is_not_end_block():
 			if self.consumer.is_variable_assignment():
 				new_assignment = self.expect_assignment()

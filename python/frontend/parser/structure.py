@@ -29,11 +29,37 @@ class structure():
 	def is_constant(self, arg):
 		return isinstance(arg, constant)
 
+	def is_init_block(self, arg):
+		return isinstance(arg, init_block)
+
+
+class global_object():
+
+	def __init__(self):
+		self.sandbox = list()
+
+
+class sandbox():
+
+	def __init__(self):
+		self.name = ''
+		self.init = list()
+		self.service = list()
+		self.bind = list()
+		self.map = list()
+
 class block():
+	pass
+
+
+
+class script_block(block):
 
 	def __init__(self):
 		self.resolution = None
 		self.sequence = list()
+
+
 
 class variable():
 	name = ''
@@ -142,6 +168,21 @@ class consumer():
 
 	def is_not_end_service_call(self):
 		return self.token() != ')'
+
+	#
+
+	def is_sandbox(self):
+		return self.token() == 'sandbox'
+
+	def is_block(self):
+		return self.token(1) == '{'
+
+	def retrieve_block_and_use(self):
+		block_map = {
+		'init' : init_block
+		}
+		block_class = block_map(self.token())
+		return block_class
 
 	#expression functions
 
