@@ -43,23 +43,12 @@ class sandbox():
 
 	def __init__(self):
 		self.name = ''
-		self.init = list()
 		self.service = list()
 		self.bind = list()
 		self.map = list()
 
 class block():
 	pass
-
-
-
-class script_block(block):
-
-	def __init__(self):
-		self.resolution = None
-		self.sequence = list()
-
-
 
 class variable():
 	name = ''
@@ -74,6 +63,31 @@ class service():
 
 	def __init__(self):
 		self.arg = list()
+		self.resolution = None
+		self.sequence = list()
+
+class config():
+
+	def __init__(self):
+		self.map = dict()
+
+class binding(config):
+	pass
+
+class mapping(config):
+	pass
+
+
+class event():
+
+	def __init__(self, event):
+		self.value = event
+
+
+class key():
+
+	def __init__(self, key):
+		self.value = key
 
 class constant(variable):
 	pass
@@ -166,7 +180,7 @@ class consumer():
 	def is_not_end_block(self):
 		return self.token() != '}'
 
-	def is_not_end_service_call(self):
+	def is_not_end_service_arg(self):
 		return self.token() != ')'
 
 	#
@@ -175,14 +189,9 @@ class consumer():
 		return self.token() == 'sandbox'
 
 	def is_block(self):
-		return self.token(1) == '{'
+		block_types = ('service', 'map', 'bind')
+		return self.token() in block_types
 
-	def retrieve_block_and_use(self):
-		block_map = {
-		'init' : init_block
-		}
-		block_class = block_map(self.token())
-		return block_class
 
 	#expression functions
 
