@@ -2,11 +2,14 @@
 EBNF
 
 sandbox = 'sandbox ' sname { bind_block | map_block | service_block }
-service_block = 'service' sname '(' { vname [,]} ')' '{' script_block '}'
+service_block = 'service' sname service_args '{' script_block '}'
 script_block = { statement }
+bind_block = '{' { key ':' event } '}'
+map_block = '{' { event ':' service_call } '}'
 statement = assignment | service_call
-service_call = ename '(' { vname [,]} ')'
+service_call = ename service_args
 assignment = vname '=' exp
+service_args = '(' { vname [,] } ')'
 exp = ( p_exp | exp binop exp | unop exp | value)
 p_exp = '(' exp ')'
 binop = '=' | '|' | '&'
@@ -49,7 +52,6 @@ def expect_sandbox(consumer):
 			new_sandbox.bind.append(new_block)
 		else:
 			parsing_error(consumer)
-		consumer.consume('}')
 	return new_sandbox
 
 
@@ -65,6 +67,7 @@ def expect_bind_block(consumer):
 		new_event = event(consumer.token())
 		consumer.consume()
 		new_binding.map[new_key] = new_event
+	consumer.consume('}')
 	return new_binding
 
 def expect_map_block(consumer):
@@ -77,6 +80,7 @@ def expect_map_block(consumer):
 		consumer.consume(':')
 		service_call = expect_service_call(consumer)
 		new_mapping.map[event_string] = service_call
+	consumer.consume('}')
 	return new_mapping
 
 
@@ -95,6 +99,7 @@ def expect_service_block(consumer):
 			new_block.sequence.append(new_service_call)
 		else:
 			parsing_error(consumer)
+	consumer.consume('}')
 	return new_block
 
 
@@ -134,57 +139,42 @@ def expect_p_expression(consumer):
 	consumer.consume(')')
 	return new_expression
 
-def expect_expression(consumer):
-	new_expression = ''
+def expect_expression_atomic(consumer):
 	if consumer.is_unop():
-		new_expression = expect_unop(consumer)
+		return expect_unop(consumer)
 	elif consumer.is_subexpression():
-		new_expression = expect_p_expression(consumer)
-	elif consumer.is_unchained_value():
-		new_expression = consumer.token()
-		consumer.consume()
+		return expect_p_expression(consumer)
+	elif consumer.is_literal_value():
+		return expect_literal_value(consumer)
 	else:
-		new_expression = expect_binop(consumer)
-	while consumer.is_binop():
+		parsing_error(consumer)
+
+def expect_expression(consumer):
+	new_expression = expect_expression_atomic(consumer)
+	if consumer.is_binop():
 		new_expression = expect_binop(consumer, new_expression)
-		#this handles the case of binary "chaining" where order of operations is ambiguous.
-		#the expression is nested into the first argument of a binary operation object.
-		#this nesting produces left-to-right evaluation without operator precedence.
 	return new_expression
 
 
-def expect_argument(consumer):
-	arg = ''
-	if consumer.is_subexpression():
-		arg = expect_p_expression(consumer)
-	elif consumer.token_is_value():
-		arg = consumer.token()
-		consumer.consume()
-	else:
-		parsing_error(consumer)
-	return arg
+def expect_literal_value(consumer):
+	new_literal_value = literal_value()
+	new_literal_value.identifier = consumer.token()
+	consumer.consume()
+	return new_literal_value
 
 
 def expect_unop(consumer):
 	new_unop = unary_operator()
-	new_unop.identity = consumer.retrieve_identity()
-	consumer.consume()
-	new_unop.arg[0] = expect_argument(consumer)
+	new_unop.identity = consumer.retrieve_and_use_unary_identity()
+	new_unop.arg[0] = expect_expression(consumer)
 	return new_unop
 
 
-def expect_binop(consumer, chain=None):
+def expect_binop(consumer, chain):
 	new_binop = binary_operator()
-	if chain is None:
-		new_binop.arg[0] = expect_argument(consumer)
-	else:
-		new_binop.arg[0] = chain
-	if consumer.is_binop():
-		new_binop.identity = consumer.retrieve_identity()
-		consumer.consume()
-	else:
-		parsing_error(parser)
-	new_binop.arg[1] = expect_argument(consumer)
+	new_binop.arg[0] = chain
+	new_binop.identity = consumer.retrieve_and_use_binary_identity()
+	new_binop.arg[1] = expect_expression(consumer)
 	return new_binop
 
 

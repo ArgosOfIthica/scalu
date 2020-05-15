@@ -122,6 +122,8 @@ class binary_operator(operator):
 	def __init__(self):
 		self.arg =  [None] * 2
 
+class literal_value(operator):
+	pass
 
 
 class consumer():
@@ -198,8 +200,8 @@ class consumer():
 	def is_subexpression(self):
 		return self.token() == '('
 
-	def is_unchained_value(self):
-		return self.token_is_value() and not self.is_binop(1)
+	def is_literal_value(self):
+		return self.token_is_value()
 
 	def is_unop(self, lookahead=0):
 		ops = ['~']
@@ -209,10 +211,25 @@ class consumer():
 		ops = ['|', '&']
 		return self.token(lookahead) in ops
 
-	def retrieve_identity(self):
+	def retrieve_and_use_binary_identity(self):
 		identity_map = {
-		'~' : 'bitwise_neg',
 		'|' : 'bitwise_or',
 		'&' : 'bitwise_and'
 		}
-		return identity_map[self.token()]
+		token = self.token()
+		if token in identity_map:
+			self.consume()
+			return identity_map[token]
+		else:
+			parsing_error(self)
+
+	def retrieve_and_use_unary_identity(self):
+		identity_map = {
+		'~' : 'bitwise_neg'
+		}
+		token = self.token()
+		if token in identity_map:
+			self.consume()
+			return identity_map[token]
+		else:
+			parsing_error(self)
