@@ -37,6 +37,7 @@ def global_context(consumer):
 
 def expect_sandbox(consumer):
 	new_sandbox = sandbox()
+	consumer.current_sandbox = new_sandbox #this lets us cheat and see the resolution of the sandbox without passing the sandbox as a argument
 	consumer.consume('sandbox')
 	new_sandbox.name = consumer.use_if_name()
 	while consumer.is_block():
@@ -123,14 +124,21 @@ def expect_service_header(consumer):
 
 def expect_assignment(consumer):
 	new_assignment = assignment()
-	new_assignment.identifier = expect_assignment_write(consumer)
+	new_assignment.identifier = expect_assignment_identifier(consumer)
+	consumer.consume('=')
 	new_assignment.arg[0] = expect_expression(consumer)
 	return new_assignment
 
-def expect_assignment_write(consumer):
-	write = consumer.use_if_name()
-	consumer.consume('=')
-	return write
+
+def expect_assignment_identifier(consumer):
+	identifier = consumer.use_if_name()
+	if identifier in consumer.current_sandbox.resolution.variable_lookup:
+		return consumer.current_sandbox.resolution.variable_lookup[identifier]
+	else:
+		new_variable = variable()
+		new_variable.name = identifier
+		consumer.current_sandbox.resolution.variable_lookup[identifier] = new_variable
+		return new_variable
 
 
 def expect_p_expression(consumer):
@@ -158,9 +166,46 @@ def expect_expression(consumer):
 
 def expect_literal_value(consumer):
 	new_literal_value = literal_value()
-	new_literal_value.identifier = consumer.token()
-	consumer.consume()
+	new_literal_value.arg[0] = expect_value(consumer)
+
 	return new_literal_value
+
+
+
+def resolve_operator(operator):
+	operator.arg = [resolve_operator_transform(arg) for arg in operator.arg]
+
+def resolve_operator_transform(arg):
+	if type(arg) is str:
+		return resolve_value(arg)
+	elif s.is_operator(arg):
+		resolve_operator(arg)
+		return arg
+	else:
+		resolution_error()
+
+def expect_value(consumer):
+	value = consumer.token()
+	consumer.consume()
+	res = consumer.current_sandbox.resolution
+	if value in res.variable_lookup:
+		return res.variable_lookup[value]
+	elif token_is_numeric(value):
+		if value in res.constant_lookup:
+			return res.constant_lookup[value]
+		else:
+			new_constant = constant(value)
+			res.constant_lookup[value] = new_constant
+			return new_constant
+	else:
+		parsing_error(consumer)
+
+def generate_constant(value):
+	constant_val = constant()
+	constant_val.identity = 'constant'
+	constant_val.name = value
+	constant_val.value = value
+	return constant_val
 
 
 def expect_unop(consumer):

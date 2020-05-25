@@ -4,45 +4,42 @@ from frontend.utility.utility import *
 def parsing_error(parser):
 	raise Exception('did not expect token # ' + str(parser.count) + ' : """' + parser.token() + '""" at line ' + str(parser.current_line()))
 
+def is_assignment(arg):
+	return isinstance(arg, assignment)
 
+def is_service_call(arg):
+	return isinstance(arg, service_call)
 
-class structure():
+def is_operator(arg):
+	return isinstance(arg, operator)
 
-	def is_assignment(self, arg):
-		return isinstance(arg, assignment)
+def is_unary_operator(arg):
+	return isinstance(arg, unary_operator)
 
-	def is_service_call(self, arg):
-		return isinstance(arg, service_call)
+def is_binary_operator(arg):
+	return isinstance(arg, binary_operator)
 
-	def is_operator(self, arg):
-		return isinstance(arg, operator)
+def is_variable(arg):
+	return isinstance(arg, variable)
 
-	def is_unary_operator(self, arg):
-		return isinstance(arg, unary_operator)
-
-	def is_binary_operator(self, arg):
-		return isinstance(arg, binary_operator)
-
-	def is_variable(self, arg):
-		return isinstance(arg, variable)
-
-	def is_constant(self, arg):
-		return isinstance(arg, constant)
-
-	def is_init_block(self, arg):
-		return isinstance(arg, init_block)
-
+def is_constant(arg):
+	return isinstance(arg, constant)
 
 class global_object():
 
 	def __init__(self):
 		self.sandbox = list()
 
+class resolution_block():
+	variable_lookup = dict()
+	service_lookup = dict()
+	constant_lookup = dict()
 
 class sandbox():
 
 	def __init__(self):
 		self.name = ''
+		self.resolution = resolution_block()
 		self.service = list()
 		self.bind = list()
 		self.map = list()
@@ -51,10 +48,12 @@ class block():
 	pass
 
 class variable():
-	name = ''
-	type = 'int'
-	value = '0'
-	word_size = '8'
+
+	def __init__(self, value='0'):
+		self.name = ''
+		self.type = 'int'
+		self.value = value
+		self.word_size = '8'
 
 
 
@@ -63,7 +62,6 @@ class service():
 
 	def __init__(self):
 		self.arg = list()
-		self.resolution = None
 		self.sequence = list()
 
 class config():
@@ -123,12 +121,16 @@ class binary_operator(operator):
 		self.arg =  [None] * 2
 
 class literal_value(operator):
-	pass
+
+	def __init__(self):
+		self.identity = 'literal'
+		self.arg = [None]
 
 
 class consumer():
 
 	def __init__(self, tokens):
+		self.current_sandbox = ''
 		self.tokens = tokens
 		self.count = 0
 

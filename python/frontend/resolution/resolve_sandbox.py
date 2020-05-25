@@ -1,95 +1,80 @@
 
 from frontend.utility.utility import *
-from frontend.parser.structure import constant
-from frontend.parser.structure import variable
-from frontend.parser.structure import structure
-from frontend.service_definitions.service import core_service_resolver
-
-class resolution_block():
-	variable_lookup = dict()
-	service_lookup = dict()
-	constant_lookup = dict()
+import model.structure as s
+import frontend.service_definitions.service as core
 
 
-class resolver():
+def resolve(sandbox):
+	for service in sandbox.service:
+		resolve_service(sandbox, service)
+	return sandbox
 
-	def __init__(self):
-		self.res = resolution_block()
-		self.s = structure()
-		self.core = core_service_resolver()
-
-	def resolve(self, sandbox):
-		for init in sandbox.init:
-			self.resolve_block(init)
-			sandbox.resolution = self.res
-		return sandbox
+def resolution_error():
+	raise Exception("Resolution error")
 
 
-	def resolution_error(self):
-		raise Exception("Resolution error")
-
-
-	def resolve_block(self, block):
-		for ele in block.sequence:
-			if self.s.is_assignment(ele):
-				self.resolve_assignment(ele)
-			elif self.s.is_service_call(ele):
-				self.resolve_service_call(ele)
-			else:
-				self.resolution_error()
-
-	def resolve_service_call(self, ele):
-		ele.identifier = self.resolve_service_call_write(ele.identifier)
-		self.resolve_operator(ele)
-
-	def resolve_service_call_write(self, write):
-		if write in self.core.core_service_list():
-			return self.core.get_service_object(write)
+def resolve_service(sandbox, service):
+	for statement in service.sequence:
+		if s.is_assignment(statement):
+			pass
+		elif s.is_service_call(statement):
+			resolve_service_call(sandbox, statement)
 		else:
-			self.resolution_error()
+			resolution_error()
 
-	def resolve_assignment(self, ele):
-		ele.identifier = self.resolve_assignment_write(ele.identifier)
-		self.resolve_operator(ele)
+def resolve_service_call(sandbox, call):
+	call.identifier = resolve_service_call_write(sandbox, call.identifier)
+	resolve_operator(call)
 
-	def resolve_assignment_write(self, write):
-		if write in self.res.variable_lookup:
-			return self.res.variable_lookup[write]
-		elif type(write) == str:
-			new_variable = variable()
-			new_variable.name = write
-			self.res.variable_lookup[write] = new_variable
-			return new_variable
+def resolve_service_call_write(sandbox, call_identifier):
+	if call_identifier in core.core_service_list():
+		return core.get_service_object(call_identifier)
+	else:
+		resolution_error()
+
+def resolve_assignment(sandbox, assignment):
+	assignment.identifier = resolve_assignment_identifier(sandbox, assignment.identifier)
+	resolve_operator(assignment)
+
+def resolve_assignment_identifier(sandbox, identifier):
+	if identifier in sandbox.resolution.variable_lookup:
+		return sandbox.variable_lookup[write]
+	elif type(identifier) == str:
+		new_variable = variable()
+		new_variable.name = identifier
+		sandbox.resolution.variable_lookup[identifier] = new_variable
+		return new_variable
+	else:
+		resolution_error()
+
+def resolve_operator(operator):
+	operator.arg = [resolve_operator_transform(arg) for arg in operator.arg]
+
+def resolve_operator_transform(arg):
+	if type(arg) is str:
+		return resolve_value(arg)
+	elif s.is_operator(arg):
+		resolve_operator(arg)
+		return arg
+	else:
+		print(arg)
+		resolution_error()
+
+def resolve_value(token_string):
+	if token_is_name(token_string):
+		return res.variable_lookup[token_string]
+	elif token_is_numeric(token_string):
+		if token_string in res.constant_lookup:
+			return res.constant_lookup[token_string]
 		else:
-			self.resolution_error()
-
-	def resolve_operator(self, ele):
-		ele.arg = [self.resolve_operator_transform(arg) for arg in ele.arg]
-
-	def resolve_operator_transform(self, arg):
-		if type(arg) is str:
-			return self.resolve_value(arg)
-		elif self.s.is_operator(arg):
-			self.resolve_operator(arg)
-			return arg
-		else:
-			self.resolution_error()
-
-	def resolve_value(self, token_string):
-		if token_is_name(token_string):
-			return self.res.variable_lookup[token_string]
-		elif token_is_numeric(token_string):
-			if token_string in self.res.constant_lookup:
-				return self.res.constant_lookup[token_string]
-			else:
-				new_constant = self.generate_constant(token_string)
-				self.res.constant_lookup[token_string] = new_constant
-				return new_constant
+			new_constant = generate_constant(token_string)
+			res.constant_lookup[token_string] = new_constant
+			return new_constant
 
 
-	def generate_constant(self, value):
-		constant_val = constant()
-		constant_val.identity = 'constant'
-		constant_val.name = value
-		constant_val.value = value
-		return constant_val
+def generate_constant(value):
+	constant_val = constant()
+	constant_val.identity = 'constant'
+	constant_val.name = value
+	constant_val.value = value
+	return constant_val
