@@ -132,12 +132,12 @@ def expect_assignment(consumer):
 
 def expect_assignment_identifier(consumer):
 	identifier = consumer.use_if_name()
-	if identifier in consumer.current_sandbox.resolution.variable_lookup:
-		return consumer.current_sandbox.resolution.variable_lookup[identifier]
+	res = consumer.current_sandbox.resolution
+	if identifier in res.variable_lookup:
+		return res.variable_lookup[identifier]
 	else:
-		new_variable = variable()
-		new_variable.name = identifier
-		consumer.current_sandbox.resolution.variable_lookup[identifier] = new_variable
+		new_variable = variable(identifier)
+		res.variable_lookup[identifier] = new_variable
 		return new_variable
 
 
@@ -167,22 +167,8 @@ def expect_expression(consumer):
 def expect_literal_value(consumer):
 	new_literal_value = literal_value()
 	new_literal_value.arg[0] = expect_value(consumer)
-
 	return new_literal_value
 
-
-
-def resolve_operator(operator):
-	operator.arg = [resolve_operator_transform(arg) for arg in operator.arg]
-
-def resolve_operator_transform(arg):
-	if type(arg) is str:
-		return resolve_value(arg)
-	elif s.is_operator(arg):
-		resolve_operator(arg)
-		return arg
-	else:
-		resolution_error()
 
 def expect_value(consumer):
 	value = consumer.token()
@@ -199,13 +185,6 @@ def expect_value(consumer):
 			return new_constant
 	else:
 		parsing_error(consumer)
-
-def generate_constant(value):
-	constant_val = constant()
-	constant_val.identity = 'constant'
-	constant_val.name = value
-	constant_val.value = value
-	return constant_val
 
 
 def expect_unop(consumer):

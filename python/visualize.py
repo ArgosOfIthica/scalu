@@ -12,7 +12,6 @@ def visualize(global_object):
 			print('WITH SEQUENCING:')
 			for statement in service.sequence:
 				print('STATEMENT ON "' + statement.identifier.name + '"')
-				print(statement.arg[0])
 				for arg in statement.arg:
 					visualize_subexpression(arg)
 
@@ -30,13 +29,17 @@ def visualize_subexpression(arg, indentation_level=0):
 	elif is_variable(arg) and not is_constant(arg):
 		print(indent + 'ARG IS SCALU VARIABLE: "' + arg.name + '"')
 	elif is_constant(arg):
-		print(indent + 'ARG IS SCALU CONSTANT: "' + arg.name + '"')
+		print(indent + 'ARG IS SCALU CONSTANT: "' + arg.value + '"')
 	elif is_binary_operator(arg):
 		print(indent + 'ARG IS BINARY OPERATOR: "' + arg.identity + '" WITH ARGS:')
 		for sub_arg in arg.arg:
 			visualize_subexpression(sub_arg, indentation_level + 1)
 	elif is_unary_operator(arg):
-		print('ARG IS UNARY OPERATOR: "' + arg.identity + '" WITH ARGS:')
+		print(indent + 'ARG IS UNARY OPERATOR: "' + arg.identity + '" WITH ARGS:')
+		for sub_arg in arg.arg:
+			visualize_subexpression(sub_arg, indentation_level + 1)
+	elif is_literal_value(arg):
+		print(indent + 'ARG IS LITERAL VALUE: "' + arg.identity + '" WITH ARGS:')
 		for sub_arg in arg.arg:
 			visualize_subexpression(sub_arg, indentation_level + 1)
 

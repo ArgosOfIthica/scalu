@@ -25,6 +25,9 @@ def is_variable(arg):
 def is_constant(arg):
 	return isinstance(arg, constant)
 
+def is_literal_value(arg):
+	return isinstance(arg, literal_value)
+
 class global_object():
 
 	def __init__(self):
@@ -34,6 +37,7 @@ class resolution_block():
 	variable_lookup = dict()
 	service_lookup = dict()
 	constant_lookup = dict()
+	service_promises = dict()
 
 class sandbox():
 
@@ -49,13 +53,19 @@ class block():
 
 class variable():
 
-	def __init__(self, value='0'):
+	def __init__(self, name=''):
 		self.name = ''
+		self.type = 'int'
+		self.value = '0'
+		self.word_size = '8'
+
+class constant(variable):
+
+	def __init__(self, value='0'):
+		self.name = value
 		self.type = 'int'
 		self.value = value
 		self.word_size = '8'
-
-
 
 class service():
 	name = ''
@@ -86,9 +96,6 @@ class key():
 
 	def __init__(self, key):
 		self.value = key
-
-class constant(variable):
-	pass
 
 class statement():
 	identifier = ''
