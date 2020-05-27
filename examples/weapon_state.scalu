@@ -1,0 +1,43 @@
+sandbox weapon_state
+map{
+	self: init()
+	slot1: switch_to(1)
+	slot2: switch_to(2)
+	slot3: switch_to(3)
+	next: switch_up()
+	previous: switch_down()
+}
+
+service init(){
+	current_weapon = 1
+	last_weapon = 3
+	max_slot = 3
+
+}
+
+service switch_to(index) {
+	if current_weapon != index {
+		last_weapon = current_weapon
+		current_weapon = index
+	}
+}
+
+service switch_up() {
+	previous_weapon = current_weapon
+	if current_weapon == max_slot {
+		current_weapon = 1
+	}
+	else {
+		current_weapon = current_weapon + 1
+	}
+}
+
+service switch_down() {
+	previous_weapon = current_weapon
+	if current_weapon == max_slot {
+		current_weapon = 3
+	}
+	else {
+		current_weapon = current_weapon - 1
+	}
+}

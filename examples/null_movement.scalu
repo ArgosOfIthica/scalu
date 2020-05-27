@@ -1,0 +1,74 @@
+sandbox null_movement
+
+map {
+	self: init()
+	+forward: forward_pressed()
+	-forward: forward_not_pressed()
+	+back: back_pressed()
+	-back: back_not_pressed()
+	+left: left_pressed()
+	-left: left_not_pressed()
+	+right: right_pressed()
+	-right: right_not_pressed()
+}
+
+service init() {
+	PRESSED = 1
+	NOT_PRESSED = 0
+	forward = NOT_PRESSED
+	back = NOT_PRESSED
+	left = NOT_PRESSED
+	right = NOT_PRESSED
+}
+
+service forward_pressed() {
+	cvar(-back;+forward)
+	forward = PRESSED
+}
+
+service forward_not_pressed() {
+	cvar(-forward)
+	forward = NOT_PRESSED
+	if back == PRESSED {
+		cvar(+back)
+	}
+}
+
+service back_pressed() {
+	cvar(-forward;+back)
+	back = PRESSED
+}
+
+service back_not_pressed() {
+	cvar(-back)
+	back = NOT_PRESSED
+	if back == PRESSED {
+		cvar(+back)
+	}
+}
+
+service right_pressed() {
+	cvar(-left;+right)
+	right = PRESSED
+}
+
+service right_not_pressed() {
+	cvar(-right)
+	right = NOT_PRESSED
+	if left == PRESSED {
+		cvar(+left)
+	}
+}
+
+service left_pressed() {
+	cvar(-right;+left)
+	left = PRESSED
+}
+
+service left_not_pressed() {
+	cvar(-left)
+	left = NOT_PRESSED
+	if right == PRESSED {
+		cvar(+right)
+	}
+}
