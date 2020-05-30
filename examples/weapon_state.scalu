@@ -34,8 +34,8 @@ service switch_up() {
 
 service switch_down() {
 	previous_weapon = current_weapon
-	if current_weapon == max_slot {
-		current_weapon = 3
+	if current_weapon == 1 {
+		current_weapon = max_slot
 	}
 	else {
 		current_weapon = current_weapon - 1
