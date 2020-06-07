@@ -2,12 +2,14 @@
 EBNF
 
 sandbox = 'sandbox ' sname { bind_block | map_block | service_block }
-service_block = 'service' sname service_args '{' script_block '}'
+service_block = 'service' sname '{' script_block '}'
 script_block = { statement }
 bind_block = '{' { key ':' event } '}'
-map_block = '{' { event ':' service_call } '}'
-statement = assignment | service_call
-service_call = ename service_args
+map_block = '{' { event ':' call } '}'
+statement = assignment | call
+call = source_call | service_call
+source_call = '[' text ']'
+service_call = '@' ename
 assignment = vname '=' exp
 service_args = '(' { vname [,] } ')'
 exp = ( p_exp | exp binop exp | unop exp | value)
@@ -37,7 +39,8 @@ def global_context(consumer):
 
 def expect_sandbox(consumer):
 	new_sandbox = sandbox()
-	consumer.current_sandbox = new_sandbox #this lets us cheat and see the resolution of the sandbox without passing the sandbox as a argument
+	consumer.current_sandbox = new_sandbox #this lets us cheat and
+	#see the resolution of the sandbox without passing the sandbox as a argument
 	consumer.consume('sandbox')
 	new_sandbox.name = consumer.use_if_name()
 	while consumer.is_block():
@@ -47,10 +50,8 @@ def expect_sandbox(consumer):
 			new_sandbox.service.append(new_block)
 		elif block_type == 'map':
 			new_block = expect_map_block(consumer)
-			new_sandbox.map.append(new_block)
 		elif block_type == 'bind':
 			new_block = expect_bind_block(consumer)
-			new_sandbox.bind.append(new_block)
 		else:
 			parsing_error(consumer)
 	return new_sandbox
@@ -58,38 +59,41 @@ def expect_sandbox(consumer):
 
 
 def expect_bind_block(consumer):
-	new_binding = binding()
+	binding = consumer.current_sandbox.bind
 	consumer.consume('bind')
 	consumer.consume('{')
 	while consumer.is_not_end_block():
 		new_key = key(consumer.token())
+		if new_key.value in [bind.value for bind in binding]:
+			parsing_error(consumer)
 		consumer.consume()
 		consumer.consume(':')
 		new_event = event(consumer.token())
 		consumer.consume()
-		new_binding.map[new_key] = new_event
+		binding[new_key] = new_event
 	consumer.consume('}')
-	return new_binding
+	return binding
 
 def expect_map_block(consumer):
-	new_mapping = mapping()
+	mapping = consumer.current_sandbox.map
 	consumer.consume('map')
 	consumer.consume('{')
 	while consumer.is_not_end_block():
-		event_string = consumer.token()
+		event_promise = consumer.token()
 		consumer.consume()
 		consumer.consume(':')
-		service_call = expect_service_call(consumer)
-		new_mapping.map[event_string] = service_call
+		call = expect_call(consumer)
+		if event_promise not in mapping:
+			mapping[event_promise] = list()
+		mapping[event_promise].append(call)
 	consumer.consume('}')
-	return new_mapping
+	return mapping
 
 
 def expect_service_block(consumer):
 	new_block = service()
 	consumer.consume('service')
 	new_block.name = consumer.use_if_name()
-	new_block.arg = expect_service_header(consumer)
 	consumer.consume('{')
 	while consumer.is_not_end_block():
 		if consumer.is_variable_assignment():
@@ -98,28 +102,35 @@ def expect_service_block(consumer):
 		elif consumer.is_service_call():
 			new_service_call = expect_service_call(consumer)
 			new_block.sequence.append(new_service_call)
+		elif consumer.is_source_call():
+			new_source_call = expect_source_call(consumer)
 		else:
 			parsing_error(consumer)
 	consumer.consume('}')
 	return new_block
 
+def expect_call(consumer):
+	if consumer.is_service_call():
+		return expect_service_call(consumer)
+	elif consumer.is_source_call():
+		return expect_source_call(consumer)
+	else:
+		parsing_error(consumer)
+
+def expect_source_call(consumer):
+	new_source_call = source_call()
+	consumer.consume('[')
+	new_source_call.arg[0] = consumer.token()
+	new_source_call.identifier = '[' + consumer.token() + ']'
+	consumer.consume()
+	consumer.consume(']')
+	return new_source_call
 
 def expect_service_call(consumer):
 	new_service_call = service_call()
+	consumer.consume('@')
 	new_service_call.identifier = consumer.use_if_name()
-	new_service_call.arg = expect_service_header(consumer)
 	return new_service_call
-
-def expect_service_header(consumer):
-	args = list()
-	consumer.consume('(')
-	while consumer.is_not_end_service_arg():
-		arg = expect_expression(consumer)
-		args.append(arg)
-		if consumer.is_not_end_service_arg() and consumer.token() == ',':
-			consumer.consume(',')
-	consumer.consume(')')
-	return args
 
 
 def expect_assignment(consumer):

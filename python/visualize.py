@@ -1,14 +1,19 @@
 from model.structure import *
 
 def visualize(global_object):
+	print('GLOBAL KEYBINDS: ')
+	for bind in global_object.bind:
+		print('BIND IS KEY "' + bind.value + '" BOUND TO EVENT "' + global_object.bind[bind].value + '"')
+	print('GLOBAL MAPPINGS: ')
+	for mapping in global_object.map:
+		print('EVENT IS "' + mapping.value + '" MAPPED TO SERVICES: ' )
+		for service in global_object.map[mapping]:
+			print(service.identifier)
 	for sandbox in global_object.sandbox:
 		print('SANDBOX : ' + sandbox.name)
 		print('WITH SERVICES:')
 		for service in sandbox.service:
 			print(service.name)
-			print('WITH ARGS:')
-			for arg in service.arg:
-				visualize_subexpression(arg)
 			print('WITH SEQUENCING:')
 			for statement in service.sequence:
 				print('STATEMENT ON "' + statement.identifier.name + '"')

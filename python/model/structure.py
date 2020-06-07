@@ -32,6 +32,9 @@ class global_object():
 
 	def __init__(self):
 		self.sandbox = list()
+		self.bind = dict()
+		self.map = dict()
+
 
 class resolution_block():
 	variable_lookup = dict()
@@ -45,8 +48,8 @@ class sandbox():
 		self.name = ''
 		self.resolution = resolution_block()
 		self.service = list()
-		self.bind = list()
-		self.map = list()
+		self.bind = dict()
+		self.map = dict()
 
 class block():
 	pass
@@ -54,7 +57,7 @@ class block():
 class variable():
 
 	def __init__(self, name=''):
-		self.name = ''
+		self.name = name
 		self.type = 'int'
 		self.value = '0'
 		self.word_size = '8'
@@ -71,20 +74,7 @@ class service():
 	name = ''
 
 	def __init__(self):
-		self.arg = list()
 		self.sequence = list()
-
-class config():
-
-	def __init__(self):
-		self.map = dict()
-
-class binding(config):
-	pass
-
-class mapping(config):
-	pass
-
 
 class event():
 
@@ -111,6 +101,10 @@ class assignment(statement):
 class service_call(statement):
 	pass
 
+class source_call(statement):
+
+	def __init__(self):
+		self.arg = [None]
 
 class operator():
 	identity = ''
@@ -184,7 +178,10 @@ class consumer():
 		return self.token(1) == '='
 
 	def is_service_call(self):
-		return self.token_is_name() and self.token(1) == '('
+		return self.token() == '@'
+
+	def is_source_call(self):
+		return self.token() == '['
 
 	#look for end token
 

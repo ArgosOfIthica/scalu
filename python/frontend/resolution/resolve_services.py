@@ -7,6 +7,7 @@ import frontend.service_definitions.service as core
 def resolve(sandbox):
 	for service in sandbox.service:
 		resolve_service(sandbox, service)
+
 	return sandbox
 
 def resolution_error():
