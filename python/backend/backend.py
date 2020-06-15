@@ -1,17 +1,16 @@
-from backend.static import static_generator
+import backend.static as static_pass
 from backend.sequencer import sequence_generator
-from visualize import visualizer
 
 class backend_manager():
 
 	def __init__(self):
-		self.static_pass = static_generator()
 		self.sequence_pass = sequence_generator()
 
-	def compile(self, ast):
-		header = 'alias btrue btrue\nalias bfalse bfalse\n'
-		header += self.static_pass.compile(ast.resolution)
-		bundle = self.sequence_pass.generate_sequence(ast.sequence, set())
-		header += bundle.header
-		sequence = bundle.sequence
-		return header + sequence
+	def compile(self, global_object):
+		alias_universe = universe()
+		alias_universe = static_pass.compile(new_universe, global_object)
+		print(header)
+		bundle = self.sequence_pass.generate_sequence(global_object)
+		#header += bundle.header
+		#sequence = bundle.sequence
+		return header #+ sequence

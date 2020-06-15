@@ -4,12 +4,10 @@ import random
 
 class sequence_generator():
 	alias_name_length = 31
-	console_max_buffer = 510
 	random_max = 9223372036854775806
 	next = '; '
 
-	def generate_sequence(self, raw_sequence, alias_set):
-
+	def generate_sequence(self, global_object, alias_set=set()):
 		random.seed(42)
 		instr_constr = instruction_constructor()
 		bundle = self.sequence_bundle()

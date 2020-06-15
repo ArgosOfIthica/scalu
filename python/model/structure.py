@@ -28,6 +28,9 @@ def is_constant(arg):
 def is_literal_value(arg):
 	return isinstance(arg, literal_value)
 
+def is_source_call(arg):
+	return isinstance(arg, source_call)
+
 class global_object():
 
 	def __init__(self):
@@ -49,7 +52,7 @@ class sandbox():
 		self.resolution = resolution_block()
 		self.service = list()
 		self.bind = dict()
-		self.map = dict()
+		self.map = dict() #TODO: values in map are lists. Make this more explicit
 
 class block():
 	pass
@@ -71,9 +74,9 @@ class constant(variable):
 		self.word_size = '8'
 
 class service():
-	name = ''
 
 	def __init__(self):
+		self.name = ''
 		self.sequence = list()
 
 class event():
@@ -88,9 +91,9 @@ class key():
 		self.value = key
 
 class statement():
-	identifier = ''
 
 	def __init__(self):
+		self.identifier = ''
 		self.arg = list()
 
 class assignment(statement):
