@@ -1,37 +1,64 @@
 
 
 
-
+import math
 
 
 class universe():
 
-	def __init__():
+	def __init__(self):
 		self.computations = list()
 		self.known_aliases = list()
 		self.picker = picker()
+		self.constructs = dict()
+		#initialize universal aliases
+		true_alias = self.picker.new_alias()
+		false_alias = self.picker.new_alias()
+		self.true = alias(true_alias, "true")
+		self.false = alias(false_alias, "false")
+		self.known_aliases.append(self.true)
+		self.known_aliases.append(self.false)
 
-	def add_computation(alias_type):
+	def add_computation(self, alias_type):
 		alias_string = self.picker.new_alias()
 		new_alias = alias(alias_string, alias_type)
-		new_computation = computation(new_alias, command_list)
+		new_computation = computation(new_alias, list())
+		self.known_aliases.append(new_alias)
+		self.computations.append(new_computation)
+		return new_computation
 
-
-	def generate_anonymous_alias():
-
+	def add_alias(self, alias_type):
+		alias_string = self.picker.new_alias()
+		new_alias = alias(alias_string, alias_type)
+		self.known_aliases.append(new_alias)
+		return new_alias
 
 
 class computation():
 
-	def __init__(alias_object, command_list):
+	def __init__(self, alias_object, command_list):
 		self.alias = alias_object
 		self.commands = list()
 
+	def extend(self, command):
+		self.commands.append(command)
+
 class alias():
 
-	def __init__(string, compile_type):
+	def __init__(self, string, compile_type):
 		self.string = string
 		self.type = compile_type
+
+class bind():
+
+	def __init__(self, key, computation):
+		self.key = key
+		self.computation = computation
+
+class source_command():
+
+	def __init__(self, string):
+		self.string = string
 
 class picker():
 
@@ -39,9 +66,11 @@ class picker():
 
 		self.symbols = list()
 		self.current_use = 1
-		for x in range(48, 58):
+		lower_case_letters = range(97,123)
+		numbers = range(48,58)
+		for x in numbers:
 			self.symbols.append(chr(x))
-		for x in range(97, 123):
+		for x in lower_case_letters:
 			self.symbols.append(chr(x))
 
 	def new_alias_list(self, count):

@@ -2,6 +2,9 @@
 from backend.definitions.instructions import instruction_constructor
 import random
 
+
+
+'''
 class sequence_generator():
 	alias_name_length = 31
 	random_max = 9223372036854775806
@@ -41,3 +44,4 @@ def gen_origin(tail):
 	origin_name = 'or' + tail
 	origin_declaration = alias + origin_name + ' "'
 	return origin_declaration, origin_name
+'''

@@ -37,6 +37,7 @@ class global_object():
 		self.sandbox = list()
 		self.bind = dict()
 		self.map = dict()
+		self.universe = None #TODO: bind universe later
 
 
 class resolution_block():

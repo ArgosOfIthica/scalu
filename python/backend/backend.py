@@ -1,16 +1,12 @@
 import backend.static as static_pass
-from backend.sequencer import sequence_generator
+from backend.alias import *
 
 class backend_manager():
 
-	def __init__(self):
-		self.sequence_pass = sequence_generator()
-
 	def compile(self, global_object):
 		alias_universe = universe()
-		alias_universe = static_pass.compile(new_universe, global_object)
-		print(header)
-		bundle = self.sequence_pass.generate_sequence(global_object)
+		global_object.universe = alias_universe #TODO: delete universe assignment after correcting the model
+		alias_universe = static_pass.compile(global_object)
+		print(alias_universe)
 		#header += bundle.header
 		#sequence = bundle.sequence
-		return header #+ sequence
