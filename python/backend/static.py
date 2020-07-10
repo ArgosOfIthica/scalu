@@ -1,12 +1,14 @@
 from backend.definitions.vbuilder import build_variable
 from backend.definitions.global_builder import *
 from backend.alias import *
+from backend.definitions.instruction import handle_instruction
 
 
 
 def compile(global_object):
 	header = build_header(global_object)
 	build_bindings(global_object, header)
+	unwrap_compute(header, '')
 	'''
 	for event in global_object.map:
 		header += generate_mapping(event.value, global_object.map[event]) + '\n'
@@ -20,7 +22,7 @@ def compile(global_object):
 			header += build_variable(const.name, const.word_size, const.value)
 		return header
 		'''
-	return global_object
+	return header
 
 
 def build_header(global_object):
@@ -28,7 +30,7 @@ def build_header(global_object):
 	header = uni.add_computation('header')
 	for sandbox in global_object.sandbox:
 		for service in sandbox.service:
-			service_compute = build_service(global_object, service)
+			service_compute = build_service(global_object, service, header)
 			find_event(global_object, service)
 	return header
 
@@ -52,24 +54,23 @@ def build_events(global_object, header):
 		new_
 
 
-def build_service(global_object, service):
+def build_service(global_object, service, header):
 	uni = global_object.universe
-	service_compute = uni.add_computation('service')
+	service_compute = uni.extend_add_computation(header, 'service')
 	for statement in service.sequence:
-		build_statement(global_object, service_compute, statement)
+		handle_instruction(global_object, service_compute, statement)
 	return service_compute
 
 
-
-def build_statement(global_object, compute, statement):
-	print(statement.identity)
-	print('###' + statement.output.name)
-	for arg in statement.arg:
-		print(arg.name)
-
-
-
-
+def unwrap_compute(compute, indentation):
+	if isinstance(compute, computation):
+		print(indentation + compute.alias.string + ' : ' + compute.alias.type)
+		for command in compute.commands:
+			unwrap_compute(command, indentation + ' ')
+	elif isinstance(compute, alias):
+		print(indentation + 'ALIAS -> ' + compute.string + ' : ' + compute.type)
+	else:
+		print(indentation + str(compute))
 
 
 
