@@ -17,11 +17,16 @@ def emit(computation_target, uni):
 				emission_queue.append(command)
 		elif isinstance(command, alias):
 			emit_string += command.string
+		elif isinstance(command, source_command):
+			emit_string += command.string
+		elif isinstance(command, bind):
+			emit_string += 'bind ' + command.key + ' ' + command.compute.alias.string
+			emission_queue.append(command.compute)
 		emit_string += ';'
 	emit_string += '"\n'
 	for compute in emission_queue:
 		emit_string += emit(compute, uni)
 	return emit_string
 
-def is_normalized(computation):
-	return len(computation.commands) == 1
+def is_normalized(compute):
+	return len(compute.commands) == 1 and isinstance(compute.commands[0], alias)

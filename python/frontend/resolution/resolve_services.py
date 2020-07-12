@@ -5,6 +5,10 @@ import frontend.service_definitions.service as core
 
 
 def resolve(sandbox):
+	for event in sandbox.map:
+		for service in sandbox.map[event]:
+			if s.is_service_call(service):
+				resolve_service_call(sandbox, service)
 	for service in sandbox.service:
 		resolve_service(sandbox, service)
 

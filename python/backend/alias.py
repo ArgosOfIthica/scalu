@@ -33,7 +33,7 @@ class universe():
 		self.known_aliases.append(new_alias)
 		return new_alias
 
-	def extend_add_computation(self, host , extension_type, ):
+	def extend_add_computation(self, host , extension_type):
 		new_computation = self.add_computation(extension_type)
 		host.extend(new_computation)
 		return new_computation
@@ -58,9 +58,9 @@ class alias():
 
 class bind():
 
-	def __init__(self, key, computation):
+	def __init__(self, key, compute):
 		self.key = key
-		self.computation = computation
+		self.compute = compute
 
 class source_command():
 
