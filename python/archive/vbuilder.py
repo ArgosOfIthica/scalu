@@ -101,41 +101,21 @@ def generate_array(varname, word_size, size, type, incoming_list):
 		if incoming_list is not None:
 			verify_int_array(word_size, incoming_list)
 		out = generate_batch(varname, word_size, size, incoming_list)
-		
+
 
 		def get_endpoint_string(var):
 			return alias + array_varname + '_ret_alpha ' + varname + str(var) + '_is_a' + next + alias + array_varname + '_ret_beta ' + varname + str(var) + '_is_b'
-		
+
 		out += alias + array_varname + '_ret_alpha\n'
 		out += alias + array_varname + '_ret_beta\n'
 		out += generate_lookup_table(array_varname, word_size, size, get_endpoint_string)
 		return out
 
-def generate_batch(varname, word_size, size, incoming_list):
-	out = ''
-	if incoming_list is not None:
-		for var in range(0, size):
-			bname = varname + str(var)
-			if len(incoming_list) >= var:
-				out += generate_variable(bname, word_size, incoming_list[var])
-			else:
-				out += generate_variable(bname, word_size)
-	else:
-		for var in range(0, size):
-			bname = varname + str(var)
-			out += generate_variable(bname, word_size)
-	out += '\n'
-	return out
 
 def generate_variable(varname, word_size, value):
 	prefix = varname
-	alpha_register = 'ga'
-	beta_register = 'gb'
-	return_true = 'gt'
-	return_false = 'gf'
 	true = ' btrue'
 	false = ' bfalse'
-
 
 	out = '// ---VARIABLE ' + varname + ' ( ' + str(word_size) + ' BIT, ver: ' + version + ' )\n'
 	bool_string = get_bin(value, word_size)

@@ -1,6 +1,6 @@
 
 from backend.definitions.vbuilder import build_lookup
-from frontend.parser.structure import structure
+from model.structure import *
 
 
 alias = 'alias '
