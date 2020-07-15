@@ -1,35 +1,9 @@
 
 from frontend.utility.utility import *
+from backend.model.universe import universe
 
 def parsing_error(parser):
 	raise Exception('did not expect token # ' + str(parser.count) + ' : """' + parser.token() + '""" at line ' + str(parser.current_line()))
-
-def is_assignment(arg):
-	return isinstance(arg, assignment)
-
-def is_service_call(arg):
-	return isinstance(arg, service_call)
-
-def is_operator(arg):
-	return isinstance(arg, operator)
-
-def is_unary_operator(arg):
-	return isinstance(arg, unary_operator)
-
-def is_binary_operator(arg):
-	return isinstance(arg, binary_operator)
-
-def is_variable(arg):
-	return isinstance(arg, variable)
-
-def is_constant(arg):
-	return isinstance(arg, constant)
-
-def is_literal_value(arg):
-	return isinstance(arg, literal_value)
-
-def is_source_call(arg):
-	return isinstance(arg, source_call)
 
 class global_object():
 
@@ -37,7 +11,7 @@ class global_object():
 		self.sandbox = list()
 		self.bind = dict()
 		self.map = dict()
-		self.universe = None #TODO: bind universe later
+		self.universe = universe()
 
 
 class resolution_block():
@@ -243,3 +217,30 @@ class consumer():
 			return identity_map[token]
 		else:
 			parsing_error(self)
+
+def is_assignment(arg):
+	return isinstance(arg, assignment)
+
+def is_service_call(arg):
+	return isinstance(arg, service_call)
+
+def is_operator(arg):
+	return isinstance(arg, operator)
+
+def is_unary_operator(arg):
+	return isinstance(arg, unary_operator)
+
+def is_binary_operator(arg):
+	return isinstance(arg, binary_operator)
+
+def is_variable(arg):
+	return isinstance(arg, variable)
+
+def is_constant(arg):
+	return isinstance(arg, constant)
+
+def is_literal_value(arg):
+	return isinstance(arg, literal_value)
+
+def is_source_call(arg):
+	return isinstance(arg, source_call)

@@ -1,6 +1,3 @@
-
-
-
 import math
 
 
@@ -88,12 +85,25 @@ class picker():
 
 
 	def new_alias(self):
+		RESERVED_PREFIX = '%'
 		revolutions = int(math.log(self.current_use, len(self.symbols))) + 1
 		new_alias = list()
 		for x in range(0, revolutions):
 			selected = int((self.current_use / int((len(self.symbols) ** x)) % len(self.symbols)))
 			new_alias = [self.symbols[selected]] + new_alias
 		new_alias = ''.join(new_alias)
-		new_alias = '%' + new_alias  #using π here causes strange behavior
+		new_alias = RESERVED_PREFIX + new_alias
 		self.current_use += 1
 		return new_alias
+
+def is_computation(arg):
+	return isinstance(arg, computation)
+
+def is_alias(arg):
+	return isinstance(arg, alias)
+
+def is_source_command(arg):
+	return isinstance(arg, source_command)
+
+def is_bind(arg):
+	return isinstance(arg, bind)

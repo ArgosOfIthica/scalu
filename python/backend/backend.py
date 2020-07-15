@@ -1,12 +1,8 @@
-import backend.static as static_pass
-from backend.alias import *
-from backend.emitter import emission
+import backend.generation.abstract_generation as gen
+import backend.emission.emission as emission
 
-class backend_manager():
 
-	def compile(self, global_object):
-		alias_universe = universe()
-		global_object.universe = alias_universe #TODO: delete universe assignment after correcting the model
-		header = static_pass.compile(global_object)
-		config = emission(header, alias_universe)
-		print(config)
+def compile(global_object):
+	computation_tree = gen.compile(global_object)
+	config = emission.emit(computation_tree, global_object.universe)
+	return config

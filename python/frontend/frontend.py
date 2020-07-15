@@ -1,6 +1,6 @@
 import frontend.lexer.lexer as lexer
 import frontend.parser.parser as parser
-import visualize as visualize
+import visualize.visualize as visualize
 import frontend.resolution.resolution as resolution
 import frontend.unwrapper.unwrapper as unwrapper
 
