@@ -6,7 +6,7 @@ import src.frontend.unwrapper.unwrapper as unwrapper
 
 
 def compile(program_string):
-	debug = True
+	debug = False
 	program_tokens = lexer.tokenize(program_string)
 	syntax_tree = parser.parse(program_tokens)
 	enriched_syntax_tree = resolution.resolve(syntax_tree)

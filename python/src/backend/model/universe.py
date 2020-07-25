@@ -67,7 +67,6 @@ class source_command():
 class picker():
 
 	def __init__(self):
-
 		self.symbols = list()
 		self.current_use = 1
 		lower_case_letters = range(97,123)

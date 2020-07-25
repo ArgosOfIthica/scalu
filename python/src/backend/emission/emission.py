@@ -3,7 +3,7 @@ import src.backend.model.universe as model
 
 def emit(computation_target, uni):
 	emission_queue = list()
-	emit_string = 'alias ' + computation_target.alias.string + computation_target.alias.type + ' "'
+	emit_string = 'alias ' + computation_target.alias.string + ' "'
 	for command in computation_target.commands:
 		if model.is_computation(command):
 			if is_normalized(command):

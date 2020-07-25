@@ -58,6 +58,14 @@ class TestParsing(unittest.TestCase):
 		self.compiler.compile(program)
 
 	def test_sandbox_accepts_shared_events(self):
-		program = self.blueprint + 'sandbox test2 bind {null2: test_event} map {test_event: @test_service2} service test_service2{}'
+		program = self.blueprint + 'sandbox test2 map {test_event: @test_service2} service test_service2{}'
+		self.compiler.compile(program)
+
+	def test_comments(self):
+		program = 'sandbox test /* this is a comment; sandbox test2 service */ service test_service{}'
+		self.compiler.compile(program)
+
+	def test_nested_comment_syntax(self):
+		program = 'sandbox test /* comment /* more comment service */ service test_service{}'
 		self.compiler.compile(program)
 
