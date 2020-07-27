@@ -65,7 +65,8 @@ class TestParsing(unittest.TestCase):
 		program = 'sandbox test /* this is a comment; sandbox test2 service */ service test_service{}'
 		self.compiler.compile(program)
 
-	def test_nested_comment_syntax(self):
-		program = 'sandbox test /* comment /* more comment service */ service test_service{}'
+	@unittest.expectedFailure
+	def test_comments_dont_nest(self):
+		program = 'sandbox test /* comment /* more comment service */ */ service test_service{}'
 		self.compiler.compile(program)
 
