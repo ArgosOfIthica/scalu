@@ -3,6 +3,6 @@ import src.backend.emission.emission as emission
 
 
 def compile(global_object):
-	computation_tree = gen.compile(global_object)
-	config = emission.emit(computation_tree, global_object.universe)
+	universe = gen.compile(global_object)
+	config = emission.emission(universe)
 	return config

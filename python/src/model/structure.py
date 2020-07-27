@@ -242,3 +242,6 @@ def is_literal_value(arg):
 
 def is_source_call(arg):
 	return isinstance(arg, source_call)
+
+def is_key(arg):
+	return isinstance(arg, key)

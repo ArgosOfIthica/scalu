@@ -26,16 +26,16 @@ def visualize_unwrapping(global_object):
 		for service in sandbox.service:
 			print('	SERVICE: ' + service.name)
 			for ele in service.sequence:
-				if is_unary_operator(ele):
+				if model.is_unary_operator(ele):
 					print('		' + ele.identity + ' ' + ele.arg[0].name + ' ' + ele.output.name)
-				elif is_binary_operator(ele):
+				elif model.is_binary_operator(ele):
 					print('		' + ele.identity + ' ' + ele.arg[0].name + ' ' + ele.arg[1].name + ' ' + ele.output.name)
 
 def visualize_subexpression(arg, indentation_level=0):
 	indent = '  ' * indentation_level
 	if type(arg) == str:
 		print(indent + 'PYTHON STRING: (' + '"' + arg + '")')
-	elif model.is_variable(arg) and not is_constant(arg):
+	elif model.is_variable(arg) and not model.is_constant(arg):
 		print(indent + 'SCALU VARIABLE: "' + arg.name + '"')
 	elif model.is_constant(arg):
 		print(indent + 'SCALU CONSTANT: "' + arg.value + '"')

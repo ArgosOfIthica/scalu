@@ -2,7 +2,7 @@ import src.model.structure as model
 import src.backend.model.universe as universe
 
 
-def unary_mapper(statement):
+def unary_mapper(identity):
 	return { 'binary_print' : ibinary_print }
 
 class instruction_wrapper():
@@ -20,6 +20,8 @@ class computation_wrapper():
 		self.var_access = var_access
 
 def handle_instruction(global_object, compute, statement):
+	unary_map = {'binary_print' : ibinary_print}
+
 	uni = global_object.universe
 	if statement.output not in uni.constructs:
 		var_compute = add_var(global_object, statement.output)
@@ -32,7 +34,8 @@ def handle_instruction(global_object, compute, statement):
 	if model.is_literal_value(statement):
 		icopy(instr)
 	elif model.is_unary_operator(statement):
-		pass
+		instr_function = unary_map[statement.identity]
+		instr_function(instr)
 
 def get_bin(value, word_size):
 	return format(int(value), 'b').zfill(int(word_size))
@@ -45,14 +48,14 @@ def add_var(global_object, var):
 	set_true = uni.extend_add_computation(var_computation, 'true_collection')
 	set_false = uni.extend_add_computation(var_computation, 'false_collection')
 	for bit in range(0, int(var.word_size)):
-		vb = uni.add_computation("variable_bit")
+		vb = uni.extend_add_computation(bits, "variable_bit")
+		#vb_sub = uni.extend_add_computation(vb, "set_vb")
 		if bool_string[bit] == '0':
 			vb.extend(uni.false)
 		elif bool_string[bit] == '1':
 			vb.extend(uni.true)
 		else:
 			print('TODO: ADD EXCEPTION')
-		bits.extend(vb)
 		true_compute = uni.extend_add_computation(set_true, 'set_true')
 		true_vb = uni.extend_add_computation(true_compute, 'set_vb_true')
 		true_vb.alias = vb.alias
@@ -102,13 +105,13 @@ def icopy(instr):
 		alpha_bit = execute_bit(alpha_wrapper, bit)
 
 def ibinary_print(instr):
-	uni = global_object.universe
+	uni = instr.global_object.universe
 	alpha_arg = uni.constructs[instr.statement.arg[0]]
 	binary_print = uni.extend_add_computation(instr.compute, "instruction")
 	alpha_wrapper = computation_wrapper(instr.global_object, binary_print, alpha_arg)
-	set_uni_boolean_to_command(comp_wrapper, 'echo 1', True)
-	set_uni_boolean_to_command(comp_wrapper, 'echo 0', False)
-	for bit in range(0, int(statement.output.word_size)):
+	set_uni_boolean_to_command(alpha_wrapper, 'echo 1', True)
+	set_uni_boolean_to_command(alpha_wrapper, 'echo 0', False)
+	for bit in range(0, int(instr.statement.output.word_size)):
 		alpha_bit = execute_bit(alpha_wrapper, bit)
 
 

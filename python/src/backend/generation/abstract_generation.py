@@ -24,10 +24,11 @@ def build_bindings(global_object):
 	header = uni.add_computation('header')
 	for key in global_object.bind:
 		bind_compute = uni.extend_add_computation(header, 'bind')
+		uni.constructs[key] = bind_compute
 		exclusive_event = uni.constructs[global_object.bind[key]]
 		new_bind = model.bind(key.value, exclusive_event)
 		bind_compute.extend(new_bind)
-	return header
+	return uni
 
 def build_events(global_object):
 	uni = global_object.universe
