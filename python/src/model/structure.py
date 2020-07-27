@@ -112,7 +112,14 @@ class consumer():
 		self.current_sandbox = ''
 		self.tokens = tokens
 		self.count = 0
-
+		self.binary_symbol_map = {
+		'|' : 'bitwise_or',
+		'&' : 'bitwise_and'
+		}
+		self.unary_symbol_map = {
+		'~' : 'bitwise_neg',
+		'?' : 'binary_print'
+		}
 
 	#token functions
 
@@ -188,33 +195,24 @@ class consumer():
 		return self.token_is_value()
 
 	def is_unop(self, lookahead=0):
-		ops = ['~']
-		return self.token(lookahead) in ops
+		return self.token(lookahead) in self.unary_symbol_map
 
 	def is_binop(self, lookahead=0):
-		ops = ['|', '&']
-		return self.token(lookahead) in ops
+		return self.token(lookahead) in self.binary_symbol_map
 
 	def retrieve_and_use_binary_identity(self):
-		identity_map = {
-		'|' : 'bitwise_or',
-		'&' : 'bitwise_and'
-		}
 		token = self.token()
-		if token in identity_map:
+		if token in self.binary_symbol_map:
 			self.consume()
-			return identity_map[token]
+			return self.binary_symbol_map[token]
 		else:
 			parsing_error(self)
 
 	def retrieve_and_use_unary_identity(self):
-		identity_map = {
-		'~' : 'bitwise_neg'
-		}
 		token = self.token()
-		if token in identity_map:
+		if token in self.unary_symbol_map:
 			self.consume()
-			return identity_map[token]
+			return self.unary_symbol_map[token]
 		else:
 			parsing_error(self)
 

@@ -8,15 +8,15 @@ def unwrap(global_object):
 			sequence_out = list()
 			for statement in service.sequence:
 				unwrapped = unwrapped_element(sandbox.resolution)
-				if is_assignment(statement):
+				if model.is_assignment(statement):
 					new_sequencing = unwrapped.unwrap_assignment(statement)
 				sequence_out = sequence_out + new_sequencing
 			service.sequence = sequence_out
 	return global_object
 
 
-def header_error(self):
-	Exception('header error')
+def unwrapper_error(self):
+	Exception('unwrapper error')
 
 
 class unwrapped_element():
@@ -28,7 +28,7 @@ class unwrapped_element():
 
 
 	def unwrap_assignment(self, assignment):
-		if is_variable(assignment.arg[0]):
+		if model.is_variable(assignment.arg[0]):
 			icopy = unary_operator()
 			icopy.identity = 'copy'
 			icopy.arg[0] = assignment.arg[0]
@@ -44,7 +44,7 @@ class unwrapped_element():
 		self.instr_order.append(item)
 
 	def unwrap_transform(self, item, output_variable):
-		if not is_variable(item):
+		if not model.is_variable(item):
 			new_output_variable = self.generate_temporary_variable()
 			self.unwrap(item, new_output_variable)
 			return new_output_variable
@@ -58,7 +58,7 @@ class unwrapped_element():
 			self.var_counter += 1
 			return self.res.variable_lookup[name]
 		else:
-			temp = variable()
+			temp = model.variable()
 			temp.name = name
 			self.res.variable_lookup[temp.name] = temp
 			self.var_counter += 1

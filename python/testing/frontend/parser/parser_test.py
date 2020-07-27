@@ -5,7 +5,9 @@ class TestParsing(unittest.TestCase):
 
 	def setUp(self):
 		self.compiler = compiler.compiler()
-		self.blueprint = 'sandbox test1 bind {null: test_event} map {test_event: @test_service} service test_service {} '
+		self.blueprint_full_chain = 'sandbox test1 bind {k: test_event} map {test_event: @test_service} service test_service {} '
+		self.blueprint_two_chain = 'sandbox test1 bind {k: test_event} map {test_event: @test_service} service test_service '
+		self.blueprint_one_chain = 'sandbox test1 bind{k: test_event} map '
 
 	def test_empty_program(self):
 		program = 'sandbox test'
@@ -54,11 +56,11 @@ class TestParsing(unittest.TestCase):
 
 	@unittest.expectedFailure
 	def test_sandbox_rejects_shared_binding(self):
-		program = self.blueprint + 'sandbox test2 bind {null: other_event} map {other_event: @test_service2} service test_service2 {}'
+		program = self.blueprint_full_chain + 'sandbox test2 bind {k: other_event} map {other_event: @test_service2} service test_service2 {}'
 		self.compiler.compile(program)
 
 	def test_sandbox_accepts_shared_events(self):
-		program = self.blueprint + 'sandbox test2 map {test_event: @test_service2} service test_service2{}'
+		program = self.blueprint_full_chain + 'sandbox test2 map {test_event: @test_service2} service test_service2{}'
 		self.compiler.compile(program)
 
 	def test_comments(self):
@@ -69,4 +71,17 @@ class TestParsing(unittest.TestCase):
 	def test_comments_dont_nest(self):
 		program = 'sandbox test /* comment /* more comment service */ */ service test_service{}'
 		self.compiler.compile(program)
+
+	def test_console_command_in_event(self):
+		program = self.blueprint_one_chain + '{ test_event: [echo "test_console_command_in_event] }'
+		self.compiler.compile(program)
+
+	def test_console_command_in_service(self):
+		program = self.blueprint_two_chain + '{ [echo "test_console_command_in_service"] }'
+		self.compiler.compile(program)
+
+	def test_binary_print(self):
+		program = self.blueprint_two_chain + '{ a = ?5 a = ?2  }'
+		self.compiler.compile(program)
+
 

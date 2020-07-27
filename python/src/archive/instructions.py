@@ -99,8 +99,6 @@ class ibprint(instruction):
 			self.bundle.sequence += self.alpha_bit + str(bit) + next
 		return self.bundle
 
-
-
 class ibitwise_neg(instruction):
 
 	def compile(self):

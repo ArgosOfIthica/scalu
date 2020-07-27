@@ -7,6 +7,7 @@ def scalu(mode, program):
 		output = comp.compile(program)
 		if __name__ == __main__:
 			print(output)
+		return output
 	elif mode == 'test':
 		testing.test()
 
