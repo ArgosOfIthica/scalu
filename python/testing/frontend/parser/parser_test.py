@@ -73,7 +73,7 @@ class TestParsing(unittest.TestCase):
 		self.compiler.compile(program)
 
 	def test_console_command_in_event(self):
-		program = self.blueprint_one_chain + '{ test_event: [echo "test_console_command_in_event] }'
+		program = self.blueprint_one_chain + '{ test_event: [echo test_console_command_in_event] }'
 		self.compiler.compile(program)
 
 	def test_console_command_in_service(self):
@@ -81,7 +81,7 @@ class TestParsing(unittest.TestCase):
 		self.compiler.compile(program)
 
 	def test_binary_print(self):
-		program = self.blueprint_two_chain + '{ a = 3 a = ?5 a = ?2  }'
+		program = self.blueprint_two_chain + '{ a = 3 a = ?5  }'
 		self.compiler.compile(program)
 
 

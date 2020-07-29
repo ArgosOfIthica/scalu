@@ -27,7 +27,7 @@ class sandbox():
 		self.resolution = resolution_block()
 		self.service = list()
 		self.bind = dict()
-		self.map = dict() #TODO: values in map are lists. Make this more explicit
+		self.map = dict() #TODO: values in map are lists. Make this explicit
 
 class block():
 	pass

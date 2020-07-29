@@ -11,4 +11,5 @@ def scalu(mode, program):
 	elif mode == 'test':
 		testing.test()
 
-scalu('test', '')
+if __name__ == "__main__":
+	scalu('test', '')
