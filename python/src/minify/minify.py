@@ -97,5 +97,5 @@ class alias_blob():
 		self.pick = universe.picker()
 		if uni is not None:
 			for alias in uni.known_aliases:
-				self.alias_convert[alias.string + alias.type] = self.pick.new_alias()
+				self.alias_convert[alias.identity] = self.pick.new_alias()
 

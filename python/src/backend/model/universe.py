@@ -52,6 +52,7 @@ class alias():
 	def __init__(self, string, compile_type):
 		self.string = string
 		self.type = compile_type
+		self.identity = self.string + self.type
 
 class bind():
 

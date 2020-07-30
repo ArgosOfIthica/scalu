@@ -15,22 +15,22 @@ def emission(uni):
 
 def emit(computation_target, uni):
 	emission_queue = list()
-	emit_string = 'alias ' + computation_target.alias.string + computation_target.alias.type + ' "'
+	emit_string = 'alias ' + computation_target.alias.identity + ' "'
 	for command in computation_target.commands:
 		if universe.is_computation(command):
 			if is_normalized(command):
-				emit_string += 'alias ' + command.alias.string + command.alias.type + ' ' + command.commands[0].string
+				emit_string += 'alias ' + command.alias.identity + ' ' + command.commands[0].string
 				if is_alias_normalization(command):
 					emit_string += command.commands[0].type
 			else:
-				emit_string += command.alias.string + command.alias.type
+				emit_string += command.alias.identity
 				emission_queue.append(command)
 		elif universe.is_alias(command):
-			emit_string += command.string + command.type
+			emit_string += command.identity
 		elif universe.is_source_command(command):
 			emit_string += command.string
 		elif universe.is_bind(command):
-			emit_string += 'bind ' + command.key + ' ' + command.compute.alias.string + command.compute.alias.type
+			emit_string += 'bind ' + command.key + ' ' + command.compute.alias.identity
 			emission_queue.append(command.compute)
 		emit_string += ';'
 	emit_string += '"\n'
