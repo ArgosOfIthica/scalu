@@ -33,6 +33,8 @@ def handle_instruction(global_object, compute, statement):
 	elif model.is_unary_operator(statement):
 		instr_function = unary_map[statement.identity]
 		instr_function(instr)
+	else:
+		raise Exception('invalid instruction generation')
 
 
 def icopy(instr):

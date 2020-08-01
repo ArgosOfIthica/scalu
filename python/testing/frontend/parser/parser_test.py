@@ -77,15 +77,15 @@ class TestParsing(unittest.TestCase):
 		self.compiler.compile(program)
 
 	def test_console_command_in_service(self):
-		program = self.blueprint_two_chain + '{ [echo "test_console_command_in_service"] }'
+		program = self.blueprint_two_chain + '{ a = 7 [echo test_console_command_in_service] }'
 		self.compiler.compile(program)
 
 	def test_binary_print(self):
-		program = self.blueprint_two_chain + '{ a = 3 a = ?5 a = ?7 a = ?a }'
+		program = self.blueprint_two_chain + '{ a = 3 [echo is this 5?] a = ?5 [echo is this 7?] a = ?7 a = 9 [echo is this 9?] a = ?a }'
 		self.compiler.compile(program)
 
 	def test_bitwise_negation(self):
-		program = self.blueprint_two_chain + '{ old_number = ?73 new_number = ~old_number new_number = ?new_number }'
+		program = self.blueprint_two_chain + '{ [echo input is] old_number = ?73 new_number = ~old_number [echo output is] new_number = ?new_number }'
 		self.compiler.compile(program)
 
 

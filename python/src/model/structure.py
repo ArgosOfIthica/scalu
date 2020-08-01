@@ -168,15 +168,11 @@ class consumer():
 	def is_source_call(self):
 		return self.token() == '['
 
-	#look for end token
-
 	def is_not_end_block(self):
 		return self.token() != '}'
 
 	def is_not_end_service_arg(self):
 		return self.token() != ')'
-
-	#
 
 	def is_sandbox(self):
 		return self.token() == 'sandbox'
@@ -184,9 +180,6 @@ class consumer():
 	def is_block(self):
 		block_types = ('service', 'map', 'bind')
 		return self.token() in block_types
-
-
-	#expression functions
 
 	def is_subexpression(self):
 		return self.token() == '('

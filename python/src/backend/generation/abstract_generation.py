@@ -37,23 +37,20 @@ def build_events(global_object):
 		uni.constructs[event] = event_compute
 		for service_call in global_object.map[event]:
 			if structure.is_source_call(service_call):
-				new_commands = create_source_command(uni, service_call)
-				event_compute.extend(new_commands)
+				new_source_command = model.source_command(service_call.arg[0])
+				event_compute.extend(new_source_command)
 			else:
 				event_compute.extend(uni.constructs[service_call.identifier])
-
-def create_source_command(uni, source_call):
-	source_computation = uni.add_computation('source')
-	new_source_command = model.source_command(source_call.arg[0])
-	source_computation.extend(new_source_command)
-	return source_computation
-
 
 def build_service(global_object, service):
 	uni = global_object.universe
 	service_compute = uni.add_computation('service')
 	for statement in service.sequence:
-		instr_handler.handle_instruction(global_object, service_compute, statement)
+		if structure.is_source_call(statement):
+			new_source_command = model.source_command(statement.arg[0])
+			service_compute.extend(new_source_command)
+		else:
+			instr_handler.handle_instruction(global_object, service_compute, statement)
 	return service_compute
 
 

@@ -7,16 +7,21 @@ def unwrap(global_object):
 		for service in sandbox.service:
 			sequence_out = list()
 			for statement in service.sequence:
+				new_sequencing = None
 				unwrapped = unwrapped_element(sandbox.resolution)
 				if model.is_assignment(statement):
 					new_sequencing = unwrapped.unwrap_assignment(statement)
+				elif model.is_source_call(statement):
+					new_sequencing = [statement]
+				else:
+					unwrapper_error()
 				sequence_out = sequence_out + new_sequencing
 			service.sequence = sequence_out
 	return global_object
 
 
-def unwrapper_error(self):
-	Exception('unwrapper error')
+def unwrapper_error():
+	raise Exception('unwrapper error')
 
 
 class unwrapped_element():

@@ -105,6 +105,7 @@ def expect_service_block(consumer):
 			new_block.sequence.append(new_service_call)
 		elif consumer.is_source_call():
 			new_source_call = expect_source_call(consumer)
+			new_block.sequence.append(new_source_call)
 		else:
 			model.parsing_error(consumer)
 	consumer.consume('}')
