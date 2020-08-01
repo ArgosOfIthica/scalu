@@ -81,7 +81,11 @@ class TestParsing(unittest.TestCase):
 		self.compiler.compile(program)
 
 	def test_binary_print(self):
-		program = self.blueprint_two_chain + '{ a = 3 a = ?5  }'
+		program = self.blueprint_two_chain + '{ a = 3 a = ?5 a = ?7 a = ?a }'
+		self.compiler.compile(program)
+
+	def test_bitwise_negation(self):
+		program = self.blueprint_two_chain + '{ old_number = ?73 new_number = ~old_number new_number = ?new_number }'
 		self.compiler.compile(program)
 
 
