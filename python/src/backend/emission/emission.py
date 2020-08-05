@@ -11,6 +11,7 @@ def emission(uni):
 					output += emit(subcomputes, uni)
 		elif model.is_key(ele):
 			output += emit(uni.constructs[ele], uni)
+	output += emit(uni.root, uni)
 	return output
 
 def emit(computation_target, uni):

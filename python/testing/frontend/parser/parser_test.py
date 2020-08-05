@@ -88,4 +88,10 @@ class TestParsing(unittest.TestCase):
 		program = self.blueprint_two_chain + '{ [echo input is] old_number = ?73 new_number = ~old_number [echo output is] new_number = ?new_number }'
 		self.compiler.compile(program)
 
+	def test_bitwise_and(self):
+		program = self.blueprint_two_chain + '{ [echo input1 is] input1 = ?15 [echo input2 is] input2 = ?62 [echo output is] output = ?(input1 & input2) }'
+		self.compiler.compile(program)
 
+	def test_bitwise_or(self):
+		program = self.blueprint_two_chain + '{ [echo input1 is] input1 = ?15 [echo input2 is] input2 = ?62 [echo output is] output = ?(input1 | input2) }'
+		self.compiler.compile(program)
