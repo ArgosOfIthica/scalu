@@ -15,10 +15,11 @@ service_args = '(' { vname [,] } ')'
 exp = ( p_exp | exp binop exp | unop exp | value)
 p_exp = '(' exp ')'
 binop = '=' | '|' | '&'
-unop = '~'
+unop = '~' | '?'
 
 """
 import src.model.structure as model
+import src.frontend.utility.utility as utility
 import re
 
 def parse(tokens):
@@ -34,7 +35,7 @@ def global_context(consumer):
 	if consumer.token() == '':
 		return new_global_object
 	else:
-		parsing_error(consumer)
+		model.parsing_error(consumer)
 
 
 def expect_sandbox(consumer):
@@ -53,7 +54,7 @@ def expect_sandbox(consumer):
 		elif block_type == 'bind':
 			new_block = expect_bind_block(consumer)
 		else:
-			parsing_error(consumer)
+			model.parsing_error(consumer)
 	return new_sandbox
 
 
@@ -104,8 +105,9 @@ def expect_service_block(consumer):
 			new_block.sequence.append(new_service_call)
 		elif consumer.is_source_call():
 			new_source_call = expect_source_call(consumer)
+			new_block.sequence.append(new_source_call)
 		else:
-			parsing_error(consumer)
+			model.parsing_error(consumer)
 	consumer.consume('}')
 	return new_block
 
@@ -147,7 +149,7 @@ def expect_assignment_identifier(consumer):
 	if identifier in res.variable_lookup:
 		return res.variable_lookup[identifier]
 	else:
-		new_variable = variable(identifier)
+		new_variable = model.variable(identifier)
 		res.variable_lookup[identifier] = new_variable
 		return new_variable
 
@@ -166,7 +168,7 @@ def expect_expression_atomic(consumer):
 	elif consumer.is_literal_value():
 		return expect_literal_value(consumer)
 	else:
-		parsing_error(consumer)
+		model.parsing_error(consumer)
 
 def expect_expression(consumer):
 	new_expression = expect_expression_atomic(consumer)
@@ -176,7 +178,7 @@ def expect_expression(consumer):
 
 
 def expect_literal_value(consumer):
-	new_literal_value = literal_value()
+	new_literal_value = model.literal_value()
 	new_literal_value.arg[0] = expect_value(consumer)
 	return new_literal_value
 
@@ -187,15 +189,15 @@ def expect_value(consumer):
 	res = consumer.current_sandbox.resolution
 	if value in res.variable_lookup:
 		return res.variable_lookup[value]
-	elif token_is_numeric(value):
+	elif utility.token_is_numeric(value):
 		if value in res.constant_lookup:
 			return res.constant_lookup[value]
 		else:
-			new_constant = constant(value)
+			new_constant = model.constant(value)
 			res.constant_lookup[value] = new_constant
 			return new_constant
 	else:
-		parsing_error(consumer)
+		model.parsing_error(consumer)
 
 
 def expect_unop(consumer):

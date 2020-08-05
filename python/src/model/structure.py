@@ -27,7 +27,7 @@ class sandbox():
 		self.resolution = resolution_block()
 		self.service = list()
 		self.bind = dict()
-		self.map = dict() #TODO: values in map are lists. Make this more explicit
+		self.map = dict() #TODO: values in map are lists. Make this explicit
 
 class block():
 	pass
@@ -112,7 +112,14 @@ class consumer():
 		self.current_sandbox = ''
 		self.tokens = tokens
 		self.count = 0
-
+		self.binary_symbol_map = {
+		'|' : 'bitwise_or',
+		'&' : 'bitwise_and'
+		}
+		self.unary_symbol_map = {
+		'~' : 'bitwise_neg',
+		'?' : 'binary_print'
+		}
 
 	#token functions
 
@@ -161,15 +168,11 @@ class consumer():
 	def is_source_call(self):
 		return self.token() == '['
 
-	#look for end token
-
 	def is_not_end_block(self):
 		return self.token() != '}'
 
 	def is_not_end_service_arg(self):
 		return self.token() != ')'
-
-	#
 
 	def is_sandbox(self):
 		return self.token() == 'sandbox'
@@ -178,9 +181,6 @@ class consumer():
 		block_types = ('service', 'map', 'bind')
 		return self.token() in block_types
 
-
-	#expression functions
-
 	def is_subexpression(self):
 		return self.token() == '('
 
@@ -188,33 +188,24 @@ class consumer():
 		return self.token_is_value()
 
 	def is_unop(self, lookahead=0):
-		ops = ['~']
-		return self.token(lookahead) in ops
+		return self.token(lookahead) in self.unary_symbol_map
 
 	def is_binop(self, lookahead=0):
-		ops = ['|', '&']
-		return self.token(lookahead) in ops
+		return self.token(lookahead) in self.binary_symbol_map
 
 	def retrieve_and_use_binary_identity(self):
-		identity_map = {
-		'|' : 'bitwise_or',
-		'&' : 'bitwise_and'
-		}
 		token = self.token()
-		if token in identity_map:
+		if token in self.binary_symbol_map:
 			self.consume()
-			return identity_map[token]
+			return self.binary_symbol_map[token]
 		else:
 			parsing_error(self)
 
 	def retrieve_and_use_unary_identity(self):
-		identity_map = {
-		'~' : 'bitwise_neg'
-		}
 		token = self.token()
-		if token in identity_map:
+		if token in self.unary_symbol_map:
 			self.consume()
-			return identity_map[token]
+			return self.unary_symbol_map[token]
 		else:
 			parsing_error(self)
 
@@ -244,3 +235,6 @@ def is_literal_value(arg):
 
 def is_source_call(arg):
 	return isinstance(arg, source_call)
+
+def is_key(arg):
+	return isinstance(arg, key)

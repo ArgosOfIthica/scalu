@@ -3,8 +3,8 @@ import re
 import math
 import src.backend.model.universe as universe
 
-def minify(cfg_string):
-	blob = alias_blob()
+def minify(cfg_string, uni):
+	blob = alias_blob(uni)
 	blob.alias_tuples = to_tuple_list(cfg_string)
 	output_text = minify_names(blob)
 	output_text = clean_output(output_text)
@@ -20,24 +20,30 @@ def clean_output(output):
 	return output_text
 
 def minify_names(blob):
-	HEAD = 0
-	TAIL = 1
+	HEAD_INDEX = 0
+	TAIL_INDEX = 1
 	output_text = ''
 	for alias in blob.alias_tuples:
-		attempt = blob.pick.new_alias()
-		blob.alias_convert[alias[HEAD]] = attempt
-		blob.alias_new[attempt] = alias[TAIL]
-		new_alias = blob.alias_convert[alias[HEAD]]
-		minify_payload(new_alias, blob)
-		output_text += 'alias ' + new_alias + ' "' + blob.alias_new[new_alias] + '"\n'
+		new_head = blob.alias_convert[alias[HEAD_INDEX]]
+		new_tail = minify_payload(alias[TAIL_INDEX], blob)
+		output_text += 'alias ' + new_head + ' "' + new_tail + '"\n'
 	return output_text
 
 
-def minify_payload(alias, blob):
-	split_value = re.split('(\W)', blob.alias_new[alias])
+def minify_payload(tail, blob):
+	split_tail = re.split('(\W)', tail)
+	split_value = clean_split(split_tail)
 	updated_value = [ minify_word(word, blob.alias_convert) for word in split_value]
 	updated_value = ''.join(updated_value)
-	blob.alias_new[alias] = updated_value
+	return updated_value
+
+def clean_split(split_tail):
+	for token in range(len(split_tail)):
+		if split_tail[token] == '%':
+			split_tail[token] = ''
+			split_tail[token + 1] = '%' + split_tail[token + 1]
+	return split_tail
+
 
 def reallocate(output_text, blob):
 	split_lines = re.split('\n', output_text)
@@ -71,7 +77,6 @@ def compute_reallocation(text, blob):
 			else:
 				lines[line] = lines[line] + new_aliases[line] + '"'
 				break
-		lines[line] = lines[line]
 	return lines
 
 def to_tuple_list(cfg_string):
@@ -85,10 +90,12 @@ def minify_word(word, alias_convert):
 
 class alias_blob():
 
-	def __init__(self):
-		self.CONSOLE_MAX_BUFFER = 436 - 2
+	def __init__(self, uni=None):
+		self.CONSOLE_MAX_BUFFER = 434 #limit determined by trial and error in HL:Source
 		self.alias_tuples = tuple()
-		self.alias_new = dict()
 		self.alias_convert = dict()
 		self.pick = universe.picker()
+		if uni is not None:
+			for alias in uni.known_aliases:
+				self.alias_convert[alias.identity] = self.pick.new_alias()
 

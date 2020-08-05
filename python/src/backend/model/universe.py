@@ -11,10 +11,15 @@ class universe():
 		#initialize universal aliases
 		true_alias = self.picker.new_alias()
 		false_alias = self.picker.new_alias()
-		self.true = alias(true_alias, "true")
-		self.false = alias(false_alias, "false")
+		root = self.picker.new_alias()
+		self.true = alias(true_alias, 'true')
+		self.false = alias(false_alias, 'false')
+		root = alias(root, 'root')
 		self.known_aliases.append(self.true)
 		self.known_aliases.append(self.false)
+		self.known_aliases.append(root)
+		self.root = computation(root, list())
+		self.computations.append(self.root)
 
 	def add_computation(self, alias_type):
 		alias_string = self.picker.new_alias()
@@ -35,9 +40,6 @@ class universe():
 		host.extend(new_computation)
 		return new_computation
 
-
-
-
 class computation():
 
 	def __init__(self, alias_object, command_list):
@@ -52,6 +54,7 @@ class alias():
 	def __init__(self, string, compile_type):
 		self.string = string
 		self.type = compile_type
+		self.identity = self.string + self.type
 
 class bind():
 
