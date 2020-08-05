@@ -1,7 +1,6 @@
 
 import src.frontend.utility.utility as utility
 import src.model.structure as model
-import src.frontend.service_definitions.service as core
 
 
 def resolve(sandbox):
@@ -27,8 +26,6 @@ def resolve_service_call(sandbox, call):
 	call.identifier = resolve_service_call_write(sandbox, call.identifier)
 
 def resolve_service_call_write(sandbox, call_identifier):
-	if call_identifier in core.core_service_list():
-		return core.get_service_object(call_identifier)
 	for service in sandbox.service:
 		if call_identifier == service.name:
 			return service
