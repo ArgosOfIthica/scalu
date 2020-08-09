@@ -2,20 +2,22 @@
 EBNF
 
 sandbox = 'sandbox ' sname { bind_block | map_block | service_block }
-service_block = 'service' sname '{' script_block '}'
-script_block = { statement }
+service_block = 'service' sname '{' block '}'
+block = { statement }
 bind_block = '{' { key ':' event } '}'
 map_block = '{' { event ':' call } '}'
-statement = assignment | call
+statement = assignment | call | if
 call = source_call | service_call
 source_call = '[' text ']'
 service_call = '@' ename
 assignment = vname '=' exp
-service_args = '(' { vname [,] } ')'
+if = 'if' '(' conditional ')' '{' block '}' [ '{' block '} ]
+conditional = vname condition vname
 exp = ( p_exp | exp binop exp | unop exp | value)
 p_exp = '(' exp ')'
 binop = '=' | '|' | '&'
 unop = '~' | '?'
+condition = '==' | '!='
 
 """
 import src.model.structure as model
@@ -91,10 +93,14 @@ def expect_map_block(consumer):
 	return mapping
 
 
-def expect_service_block(consumer):
+def expect_service_block(consumer, named=True):
 	new_block = model.service()
-	consumer.consume('service')
-	new_block.name = consumer.use_if_name()
+	if named == True:
+		consumer.consume('service')
+		new_block.name = consumer.use_if_name()
+	else:
+		new_block.name = ''
+		new_block.is_anonymous = True
 	consumer.consume('{')
 	while consumer.is_not_end_block():
 		if consumer.is_variable_assignment():
@@ -106,10 +112,24 @@ def expect_service_block(consumer):
 		elif consumer.is_source_call():
 			new_source_call = expect_source_call(consumer)
 			new_block.sequence.append(new_source_call)
+		elif consumer.is_if():
+			new_if = expect_if(consumer)
+			new_block.sequence.append(new_if)
 		else:
 			model.parsing_error(consumer)
 	consumer.consume('}')
 	return new_block
+
+def expect_if(consumer):
+	new_if = model.if_statement()
+	consumer.consume('if')
+	consumer.consume('(')
+	new_if.condition = expect_conditional(consumer)
+	consumer.consume(')')
+	new_if.true_service = expect_service_block(consumer, False)
+	if consumer.is_begin_block():
+		new_if.false_service = expect_service_block(consumer, False)
+	return new_if
 
 def expect_call(consumer):
 	if consumer.is_service_call():
@@ -198,6 +218,13 @@ def expect_value(consumer):
 			return new_constant
 	else:
 		model.parsing_error(consumer)
+
+def expect_conditional(consumer):
+	new_cond = model.conditional()
+	new_cond.arg[0] = expect_value(consumer)
+	new_cond.identity = consumer.retrieve_and_use_conditional()
+	new_cond.arg[1] = expect_value(consumer)
+	return new_cond
 
 
 def expect_unop(consumer):

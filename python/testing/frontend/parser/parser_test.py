@@ -60,7 +60,7 @@ class TestParsing(unittest.TestCase):
 		self.compiler.compile(program)
 
 	def test_sandbox_accepts_shared_events(self):
-		program = self.blueprint_full_chain + 'sandbox test2 map {test_event: @test_service2} service test_service2{}'
+		program = self.blueprint_full_chain + 'sandbox test2 map {test_event: @test_service2} service test_service2{[echo second service]}'
 		self.compiler.compile(program)
 
 	def test_comments(self):
@@ -84,6 +84,11 @@ class TestParsing(unittest.TestCase):
 		program = self.blueprint_two_chain + '{ a = 3 [echo is this 5?] a = ?5 [echo is this 7?] a = ?7 a = 9 [echo is this 9?] a = ?a }'
 		self.compiler.compile(program)
 
+	def test_service_call(self):
+		program = self.blueprint_two_chain + '{ a = 3 @test_service2} service test_service2 { [echo old input was] a = ?a [echo new ouput is] a = ?5 }'
+		output = self.compiler.compile(program)
+		print(output)
+
 	def test_bitwise_negation(self):
 		program = self.blueprint_two_chain + '{ [echo input is] old_number = ?73 new_number = ~old_number [echo output is] new_number = ?new_number }'
 		self.compiler.compile(program)
@@ -94,4 +99,8 @@ class TestParsing(unittest.TestCase):
 
 	def test_bitwise_or(self):
 		program = self.blueprint_two_chain + '{ [echo input1 is] input1 = ?15 [echo input2 is] input2 = ?62 [echo output is] output = ?(input1 | input2) }'
+		self.compiler.compile(program)
+
+	def test_jump(self):
+		program = self.blueprint_two_chain + '{ a = 5 if (a == 5) {a = 4 @true_branch} {a = 6 @false_branch}} service true_branch { [echo this is true] } service false_branch { [echo this is false]}'
 		self.compiler.compile(program)

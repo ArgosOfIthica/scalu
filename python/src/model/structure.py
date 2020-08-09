@@ -84,6 +84,13 @@ class source_call(statement):
 	def __init__(self):
 		self.arg = [None]
 
+class if_statement():
+
+	def __init__(self):
+		self.true_service = None
+		self.false_service = None
+		self.condition = None
+
 class operator():
 	identity = ''
 	output = ''
@@ -105,6 +112,10 @@ class literal_value(operator):
 		self.identity = 'literal'
 		self.arg = [None]
 
+class conditional(operator):
+
+	def __init__(self):
+		self.arg = [None] * 2
 
 class consumer():
 
@@ -119,6 +130,10 @@ class consumer():
 		self.unary_symbol_map = {
 		'~' : 'bitwise_neg',
 		'?' : 'binary_print'
+		}
+		self.conditional_symbol_map = {
+		'==' : 'equality',
+		'!=' : 'inequality'
 		}
 
 	#token functions
@@ -168,6 +183,9 @@ class consumer():
 	def is_source_call(self):
 		return self.token() == '['
 
+	def is_begin_block(self):
+		return self.token() == '{'
+
 	def is_not_end_block(self):
 		return self.token() != '}'
 
@@ -176,6 +194,9 @@ class consumer():
 
 	def is_sandbox(self):
 		return self.token() == 'sandbox'
+
+	def is_if(self):
+		return self.token() == 'if'
 
 	def is_block(self):
 		block_types = ('service', 'map', 'bind')
@@ -206,6 +227,14 @@ class consumer():
 		if token in self.unary_symbol_map:
 			self.consume()
 			return self.unary_symbol_map[token]
+		else:
+			parsing_error(self)
+
+	def retrieve_and_use_conditional(self):
+		token = self.token()
+		if token in self.conditional_symbol_map:
+			self.consume()
+			return self.conditional_symbol_map[token]
 		else:
 			parsing_error(self)
 

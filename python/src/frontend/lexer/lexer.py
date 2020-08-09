@@ -18,7 +18,7 @@ def purge_comments(program):
 	return re.sub("\/\*[\s\S]*?\*\/", "", program)
 
 def split_on_word(program):
-	return re.split('(\W)', program)
+	return re.split('(!=|==|\W)', program)
 
 def to_tokens(split_program):
 	tokens = list()

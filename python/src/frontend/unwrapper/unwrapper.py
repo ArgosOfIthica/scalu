@@ -11,10 +11,8 @@ def unwrap(global_object):
 				unwrapped = unwrapped_element(sandbox.resolution)
 				if model.is_assignment(statement):
 					new_sequencing = unwrapped.unwrap_assignment(statement)
-				elif model.is_source_call(statement):
-					new_sequencing = [statement]
 				else:
-					unwrapper_error()
+					new_sequencing = [statement]
 				sequence_out = sequence_out + new_sequencing
 			service.sequence = sequence_out
 	return global_object

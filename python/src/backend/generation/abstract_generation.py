@@ -15,8 +15,10 @@ def build_services(global_object):
 	uni = global_object.universe
 	for sandbox in global_object.sandbox:
 		for service in sandbox.service:
-			service_compute = build_service(global_object, service)
-			uni.constructs[service] = service_compute
+			prebuild_service(global_object, service)
+		for service in sandbox.service:
+			compute = uni.constructs[service]
+			compute = build_service(global_object, service, compute)
 
 
 def build_bindings(global_object):
@@ -42,27 +44,27 @@ def build_events(global_object):
 			else:
 				event_compute.extend(uni.constructs[service_call.identifier])
 
-def build_service(global_object, service):
+def prebuild_service(global_object, service):
 	uni = global_object.universe
 	service_compute = uni.add_computation('service')
-	for statement in service.sequence:
-		if structure.is_source_call(statement):
-			new_source_command = model.source_command(statement.arg[0])
-			service_compute.extend(new_source_command)
-		else:
-			instr_handler.handle_instruction(global_object, service_compute, statement)
+	uni.constructs[service] = service_compute
 	return service_compute
 
 
-def unwrap_compute(compute, indentation):
-	if model.is_computation(compute):
-		print(indentation + compute.alias.string + ' : ' + compute.alias.type)
-		for command in compute.commands:
-			unwrap_compute(command, indentation + ' ')
-	elif model.is_alias(compute):
-		print(indentation + 'ALIAS -> ' + compute.string + ' : ' + compute.type)
-	else:
-		print(indentation + str(compute))
+def build_service(global_object, service, compute):
+	uni = global_object.universe
+	for statement in service.sequence:
+		if structure.is_source_call(statement):
+			new_source_command = model.source_command(statement.arg[0])
+			compute.extend(new_source_command)
+		elif structure.is_service_call(statement):
+			call_compute = uni.constructs[statement.identifier]
+			compute.extend(call_compute)
+		elif structure.is_operator(statement):
+			instr_handler.handle_instruction(global_object, compute, statement)
+		else:
+			raise Exception('bad statement')
+	return compute
 
 
 
