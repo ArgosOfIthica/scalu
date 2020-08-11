@@ -155,6 +155,10 @@ class consumer():
 		else:
 			self.count += 1
 
+	def maybe_consume(self, maybe_token):
+			if maybe_token == self.token():
+				consume(maybe_token)
+
 	def token_is_name(self):
 		return utility.token_is_name(self.token())
 
@@ -172,13 +176,14 @@ class consumer():
 		else:
 			parsing_error(self)
 
-	#statement lookaheads
-
 	def is_variable_assignment(self):
 		return self.token(1) == '='
 
 	def is_service_call(self):
 		return self.token() == '@'
+
+	def is_else(self):
+		return self.token() == 'else'
 
 	def is_source_call(self):
 		return self.token() == '['
@@ -267,3 +272,9 @@ def is_source_call(arg):
 
 def is_key(arg):
 	return isinstance(arg, key)
+
+def is_if_statement(arg):
+	return isinstance(arg, if_statement)
+
+def is_conditional(arg):
+	return isinstance(arg, conditional)

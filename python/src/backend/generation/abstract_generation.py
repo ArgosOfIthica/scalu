@@ -62,6 +62,8 @@ def build_service(global_object, service, compute):
 			compute.extend(call_compute)
 		elif structure.is_operator(statement):
 			instr_handler.handle_instruction(global_object, compute, statement)
+		elif structure.is_if_statement(statement):
+			instr_handler.handle_conditional(global_object, compute, statement)
 		else:
 			raise Exception('bad statement')
 	return compute

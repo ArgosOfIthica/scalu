@@ -11,6 +11,8 @@ def emission(uni):
 					output += emit(subcomputes, uni)
 		elif model.is_key(ele):
 			output += emit(uni.constructs[ele], uni)
+		if uni.constructs[ele].alias.type == 'service':
+			output += emit(uni.constructs[ele], uni)
 	output += emit(uni.root, uni)
 	return output
 

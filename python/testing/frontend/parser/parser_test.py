@@ -86,8 +86,7 @@ class TestParsing(unittest.TestCase):
 
 	def test_service_call(self):
 		program = self.blueprint_two_chain + '{ a = 3 @test_service2} service test_service2 { [echo old input was] a = ?a [echo new ouput is] a = ?5 }'
-		output = self.compiler.compile(program)
-		print(output)
+		self.compiler.compile(program)
 
 	def test_bitwise_negation(self):
 		program = self.blueprint_two_chain + '{ [echo input is] old_number = ?73 new_number = ~old_number [echo output is] new_number = ?new_number }'
@@ -102,5 +101,5 @@ class TestParsing(unittest.TestCase):
 		self.compiler.compile(program)
 
 	def test_jump(self):
-		program = self.blueprint_two_chain + '{ a = 5 if (a == 5) {a = 4 @true_branch} {a = 6 @false_branch}} service true_branch { [echo this is true] } service false_branch { [echo this is false]}'
+		program = self.blueprint_two_chain + '{ a = 5 if (a == 5) {a = ?4 @true_branch} else {a = ?6 @false_branch}} service true_branch { [echo this is true] } service false_branch { [echo this is false]}'
 		self.compiler.compile(program)

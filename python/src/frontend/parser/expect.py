@@ -50,7 +50,6 @@ def expect_sandbox(consumer):
 		block_type = consumer.token()
 		if block_type == 'service':
 			new_block = expect_service_block(consumer)
-			new_sandbox.service.append(new_block)
 		elif block_type == 'map':
 			new_block = expect_map_block(consumer)
 		elif block_type == 'bind':
@@ -118,16 +117,21 @@ def expect_service_block(consumer, named=True):
 		else:
 			model.parsing_error(consumer)
 	consumer.consume('}')
+	consumer.current_sandbox.service.append(new_block)
 	return new_block
 
 def expect_if(consumer):
 	new_if = model.if_statement()
 	consumer.consume('if')
-	consumer.consume('(')
-	new_if.condition = expect_conditional(consumer)
-	consumer.consume(')')
+	if consumer.is_subexpression():
+		consumer.consume('(')
+		new_if.condition = expect_conditional(consumer)
+		consumer.consume(')')
+	else:
+		new_if.condition = expect_conditional(consumer)
 	new_if.true_service = expect_service_block(consumer, False)
-	if consumer.is_begin_block():
+	if consumer.is_else():
+		consumer.consume('else')
 		new_if.false_service = expect_service_block(consumer, False)
 	return new_if
 
