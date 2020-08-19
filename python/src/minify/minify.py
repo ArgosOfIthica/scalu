@@ -14,7 +14,7 @@ def minify(cfg_string, uni):
 
 def clean_output(output):
 	output_text = output
-	output_text = re.sub(';(\s+)', ';', output_text)
+	output_text = re.sub('\";(\s+)', ';\n', output_text)
 	output_text = re.sub(';(\s*)\"', '"', output_text)
 	output_text = re.sub('\";', '"', output_text)
 	return output_text
@@ -62,7 +62,7 @@ def reallocate(output_text, blob):
 
 def compute_reallocation(text, blob):
 	command_split = re.split(';', text)
-	line_count = math.ceil(len(text) / blob.CONSOLE_MAX_BUFFER)
+	line_count = math.ceil(len(text) / blob.CONSOLE_MAX_BUFFER) + 1
 	new_aliases = blob.pick.new_alias_list(line_count)
 	lines = [''] * line_count
 	command = 0
@@ -79,6 +79,7 @@ def compute_reallocation(text, blob):
 				break
 	return lines
 
+
 def to_tuple_list(cfg_string):
 	return list(re.findall('alias\s(\S+)\s\"(.*)\"', cfg_string))
 
@@ -91,7 +92,7 @@ def minify_word(word, alias_convert):
 class alias_blob():
 
 	def __init__(self, uni=None):
-		self.CONSOLE_MAX_BUFFER = 434 #limit determined by trial and error in HL:Source
+		self.CONSOLE_MAX_BUFFER = 430 #limit determined by trial and error in HL:Source
 		self.alias_tuples = tuple()
 		self.alias_convert = dict()
 		self.pick = universe.picker()

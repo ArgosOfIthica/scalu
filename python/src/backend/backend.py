@@ -4,7 +4,11 @@ import src.minify.minify as minifier
 
 
 def compile(global_object):
+	debug = False
 	uni = gen.compile(global_object)
 	raw_program = emission.emission(uni)
-	minified_program = minifier.minify(raw_program, uni)
-	return minified_program
+	if debug:
+		return raw_program
+	else:
+		minified_program = minifier.minify(raw_program, uni)
+		return minified_program

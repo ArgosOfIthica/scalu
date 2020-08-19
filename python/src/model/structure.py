@@ -12,6 +12,7 @@ class global_object():
 		self.bind = dict()
 		self.map = dict()
 		self.universe = universe.universe()
+		self.universe.initialize()
 
 
 class resolution_block():

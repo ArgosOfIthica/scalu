@@ -5,29 +5,18 @@ class universe():
 
 	def __init__(self):
 		self.computations = list()
+		self.vars = list()
 		self.known_aliases = list()
+		self.alias_to_def = dict()
 		self.picker = picker()
 		self.constructs = dict()
-		#initialize universal aliases
-		true_alias = self.picker.new_alias()
-		false_alias = self.picker.new_alias()
-		root = self.picker.new_alias()
-		self.true = alias(true_alias, 'true')
-		self.false = alias(false_alias, 'false')
-		root = alias(root, 'root')
-		self.known_aliases.append(self.true)
-		self.known_aliases.append(self.false)
-		self.known_aliases.append(root)
-		self.root = computation(root, list())
-		self.computations.append(self.root)
+		self.initialized = False
 
-	def add_computation(self, alias_type):
-		alias_string = self.picker.new_alias()
-		new_alias = alias(alias_string, alias_type)
-		new_computation = computation(new_alias, list())
-		self.known_aliases.append(new_alias)
-		self.computations.append(new_computation)
-		return new_computation
+	def initialize(self):
+		self.initialized = True
+		self.true = self.new_var()
+		self.false = self.new_var()
+		self.root = self.new_def('root')
 
 	def add_alias(self, alias_type):
 		alias_string = self.picker.new_alias()
@@ -35,19 +24,66 @@ class universe():
 		self.known_aliases.append(new_alias)
 		return new_alias
 
-	def extend_add_computation(self, host , extension_type):
-		new_computation = self.add_computation(extension_type)
-		host.extend(new_computation)
+	def new_def(self, alias_type):
+		if not self.initialized:
+			self.initialize()
+		alias_string = self.picker.new_alias()
+		new_alias = alias(alias_string, alias_type)
+		new_computation = definition(new_alias)
+		self.alias_to_def[new_alias] = new_computation
+		self.known_aliases.append(new_alias)
+		self.computations.append(new_computation)
 		return new_computation
+
+	def new_var(self):
+		alias_string = self.picker.new_alias()
+		new_alias = alias(alias_string, 'stateful')
+		self.known_aliases.append(new_alias)
+		self.vars.append(new_alias)
+		return new_alias
+
+	def host_def(self, host , extension_type):
+		new_computation = self.new_def(extension_type)
+		host.extend(new_computation.alias)
+		return new_computation
+
+	def set_var(self, var, target):
+		if target not in self.vars:
+			target_wrapper = self.new_def('set_target')
+			target_wrapper.extend(target)
+			target_wrapper = target_wrapper.alias
+		else:
+			target_wrapper = target
+		new_transform = state_transform(var)
+		if var.type == 'stateful':
+			new_transform.alias = var
+		else:
+			raise Exception('invalid alias for var')
+		new_transform.extend(target_wrapper)
+		var_wrapper = self.new_def('set_var')
+		var_wrapper.extend(new_transform)
+		return var_wrapper
 
 class computation():
 
-	def __init__(self, alias_object, command_list):
+	def __init__(self, alias_object):
 		self.alias = alias_object
 		self.commands = list()
 
 	def extend(self, command):
 		self.commands.append(command)
+
+class definition(computation):
+
+	def extend(self, command):
+		if isinstance(command, definition):
+			raise Exception('definitions cannot extend definitions')
+		else:
+			self.commands.append(command)
+
+class state_transform(computation):
+	pass
+
 
 class alias():
 
@@ -66,6 +102,31 @@ class source_command():
 
 	def __init__(self, string):
 		self.string = string
+
+
+def get_bin(value, word_size):
+	return format(int(value), 'b').zfill(int(word_size))
+
+class variable():
+
+	def __init__(self, global_object, var):
+		uni = global_object.universe
+		bool_string = get_bin(var.value, var.word_size)
+		self.bits = list()
+		self.set_true = list()
+		self.set_false = list()
+		for bit in range(int(var.word_size)):
+			self.bits.append( uni.new_var())
+			self.set_true.append(uni.new_def('set_true'))
+			self.set_true[bit].extend(uni.set_var(self.bits[bit], uni.true).alias)
+			self.set_false.append(uni.new_def('set_false'))
+			self.set_false[bit].extend(uni.set_var(self.bits[bit], uni.false).alias)
+			if bool_string[bit] == '0':
+				uni.root.extend(self.set_false[bit].alias)
+			elif bool_string[bit] == '1':
+				uni.root.extend(self.set_true[bit].alias)
+			else:
+				raise Exception('is not valid boolean string')
 
 class picker():
 
@@ -101,6 +162,9 @@ class picker():
 def is_computation(arg):
 	return isinstance(arg, computation)
 
+def is_definition(arg):
+	return isinstance(arg, definition)
+
 def is_alias(arg):
 	return isinstance(arg, alias)
 
@@ -109,3 +173,6 @@ def is_source_command(arg):
 
 def is_bind(arg):
 	return isinstance(arg, bind)
+
+def is_var(arg):
+	return isinstance(arg, state_transform)

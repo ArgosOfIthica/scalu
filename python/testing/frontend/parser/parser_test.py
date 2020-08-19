@@ -80,6 +80,10 @@ class TestParsing(unittest.TestCase):
 		program = self.blueprint_two_chain + '{ a = 7 [echo test_console_command_in_service] }'
 		self.compiler.compile(program)
 
+	def test_basic_binary_print(self):
+		program = self.blueprint_two_chain + '{ a = 3 [echo is this 3?]}'
+		self.compiler.compile(program)
+
 	def test_binary_print(self):
 		program = self.blueprint_two_chain + '{ a = 3 [echo is this 5?] a = ?5 [echo is this 7?] a = ?7 a = 9 [echo is this 9?] a = ?a }'
 		self.compiler.compile(program)
@@ -89,7 +93,7 @@ class TestParsing(unittest.TestCase):
 		self.compiler.compile(program)
 
 	def test_bitwise_negation(self):
-		program = self.blueprint_two_chain + '{ [echo input is] old_number = ?73 new_number = ~old_number [echo output is] new_number = ?new_number }'
+		program = self.blueprint_two_chain + '{ [echo input is] old_number = ?73  [echo output is] new_number = ?(~old_number) }'
 		self.compiler.compile(program)
 
 	def test_bitwise_and(self):
@@ -101,5 +105,5 @@ class TestParsing(unittest.TestCase):
 		self.compiler.compile(program)
 
 	def test_jump(self):
-		program = self.blueprint_two_chain + '{ a = 5 if (a == 5) {a = ?4 @true_branch} else {a = ?6 @false_branch}} service true_branch { [echo this is true] } service false_branch { [echo this is false]}'
+		program = self.blueprint_two_chain + '{ a = 6 if (a == 5) {a = ?4 @true_branch} else {a = ?6 @false_branch}} service true_branch { [echo this is true] } service false_branch { [echo this is false]}'
 		self.compiler.compile(program)
