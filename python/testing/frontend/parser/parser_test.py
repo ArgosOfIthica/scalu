@@ -110,6 +110,14 @@ class TestParsing(unittest.TestCase):
 
 	def test_partial_jump(self):
 		program = self.blueprint_two_chain + '{ a = 5 if (a == 5) {a = ?4 @true_branch}} service true_branch { [echo this is true] }'
-		print(self.compiler.compile(program))
+		self.compiler.compile(program)
+
+	def test_nested_jump(self):
+		program = self.blueprint_two_chain + '{ a = 6 if (a == 5) {a = ?4 @true_branch} else \n{ if (a == 6) { @false_branch} else {[echo wrong answer 2]}}} \n service true_branch { [echo wrong answer 1] } service false_branch { [echo correct answer]}'
+		self.compiler.compile(program)
+
+	def test_inequality(self):
+		program = self.blueprint_two_chain + '{ a = 4 if (a != 2) { [echo correct]} else {[echo wrong]}}'
+		self.compiler.compile(program)
 
 

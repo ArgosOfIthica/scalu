@@ -227,11 +227,26 @@ class iequality(conditional):
 		self.execute_beta(bit, root_compute)
 		return root_compute
 
+class iinequality(iequality):
+
+	def compile_true_branch(self, bit):
+		root_compute = self.uni.new_def('code')
+		if bit + 1 < len(self.iteration_list):
+			root_compute.extend(self.uni.set_var(self.uni.true, self.iteration_list[bit + 1].alias).alias)
+		else:
+			root_compute.extend(self.uni.set_var(self.uni.true, self.false_service_compute.alias).alias)
+		root_compute.extend(self.uni.set_var(self.uni.false, self.true_service_compute.alias).alias)
+		self.execute_beta(bit, root_compute)
+		return root_compute
 
 
-
-class iinequality(conditional):
-
-	def compile(self):
-		pass
+	def compile_false_branch(self, bit):
+		root_compute = self.uni.new_def('code')
+		root_compute.extend(self.uni.set_var(self.uni.true, self.true_service_compute.alias).alias)
+		if bit + 1 < len(self.iteration_list):
+			root_compute.extend(self.uni.set_var(self.uni.false, self.iteration_list[bit + 1].alias).alias)
+		else:
+			root_compute.extend(self.uni.set_var(self.uni.false, self.false_service_compute.alias).alias)
+		self.execute_beta(bit, root_compute)
+		return root_compute
 
