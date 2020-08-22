@@ -27,8 +27,8 @@ class emission_queue_obj():
 
 def emission(uni):
 	emission_queue = emission_queue_obj()
-	output = ''
-	output += emit_aliased_computation(uni.root, uni, emission_queue)
+	output = emit_aliased_computation(uni.root, uni, emission_queue)
+	output += uni.root.alias.identity
 	return output
 
 def emit_aliased_computation(computation_target, uni, emission_queue):

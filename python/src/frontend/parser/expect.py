@@ -120,6 +120,13 @@ def expect_service_block(consumer, named=True):
 	consumer.current_sandbox.service.append(new_block)
 	return new_block
 
+def empty_service(consumer):
+	new_block = model.service()
+	new_block.name = ''
+	new_block.is_anonymous = True
+	consumer.current_sandbox.service.append(new_block)
+	return new_block
+
 def expect_if(consumer):
 	new_if = model.if_statement()
 	consumer.consume('if')
@@ -133,6 +140,8 @@ def expect_if(consumer):
 	if consumer.is_else():
 		consumer.consume('else')
 		new_if.false_service = expect_service_block(consumer, False)
+	else:
+		new_if.false_service = empty_service(consumer)
 	return new_if
 
 def expect_call(consumer):

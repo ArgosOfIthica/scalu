@@ -104,6 +104,12 @@ class TestParsing(unittest.TestCase):
 		program = self.blueprint_two_chain + '{ [echo input1 is] input1 = ?15 [echo input2 is] input2 = ?62 [echo output is] output = ?(input1 | input2) }'
 		self.compiler.compile(program)
 
-	def test_jump(self):
+	def test_full_jump(self):
 		program = self.blueprint_two_chain + '{ a = 6 if (a == 5) {a = ?4 @true_branch} else {a = ?6 @false_branch}} service true_branch { [echo this is true] } service false_branch { [echo this is false]}'
 		self.compiler.compile(program)
+
+	def test_partial_jump(self):
+		program = self.blueprint_two_chain + '{ a = 5 if (a == 5) {a = ?4 @true_branch}} service true_branch { [echo this is true] }'
+		print(self.compiler.compile(program))
+
+

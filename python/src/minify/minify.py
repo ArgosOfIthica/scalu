@@ -6,7 +6,8 @@ import src.backend.model.universe as universe
 def minify(cfg_string, uni):
 	blob = alias_blob(uni)
 	blob.alias_tuples = to_tuple_list(cfg_string)
-	output_text = minify_names(blob)
+	root_computation = blob.alias_convert[blob.alias_tuples[0][0]]
+	output_text = minify_names(blob) + root_computation
 	output_text = clean_output(output_text)
 	output_text = reallocate(output_text, blob)
 	output_text = clean_output(output_text)
