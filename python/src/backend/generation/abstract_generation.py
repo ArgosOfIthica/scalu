@@ -36,6 +36,7 @@ def build_events(global_object):
 	uni = global_object.universe
 	for event in global_object.map:
 		event_def = uni.new_def('event')
+		event_def.alias.string = '$' + event.value
 		uni.constructs[event] = event_def
 		for service_call in global_object.map[event]:
 			if structure.is_source_call(service_call):
