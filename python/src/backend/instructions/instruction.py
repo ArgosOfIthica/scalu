@@ -154,7 +154,7 @@ class ibitwise_or(instruction):
 
 	def set_false_branch(self, bit):
 		false_branch = self.compile_false_branch(bit)
-		set_false_to_false_branch = self.uni.new_def('code')
+		set_false_to_false_branch = self.uni.host_def(self.identity_compute, 'code')
 		set_false_to_false_branch.extend(self.uni.set_var(self.uni.false, false_branch.alias).alias)
 
 	def compile_false_branch(self, bit):

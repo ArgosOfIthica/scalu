@@ -28,6 +28,11 @@ class emission_queue_obj():
 def emission(uni):
 	emission_queue = emission_queue_obj()
 	output = emit_aliased_computation(uni.root, uni, emission_queue)
+	while not emission_queue.is_exhausted():
+		compute = emission_queue.look()
+		if compute not in uni.vars:
+			compute = uni.alias_to_def[compute]
+			output += emit_aliased_computation(compute, uni, emission_queue)
 	output += uni.root.alias.identity
 	return output
 
@@ -36,13 +41,7 @@ def emit_aliased_computation(computation_target, uni, emission_queue):
 		raise Exception('invalid aliased computation')
 	emit_string = 'alias ' + computation_target.alias.identity + ' "'
 	emit_string += emit_computation(computation_target, uni, emission_queue) + '"\n'
-	while not emission_queue.is_exhausted():
-		compute = emission_queue.look()
-		if compute not in uni.vars:
-			compute = uni.alias_to_def[compute]
-			emit_string += emit_aliased_computation(compute, uni, emission_queue)
 	return emit_string
-
 
 def emit_computation(command, uni, emission_queue):
 	emit_string = ''

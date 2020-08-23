@@ -150,7 +150,7 @@ def expect_call(consumer):
 	elif consumer.is_source_call():
 		return expect_source_call(consumer)
 	else:
-		parsing_error(consumer)
+		model.parsing_error(consumer)
 
 def expect_source_call(consumer):
 	new_source_call = model.source_call()

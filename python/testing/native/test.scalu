@@ -1,0 +1,129 @@
+sandbox test_bootstrap
+
+bind {
+	k : test_event
+}
+
+map {
+	test_event: @blurb
+	}
+
+service blurb {
+	[echo initiating test bootstrapping]
+	}
+
+sandbox test_equality
+
+map {
+	test_event : @equality
+}
+
+service equality{
+	a = 5
+	[echo running equality tests]
+	[echo test 1]
+	if (a == 5) {[echo passed]}
+	[echo test 2]
+	if (a == 5) {[echo passed]} else {[echo failed]}
+	[echo test 3]
+	if (a == 6) {[echo failed]} else {[echo passed]}
+}
+
+sandbox test_inequality
+
+map {
+	test_event : @inequality
+}
+
+service inequality {
+	a = 6
+	[echo running inequality tests]
+	[echo test 1]
+	if (a != 5) {[echo passed]}
+	[echo test 2]
+	if (a != 5) {[echo passed]} else {[echo failed]}
+	[echo test 3]
+	if (a != 6) {[echo failed]} else {[echo passed]}
+}
+
+sandbox test_copy
+
+map {
+	test_event : @copy
+	}
+
+service copy {
+	a = 5
+	[echo running copy tests]
+	[echo test 1]
+	a = 6
+	if (a == 6) {[echo passed]} else {[echo failed]}
+	[echo test 2]
+	a = 7
+	if (a == 7) {[echo passed]} else {[echo failed]}
+}
+
+
+sandbox test_bitwise_not
+
+map {
+	test_event : @bitwise_not
+}
+
+service bitwise_not {
+	a = 5 /* default bit size is relevant, but casting is not implemented */
+}
+
+sandbox test_bitwise_and
+
+map {
+	test_event : @bitwise_and
+}
+
+service bitwise_and {
+	[echo running bitwise_and test]
+	[echo test 1]
+	a = 10 /* bit-pattern is 1010 */
+	b = 12 /* bit-pattern is 1100 */
+	c = a & b
+	if (c == 8) {[echo passed]} else {[echo failed]}
+	[echo test 2]
+	c = b & a
+	if (c == 8) {[echo passed]} else {[echo failed]}
+	[echo test 3]
+	d = c & (a & b)
+	if (d == 8) {[echo passed]} else {[echo failed]}
+	[echo test 4]
+	c = 23 & 69
+	d = 69 & 23
+	if (c == 5) {[echo passed]} else {[echo failed]}
+	[echo test 5]
+	if (c == d) {[echo passed]} else {[echo failed]}
+}
+
+sandbox test_bitwise_or
+
+map {
+	test_event : @bitwise_or
+	}
+
+service bitwise_or {
+	[echo running bitwise_or test]
+	[echo test 1]
+	a = 10
+	b = 12
+	c = (a | b)
+	if (c == 14) {[echo passed]} else {[echo failed]}
+	[echo test 2]
+	c = (b | a)
+	if (c == 14) {[echo passed]} else {[echo failed]}
+	[echo test 3]
+	d = (c | (a | b))
+	if (d == 14) {[echo passed]} else {[echo failed]}
+	[echo test 4]
+	c = 23 | 69
+	d = 69 | 23
+	if (c == 87) {[echo passed]} else {[echo failed]}
+	[echo test 5]
+	if (c == d) {[echo passed]} else {[echo failed]}
+}
