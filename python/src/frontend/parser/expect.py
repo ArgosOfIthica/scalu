@@ -22,19 +22,22 @@ condition = '==' | '!='
 """
 import src.model.structure as model
 import src.frontend.utility.utility as utility
+import src.model.consumer as consumer
 import re
 
 def parse(tokens):
-	consumer_obj = model.consumer(tokens)
+	consumer_obj =  consumer.consumer(tokens)
 	return global_context(consumer_obj)
 
 
 def global_context(consumer):
 	new_global_object = model.global_object()
+	consumer.global_object = new_global_object
 	while consumer.is_sandbox():
 		new_sandbox = expect_sandbox(consumer)
 		new_global_object.sandbox.append(new_sandbox)
 	if consumer.token() == '':
+		new_global_object.resolve()
 		return new_global_object
 	else:
 		model.parsing_error(consumer)
@@ -59,35 +62,32 @@ def expect_sandbox(consumer):
 	return new_sandbox
 
 
-
 def expect_bind_block(consumer):
-	binding = consumer.current_sandbox.bind
+	binding = consumer.global_object.maps
 	consumer.consume('bind')
 	consumer.consume('{')
 	while consumer.is_not_end_block():
-		new_key = model.key(consumer.token())
-		if new_key.value in [bind.value for bind in binding]:
-			parsing_error(consumer)
+		new_key = consumer.token()
 		consumer.consume()
 		consumer.consume(':')
 		new_event = model.event(consumer.token())
 		consumer.consume()
-		binding[new_key] = new_event
+		new_event.add_key(new_key)
+		binding.add(new_event)
 	consumer.consume('}')
 	return binding
 
 def expect_map_block(consumer):
-	mapping = consumer.current_sandbox.map
+	mapping = consumer.global_object.maps
 	consumer.consume('map')
 	consumer.consume('{')
 	while consumer.is_not_end_block():
-		event_promise = consumer.token()
+		new_event = model.event(consumer.token())
 		consumer.consume()
 		consumer.consume(':')
 		call = expect_call(consumer)
-		if event_promise not in mapping:
-			mapping[event_promise] = list()
-		mapping[event_promise].append(call)
+		new_event.services.append(call)
+		mapping.add(new_event)
 	consumer.consume('}')
 	return mapping
 
@@ -117,14 +117,14 @@ def expect_service_block(consumer, named=True):
 		else:
 			model.parsing_error(consumer)
 	consumer.consume('}')
-	consumer.current_sandbox.service.append(new_block)
+	consumer.current_sandbox.services.append(new_block)
 	return new_block
 
 def empty_service(consumer):
 	new_block = model.service()
 	new_block.name = ''
 	new_block.is_anonymous = True
-	consumer.current_sandbox.service.append(new_block)
+	consumer.current_sandbox.services.append(new_block)
 	return new_block
 
 def expect_if(consumer):
@@ -162,9 +162,10 @@ def expect_source_call(consumer):
 	return new_source_call
 
 def expect_service_call(consumer):
-	new_service_call = model.service_call()
+	new_service_call = model.service_call(consumer.current_sandbox)
 	consumer.consume('@')
 	new_service_call.identifier = consumer.use_if_name()
+	new_service_call.sandbox = consumer.current_sandbox
 	return new_service_call
 
 
@@ -185,7 +186,6 @@ def expect_assignment_identifier(consumer):
 		new_variable = model.variable(identifier)
 		res.variable_lookup[identifier] = new_variable
 		return new_variable
-
 
 def expect_p_expression(consumer):
 	consumer.consume('(')

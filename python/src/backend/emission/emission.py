@@ -6,15 +6,13 @@ class emission_queue_obj():
 
 	def __init__(self):
 		self.queue = list()
-		self.unique_elements = list()
 		self.index = 0
 
 	def append(self, element):
 		if not universe.is_alias(element):
 			raise Exception('invalid emission alias')
-		if element not in self.unique_elements:
+		if element not in self.queue:
 			self.queue.append(element)
-			self.unique_elements.append(element)
 
 	def look(self):
 		output = self.queue[self.index]
@@ -27,7 +25,11 @@ class emission_queue_obj():
 
 def emission(uni):
 	emission_queue = emission_queue_obj()
-	output = emit_aliased_computation(uni.root, uni, emission_queue)
+	output = ''
+	for construct in uni.constructs.values():
+		if universe.is_definition(construct) and construct.alias.type == 'event':
+			output += emit_aliased_computation(construct, uni, emission_queue)
+	output = emit_aliased_computation(uni.root, uni, emission_queue) + output
 	while not emission_queue.is_exhausted():
 		compute = emission_queue.look()
 		if compute not in uni.vars:
@@ -56,7 +58,6 @@ def emit_computation(command, uni, emission_queue):
 		emit_string += command.string + ';'
 	elif universe.is_bind(command):
 		emit_string += 'bind ' + command.key + ' ' + command.compute.alias.identity + ';'
-		emission_queue.append(command.compute.alias)
 	elif universe.is_alias(command) and (command.type == 'service' or command.type == 'event'):
 		emit_string += command.identity + ';'
 		emission_queue.append(command)

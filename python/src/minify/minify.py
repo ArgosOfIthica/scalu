@@ -13,11 +13,10 @@ def minify(cfg_string, uni):
 	output_text = clean_output(output_text)
 	return output_text
 
-def clean_output(output):
-	output_text = output
-	output_text = re.sub('\";(\s+)', ';\n', output_text)
+def clean_output(output_text):
 	output_text = re.sub(';(\s*)\"', '"', output_text)
 	output_text = re.sub('\";', '"', output_text)
+	output_text = re.sub('\n{2,}', '\n', output_text)
 	return output_text
 
 def minify_names(blob):
@@ -93,7 +92,7 @@ def minify_word(word, alias_convert):
 class alias_blob():
 
 	def __init__(self, uni=None):
-		self.CONSOLE_MAX_BUFFER = 430 #limit determined by trial and error in HL:Source
+		self.CONSOLE_MAX_BUFFER = 440 #limit determined by trial and error in HL:Source
 		self.alias_tuples = tuple()
 		self.alias_convert = dict()
 		self.pick = universe.picker()

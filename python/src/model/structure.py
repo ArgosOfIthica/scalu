@@ -9,29 +9,67 @@ class global_object():
 
 	def __init__(self):
 		self.sandbox = list()
-		self.bind = dict()
-		self.map = dict()
+		self.maps = map_collection()
 		self.universe = universe.universe()
 		self.universe.initialize()
+
+	def resolve(self):
+		for sandbox in self.sandbox:
+			sandbox.resolve()
+		self.maps.resolve()
+
 
 
 class resolution_block():
 	variable_lookup = dict()
-	service_lookup = dict()
 	constant_lookup = dict()
-	service_promises = dict()
+
+
+class map_collection():
+
+	def __init__(self):
+		self.maps = list()
+
+	def add(self, event):
+		if event.key is None or event.key not in [x.key for x in self.maps]:
+			if event.string in [x.string for x in self.maps]:
+				old_event = self.return_matching_event(event)
+				self.merge_events(old_event, event)
+			else:
+				self.maps.append(event)
+		else:
+			raise Exception('Cannot add event "' + event.string + '" to collection, key "' + event.key + '" already in collection. The same key cannot be bound to multiple events.')
+
+	def return_matching_event(self, event):
+		for maps in self.maps:
+			if event.string == maps.string:
+				return maps
+
+	def merge_events(self, old_event, new_event):
+		if new_event.key is not None:
+			old_event.key = new_event.key
+		old_event.services = old_event.services + new_event.services
+
+	def resolve(self):
+		for event in self.maps:
+			for service_call in event.services:
+				if is_service_call(service_call):
+					service_call.resolve()
+
 
 class sandbox():
 
 	def __init__(self):
 		self.name = ''
 		self.resolution = resolution_block()
-		self.service = list()
-		self.bind = dict()
-		self.map = dict() #TODO: values in map are lists. Make this explicit
+		self.services = list()
 
-class block():
-	pass
+
+	def resolve(self):
+		for service in self.services:
+			for statement in service.sequence:
+				if is_service_call(statement):
+					statement.resolve()
 
 class variable():
 
@@ -57,14 +95,17 @@ class service():
 
 class event():
 
-	def __init__(self, event):
-		self.value = event
+	def __init__(self, string):
+		self.string = string
+		self.key = None
+		self.services = list()
 
+	def add_key(self, key_string):
+		if self.key == None:
+			self.key = key_string
+		else:
+			raise Exception('event "' + self.string + '" already has key "' + self.key + '". Cannot assign "' + key_string + '" to "' + self.string + '"')
 
-class key():
-
-	def __init__(self, key):
-		self.value = key
 
 class statement():
 
@@ -78,12 +119,27 @@ class assignment(statement):
 		self.arg = [None]
 
 class service_call(statement):
-	pass
+
+
+	def __init__(self, sandbox):
+		self.sandbox = sandbox
+
+	def resolve(self):
+		matching_service = self.get_service()
+		self.identifier = matching_service
+
+	def get_service(self):
+		for service in self.sandbox.services:
+			if self.identifier == service.name:
+				return service
+		raise Exception('service call cannot be resolved')
 
 class source_call(statement):
 
 	def __init__(self):
 		self.arg = [None]
+
+
 
 class if_statement():
 
@@ -117,132 +173,6 @@ class conditional(operator):
 
 	def __init__(self):
 		self.arg = [None] * 2
-
-class consumer():
-
-	def __init__(self, tokens):
-		self.current_sandbox = ''
-		self.tokens = tokens
-		self.count = 0
-		self.binary_symbol_map = {
-		'|' : 'bitwise_or',
-		'&' : 'bitwise_and'
-		}
-		self.unary_symbol_map = {
-		'~' : 'bitwise_neg',
-		'?' : 'binary_print'
-		}
-		self.conditional_symbol_map = {
-		'==' : 'equality',
-		'!=' : 'inequality'
-		}
-
-	#token functions
-
-	def token(self, lookahead = 0):
-		if self.count + lookahead >= len(self.tokens):
-			return ''
-		else:
-			return self.tokens[self.count + lookahead].value
-
-	def current_line(self):
-		return self.tokens[self.count].line
-
-	def consume(self, verify_token = None):
-		if verify_token is not None and self.token() != verify_token:
-			parsing_error(self)
-		elif self.count >= len(self.tokens):
-			parsing_error(self)
-		else:
-			self.count += 1
-
-	def maybe_consume(self, maybe_token):
-			if maybe_token == self.token():
-				consume(maybe_token)
-
-	def token_is_name(self):
-		return utility.token_is_name(self.token())
-
-	def token_is_numeric(self):
-		return utility.token_is_numeric(self.token())
-
-	def token_is_value(self):
-		return self.token_is_name() or self.token_is_numeric()
-
-	def use_if_name(self):
-		if self.token_is_name():
-			token_s = self.token()
-			self.consume()
-			return token_s
-		else:
-			parsing_error(self)
-
-	def is_variable_assignment(self):
-		return self.token(1) == '='
-
-	def is_service_call(self):
-		return self.token() == '@'
-
-	def is_else(self):
-		return self.token() == 'else'
-
-	def is_source_call(self):
-		return self.token() == '['
-
-	def is_begin_block(self):
-		return self.token() == '{'
-
-	def is_not_end_block(self):
-		return self.token() != '}'
-
-	def is_not_end_service_arg(self):
-		return self.token() != ')'
-
-	def is_sandbox(self):
-		return self.token() == 'sandbox'
-
-	def is_if(self):
-		return self.token() == 'if'
-
-	def is_block(self):
-		block_types = ('service', 'map', 'bind')
-		return self.token() in block_types
-
-	def is_subexpression(self):
-		return self.token() == '('
-
-	def is_literal_value(self):
-		return self.token_is_value()
-
-	def is_unop(self, lookahead=0):
-		return self.token(lookahead) in self.unary_symbol_map
-
-	def is_binop(self, lookahead=0):
-		return self.token(lookahead) in self.binary_symbol_map
-
-	def retrieve_and_use_binary_identity(self):
-		token = self.token()
-		if token in self.binary_symbol_map:
-			self.consume()
-			return self.binary_symbol_map[token]
-		else:
-			parsing_error(self)
-
-	def retrieve_and_use_unary_identity(self):
-		token = self.token()
-		if token in self.unary_symbol_map:
-			self.consume()
-			return self.unary_symbol_map[token]
-		else:
-			parsing_error(self)
-
-	def retrieve_and_use_conditional(self):
-		token = self.token()
-		if token in self.conditional_symbol_map:
-			self.consume()
-			return self.conditional_symbol_map[token]
-		else:
-			parsing_error(self)
 
 def is_assignment(arg):
 	return isinstance(arg, assignment)

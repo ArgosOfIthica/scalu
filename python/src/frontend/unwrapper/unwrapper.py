@@ -4,7 +4,7 @@ import copy
 
 def unwrap(global_object):
 	for sandbox in global_object.sandbox:
-		for service in sandbox.service:
+		for service in sandbox.services:
 			sequence_out = list()
 			for statement in service.sequence:
 				new_sequencing = None

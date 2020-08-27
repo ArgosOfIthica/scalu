@@ -7,38 +7,34 @@ import src.model.structure as structure
 def compile(global_object):
 	build_services(global_object)
 	build_events(global_object)
-	uni = build_bindings(global_object)
-	return uni
+	build_bindings(global_object)
+	return global_object.universe
 
 
 def build_services(global_object):
 	uni = global_object.universe
 	for sandbox in global_object.sandbox:
-		for service in sandbox.service:
+		for service in sandbox.services:
 			prebuild_service(global_object, service)
-		for service in sandbox.service:
+		for service in sandbox.services:
 			compute = uni.constructs[service]
 			compute = build_service(global_object, service, compute)
 
 
 def build_bindings(global_object):
 	uni = global_object.universe
-	for key in global_object.bind:
-		bind_def = uni.new_def('bind')
-		uni.constructs[key] = bind_def
-		exclusive_event = uni.constructs[global_object.bind[key]]
-		new_bind = model.bind(key.value, exclusive_event)
-		bind_def.extend(new_bind)
-		uni.root.extend(bind_def.alias)
-	return uni
+	for event in global_object.maps.maps:
+		if event.key is not None:
+			event_compute = uni.constructs[event]
+			uni.root.extend(model.bind(event.key, event_compute))
 
 def build_events(global_object):
 	uni = global_object.universe
-	for event in global_object.map:
+	for event in global_object.maps.maps:
 		event_def = uni.new_def('event')
-		event_def.alias.string = '$' + event.value
+		event_def.alias.string = '$' + event.string
 		uni.constructs[event] = event_def
-		for service_call in global_object.map[event]:
+		for service_call in event.services:
 			if structure.is_source_call(service_call):
 				new_source_command = model.source_command(service_call.arg[0])
 				event_def.extend(new_source_command)

@@ -63,6 +63,10 @@ class TestParsing(unittest.TestCase):
 		program = self.blueprint_full_chain + 'sandbox test2 map {test_event: @test_service2} service test_service2{[echo second service]}'
 		self.compiler.compile(program)
 
+	def test_can_output_bindless_event(self):
+		program = 'sandbox test map{my_event: @test_service} service test_service{[echo execute test service]}'
+		self.compiler.compile(program)
+
 	def test_comments(self):
 		program = 'sandbox test /* this is a comment; sandbox test2 service */ service test_service{}'
 		self.compiler.compile(program)
