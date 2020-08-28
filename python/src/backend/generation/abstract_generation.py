@@ -33,6 +33,8 @@ def build_events(global_object):
 	for event in global_object.maps.maps:
 		event_def = uni.new_def('event')
 		event_def.alias.string = '$' + event.string
+		if event.string == 'boot':
+			uni.root.extend(event_def.alias)
 		uni.constructs[event] = event_def
 		for service_call in event.services:
 			if structure.is_source_call(service_call):

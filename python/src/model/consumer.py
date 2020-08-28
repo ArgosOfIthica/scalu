@@ -15,7 +15,7 @@ class consumer():
 		'&' : 'bitwise_and'
 		}
 		self.unary_symbol_map = {
-		'~' : 'bitwise_neg',
+		'!' : 'bitwise_neg',
 		'?' : 'binary_print'
 		}
 		self.conditional_symbol_map = {
@@ -91,7 +91,7 @@ class consumer():
 		return self.token() == 'if'
 
 	def is_block(self):
-		block_types = ('service', 'map', 'bind')
+		block_types = ('service', 'map', 'bind', 'file')
 		return self.token() in block_types
 
 	def is_subexpression(self):

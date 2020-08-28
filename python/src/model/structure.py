@@ -31,7 +31,7 @@ class map_collection():
 		self.maps = list()
 
 	def add(self, event):
-		if event.key is None or event.key not in [x.key for x in self.maps]:
+		if self.non_colliding_keys(event) and self.non_colliding_files(event):
 			if event.string in [x.string for x in self.maps]:
 				old_event = self.return_matching_event(event)
 				self.merge_events(old_event, event)
@@ -45,9 +45,23 @@ class map_collection():
 			if event.string == maps.string:
 				return maps
 
+	def non_colliding_keys(self, event):
+		if event.key is None or event.key not in [x.key for x in self.maps]:
+			return True
+		else:
+			raise Exception('Cannot add event "' + event.string + '" to collection, key "' + event.key + '" already in collection. The same key cannot be bound to multiple events.')
+
+	def non_colliding_files(self, event):
+		if event.file is None or event.file not in [x.file for x in self.maps]:
+			return True
+		else:
+			raise Exception('Cannot add event "' + event.string + '" to collection, file "' + event.file + '" already in collection. The same file cannot be bound to multiple events.')
+
 	def merge_events(self, old_event, new_event):
 		if new_event.key is not None:
 			old_event.key = new_event.key
+		if new_event.file is not None:
+			old_event.file = new_event.file
 		old_event.services = old_event.services + new_event.services
 
 	def resolve(self):
@@ -84,8 +98,11 @@ class constant(variable):
 	def __init__(self, value='0'):
 		self.name = value
 		self.type = 'int'
-		self.value = value
 		self.word_size = '8'
+		if int(value) < 2**int(self.word_size) - 1 and int(value) >= 0:
+			self.value = value
+		else:
+			raise Exception('illegal value declaration')
 
 class service():
 
@@ -98,6 +115,7 @@ class event():
 	def __init__(self, string):
 		self.string = string
 		self.key = None
+		self.file = None
 		self.services = list()
 
 	def add_key(self, key_string):
@@ -105,6 +123,12 @@ class event():
 			self.key = key_string
 		else:
 			raise Exception('event "' + self.string + '" already has key "' + self.key + '". Cannot assign "' + key_string + '" to "' + self.string + '"')
+
+	def add_file(self, file_string):
+		if self.file == None:
+			self.file = file_string
+		else:
+			raise Exception('event "' + self.string + '" already has file "' + self.file + '". Cannot assign "' + file_string + '" to "' + self.string + '"')
 
 
 class statement():

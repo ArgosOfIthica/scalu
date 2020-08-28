@@ -92,7 +92,7 @@ def minify_word(word, alias_convert):
 class alias_blob():
 
 	def __init__(self, uni=None):
-		self.CONSOLE_MAX_BUFFER = 440 #limit determined by trial and error in HL:Source
+		self.CONSOLE_MAX_BUFFER = 510 #limit determined by trial and error in HL:Source
 		self.alias_tuples = tuple()
 		self.alias_convert = dict()
 		self.pick = universe.picker()

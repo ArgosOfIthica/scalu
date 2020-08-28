@@ -1,11 +1,12 @@
 """
 EBNF
 
-sandbox = 'sandbox ' sname { bind_block | map_block | service_block }
+sandbox = 'sandbox ' sname { bind_block | map_block | service_block | file_block }
 service_block = 'service' sname '{' block '}'
 block = { statement }
 bind_block = '{' { key ':' event } '}'
 map_block = '{' { event ':' call } '}'
+file_block = '{' { file_name ':' event } '}'
 statement = assignment | call | if
 call = source_call | service_call
 source_call = '[' text ']'
@@ -57,6 +58,8 @@ def expect_sandbox(consumer):
 			new_block = expect_map_block(consumer)
 		elif block_type == 'bind':
 			new_block = expect_bind_block(consumer)
+		elif block_type == 'file':
+			new_block = expect_file_block(consumer)
 		else:
 			model.parsing_error(consumer)
 	return new_sandbox
@@ -90,6 +93,22 @@ def expect_map_block(consumer):
 		mapping.add(new_event)
 	consumer.consume('}')
 	return mapping
+
+def expect_file_block(consumer):
+	file_map = consumer.global_object.maps
+	consumer.consume('file')
+	consumer.consume('{')
+	while consumer.is_not_end_block():
+		new_file = consumer.token()
+		consumer.consume()
+		consumer.consume(':')
+		new_event = model.event(consumer.token())
+		consumer.consume()
+		new_event.add_file(new_file)
+		file_map.add(new_event)
+	consumer.consume('}')
+	return file_map
+
 
 
 def expect_service_block(consumer, named=True):

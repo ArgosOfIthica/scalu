@@ -1,15 +1,34 @@
 sandbox test_bootstrap
 
-bind {
-	k : test_event
-}
 
 map {
-	test_event: @blurb
+	boot: @blurb
 	}
 
 service blurb {
-	[echo initiating test bootstrapping]
+	[echo running init test]
+	[echo passed]
+	}
+
+
+sandbox test_file_creation
+
+file {
+	test : test
+}
+
+map {
+	test_event : @file
+	test : @file_test
+	}
+
+service file {
+	[echo running file test]
+	[exec test.cfg]
+	}
+
+service file_test {
+	[echo passed]
 	}
 
 sandbox test_equality
@@ -71,7 +90,10 @@ map {
 }
 
 service bitwise_not {
-	a = 5 /* default bit size is relevant, but casting is not implemented */
+	[echo running bitwise_not test]
+	a = 43 /* default bit size is relevant, but casting is not implemented */
+	b = !a
+	if (b == 212) {[echo passed]} else {[echo failed]}
 }
 
 sandbox test_bitwise_and
