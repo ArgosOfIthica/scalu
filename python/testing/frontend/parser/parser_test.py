@@ -137,4 +137,18 @@ class TestParsing(unittest.TestCase):
 		program = self.blueprint_two_chain + '{a = 512}'
 		self.compiler.text_compile(program)
 
+	def test_greater_than(self):
+		program = self.blueprint_two_chain + '{a = 7 if (a > 5) {[echo true]} else {[echo false]}}'
+		self.compiler.text_compile(program)
 
+	def test_less_than(self):
+		program = self.blueprint_two_chain + '{a = 7 if (a < 5) {[echo true]} else {[echo false]}}'
+		self.compiler.text_compile(program)
+
+	def test_greater_than_or_equal(self):
+		program = self.blueprint_two_chain + '{a = 7 if (a >= 5) {[echo true]} else {[echo false]}}'
+		self.compiler.text_compile(program)
+
+	def test_less_than_or_equal(self):
+		program = self.blueprint_two_chain + '{a = 7 if (a <= 5) {[echo true]} else {[echo false]}}'
+		self.compiler.text_compile(program)

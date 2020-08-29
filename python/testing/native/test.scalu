@@ -91,9 +91,13 @@ map {
 
 service bitwise_not {
 	[echo running bitwise_not test]
+	[echo test 1]
 	a = 43 /* default bit size is relevant, but casting is not implemented */
 	b = !a
 	if (b == 212) {[echo passed]} else {[echo failed]}
+	[echo test 2]
+	b = !b
+	if (b == 43) {[echo passed]} else {[echo failed]}
 }
 
 sandbox test_bitwise_and
@@ -148,4 +152,77 @@ service bitwise_or {
 	if (c == 87) {[echo passed]} else {[echo failed]}
 	[echo test 5]
 	if (c == d) {[echo passed]} else {[echo failed]}
+}
+
+sandbox test_greater_than
+
+map {
+	test_event: @greater_than
+	}
+
+service greater_than {
+	[echo running greater than tests]
+	[echo test 1]
+	a = 22
+	b = 127
+	if (a > b) {[echo failed]} else {[echo passed]}
+	[echo test 2]
+	if (b > b) {[echo failed]} else {[echo passed]}
+	[echo test 3]
+	if (b > a) {[echo passed]} else {[echo failed]}
+}
+
+sandbox test_greater_than_or_equal
+
+map {
+	test_event : @greater_than_or_equal
+	}
+
+service greater_than_or_equal {
+	[echo running greater than or equal tests]
+	[echo test 1]
+	a = 84
+	b = 102
+	if (a >= b) {[echo failed]} else {[echo passed]}
+	[echo test 2]
+	if (b >= b) {[echo passed]} else {[echo failed]}
+	[echo test 3]
+	if (b >= a) {[echo passed]} else {[echo failed]}
+
+
+sandbox test_less_than
+
+map {
+	test_event: @less_than
+	}
+
+service less_than {
+	[echo running less than tests]
+	[echo test 1]
+	a = 26
+	b = 137
+	if (a < b) {[echo passed]} else {[echo failed]}
+	[echo test 2]
+	if (b < b) {[echo failed]} else {[echo passed]}
+	[echo test 3]
+	if (b < a) {[echo failed]} else {[echo passed]}
+}
+
+
+sandbox test_less_than_or_equal
+
+map {
+	test_event: @less_than_or_equal
+	}
+
+service less_than_or_equal {
+	[echo running less than or equal tests]
+	[echo test 1]
+	a = 30
+	b = 147
+	if (a <= b) {[echo passed]} else {[echo failed]}
+	[echo test 2]
+	if (b <= b) {[echo passed]} else {[echo failed]}
+	[echo test 3]
+	if (b <= a) {[echo failed]} else {[echo passed]}
 }

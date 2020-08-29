@@ -20,7 +20,11 @@ class consumer():
 		}
 		self.conditional_symbol_map = {
 		'==' : 'equality',
-		'!=' : 'inequality'
+		'!=' : 'inequality',
+		'>' : 'greater_than',
+		'<' : 'less_than',
+		'>=' : 'greater_than_or_equal',
+		'<=' : 'less_than_or_equal'
 		}
 
 	#token functions

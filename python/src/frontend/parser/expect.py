@@ -18,7 +18,7 @@ exp = ( p_exp | exp binop exp | unop exp | value)
 p_exp = '(' exp ')'
 binop = '=' | '|' | '&'
 unop = '~' | '?'
-condition = '==' | '!='
+condition = '==' | '!=' | '>' | '<' | '>=' | '<='
 
 """
 import src.model.structure as model

@@ -26,7 +26,11 @@ def handle_instruction(global_object, compute, statement):
 
 def handle_conditional(global_object, compute, statement):
 	operator_map = {'equality' : iequality,
-				'inequality' : iinequality}
+				'inequality' : iinequality,
+				'greater_than' : igreater_than,
+				'less_than' : iless_than,
+				'greater_than_or_equal' : igreater_than_or_equal,
+				'less_than_or_equal' : iless_than_or_equal}
 
 	uni = global_object.universe
 	for arg in statement.condition.arg:
@@ -172,24 +176,13 @@ class conditional(instruction):
 		self.container_compute = container_compute
 		self.identity_compute = self.uni.host_def(container_compute, 'instruction')
 		self.condition = statement.condition
+		self.word_size = int(self.condition.arg[0].word_size)
 		self.true_service = statement.true_service
 		self.false_service = statement.false_service
 		self.true_service_compute = self.uni.constructs[self.true_service]
 		self.false_service_compute = self.uni.constructs[self.false_service]
 		self.alpha = self.uni.constructs[self.condition.arg[0]]
 		self.beta = self.uni.constructs[self.condition.arg[1]]
-
-
-class iequality(conditional):
-
-	def compile(self):
-		self.iteration_list = list()
-		for index in range(int(self.condition.arg[0].word_size)):
-			new_compute = self.uni.new_def('code')
-			self.iteration_list.append(new_compute)
-		for bit in range(len(self.iteration_list)):
-			self.iteration(bit)
-		self.identity_compute.extend(self.iteration_list[0].alias)
 
 	def iteration(self, bit):
 		self.set_true_branch(bit)
@@ -206,47 +199,128 @@ class iequality(conditional):
 		false_branch = self.compile_false_branch(bit)
 		compute.extend(self.uni.set_var(self.uni.false, false_branch.alias).alias)
 
-	def compile_true_branch(self, bit):
-		root_compute = self.uni.new_def('code')
-		if bit + 1 < len(self.iteration_list):
-			root_compute.extend(self.uni.set_var(self.uni.true, self.iteration_list[bit + 1].alias).alias)
+	def get_next_iteration(self, bit):
+		if self.next_bit(bit) in range(self.word_size):
+			return self.iteration_list[self.next_bit(bit)]
 		else:
-			root_compute.extend(self.uni.set_var(self.uni.true, self.true_service_compute.alias).alias)
-		root_compute.extend(self.uni.set_var(self.uni.false, self.false_service_compute.alias).alias)
+			return None
+
+	def compile_true_branch_template(self, bit, triple):
+		root_compute = self.uni.new_def('code')
+		root_compute.extend(self.uni.set_var(self.uni.false, triple[0].alias).alias)
+		if self.next_bit(bit) != self.end_bit():
+			root_compute.extend(self.uni.set_var(self.uni.true, triple[1].alias).alias)
+		else:
+			root_compute.extend(self.uni.set_var(self.uni.true, triple[2].alias).alias)
 		self.execute_beta(bit, root_compute)
 		return root_compute
 
+	def compile_false_branch_template(self, bit, triple):
+		root_compute = self.uni.new_def('code')
+		root_compute.extend(self.uni.set_var(self.uni.true, triple[0].alias).alias)
+		if self.next_bit(bit) != self.end_bit():
+			root_compute.extend(self.uni.set_var(self.uni.false, triple[1].alias).alias)
+		else:
+			root_compute.extend(self.uni.set_var(self.uni.false, triple[2].alias).alias)
+		self.execute_beta(bit, root_compute)
+		return root_compute
+
+class little_endian_conditional(conditional):
+
+	def compile(self):
+		self.iteration_list = list()
+		for index in range(int(self.word_size)):
+			new_compute = self.uni.new_def('code')
+			self.iteration_list.append(new_compute)
+		for bit in range(len(self.iteration_list)):
+			self.iteration(bit)
+		self.identity_compute.extend(self.iteration_list[0].alias)
+
+	def next_bit(self, bit):
+		return bit + 1
+
+	def end_bit(self):
+		return len(self.iteration_list)
+
+class big_endian_conditional(conditional):
+
+	def compile(self):
+		self.iteration_list = list()
+		for index in range(int(self.word_size)):
+			new_compute = self.uni.new_def('code')
+			self.iteration_list.append(new_compute)
+		for bit in reversed(range(len(self.iteration_list))):
+			self.iteration(bit)
+		self.identity_compute.extend(self.iteration_list[len(self.iteration_list) - 1].alias)
+
+	def next_bit(self, bit):
+		return bit - 1
+
+	def end_bit(self):
+		return -1
+
+class iequality(little_endian_conditional):
+
+	def compile_true_branch(self, bit):
+		triple = (self.false_service_compute, self.get_next_iteration(bit), self.true_service_compute)
+		return self.compile_true_branch_template(bit, triple)
 
 	def compile_false_branch(self, bit):
-		root_compute = self.uni.new_def('code')
-		root_compute.extend(self.uni.set_var(self.uni.true, self.false_service_compute.alias).alias)
-		if bit + 1 < len(self.iteration_list):
-			root_compute.extend(self.uni.set_var(self.uni.false, self.iteration_list[bit + 1].alias).alias)
-		else:
-			root_compute.extend(self.uni.set_var(self.uni.false, self.true_service_compute.alias).alias)
-		self.execute_beta(bit, root_compute)
-		return root_compute
+		triple = (self.false_service_compute, self.get_next_iteration(bit), self.true_service_compute)
+		return self.compile_false_branch_template(bit, triple)
 
-class iinequality(iequality):
+
+class iinequality(little_endian_conditional):
 
 	def compile_true_branch(self, bit):
-		root_compute = self.uni.new_def('code')
-		if bit + 1 < len(self.iteration_list):
-			root_compute.extend(self.uni.set_var(self.uni.true, self.iteration_list[bit + 1].alias).alias)
-		else:
-			root_compute.extend(self.uni.set_var(self.uni.true, self.false_service_compute.alias).alias)
-		root_compute.extend(self.uni.set_var(self.uni.false, self.true_service_compute.alias).alias)
-		self.execute_beta(bit, root_compute)
-		return root_compute
-
+		triple = (self.true_service_compute, self.get_next_iteration(bit), self.false_service_compute)
+		return self.compile_true_branch_template(bit, triple)
 
 	def compile_false_branch(self, bit):
-		root_compute = self.uni.new_def('code')
-		root_compute.extend(self.uni.set_var(self.uni.true, self.true_service_compute.alias).alias)
-		if bit + 1 < len(self.iteration_list):
-			root_compute.extend(self.uni.set_var(self.uni.false, self.iteration_list[bit + 1].alias).alias)
-		else:
-			root_compute.extend(self.uni.set_var(self.uni.false, self.false_service_compute.alias).alias)
-		self.execute_beta(bit, root_compute)
-		return root_compute
+		triple = (self.true_service_compute, self.get_next_iteration(bit), self.false_service_compute)
+		return self.compile_false_branch_template(bit, triple)
+
+
+class igreater_than(big_endian_conditional):
+
+	def compile_true_branch(self, bit):
+		triple = (self.true_service_compute, self.get_next_iteration(bit), self.false_service_compute)
+		return self.compile_true_branch_template(bit, triple)
+
+	def compile_false_branch(self, bit):
+		triple = (self.false_service_compute, self.get_next_iteration(bit), self.false_service_compute)
+		return self.compile_false_branch_template(bit, triple)
+
+
+class iless_than(big_endian_conditional):
+
+	def compile_true_branch(self, bit):
+		triple = (self.false_service_compute, self.get_next_iteration(bit), self.false_service_compute)
+		return self.compile_true_branch_template(bit, triple)
+
+	def compile_false_branch(self, bit):
+		triple = (self.true_service_compute, self.get_next_iteration(bit), self.false_service_compute)
+		return self.compile_false_branch_template(bit, triple)
+
+
+class igreater_than_or_equal(big_endian_conditional):
+
+	def compile_true_branch(self, bit):
+		triple = (self.true_service_compute, self.get_next_iteration(bit), self.true_service_compute)
+		return self.compile_true_branch_template(bit, triple)
+
+	def compile_false_branch(self, bit):
+		triple = (self.false_service_compute, self.get_next_iteration(bit), self.true_service_compute)
+		return self.compile_false_branch_template(bit, triple)
+
+
+class iless_than_or_equal(big_endian_conditional):
+
+	def compile_true_branch(self, bit):
+		triple = (self.false_service_compute, self.get_next_iteration(bit), self.true_service_compute)
+		return self.compile_true_branch_template(bit, triple)
+
+	def compile_false_branch(self, bit):
+		triple = (self.true_service_compute, self.get_next_iteration(bit), self.true_service_compute)
+		return self.compile_false_branch_template(bit, triple)
 
