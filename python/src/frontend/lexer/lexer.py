@@ -5,7 +5,6 @@ def tokenize(program):
 	split_program = split_on_word(cleaned_program)
 	tokens = to_tokens(split_program)
 	tokens = filter_empty_tokens(tokens)
-	tokens = lower_tokens(tokens)
 	return tokens
 
 class token():
@@ -47,8 +46,3 @@ def to_tokens(split_program):
 
 def filter_empty_tokens(tokens):
 	return list(filter(lambda x: (not(x.value.isspace())) and x.value != '', tokens))
-
-def lower_tokens(tokens):
-	for token in tokens:
-		token.value = token.value.lower()
-	return tokens

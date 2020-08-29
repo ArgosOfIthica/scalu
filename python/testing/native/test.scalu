@@ -188,7 +188,7 @@ service greater_than_or_equal {
 	if (b >= b) {[echo passed]} else {[echo failed]}
 	[echo test 3]
 	if (b >= a) {[echo passed]} else {[echo failed]}
-
+	}
 
 sandbox test_less_than
 
