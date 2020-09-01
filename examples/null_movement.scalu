@@ -1,7 +1,7 @@
 sandbox null_movement
 
 map {
-	self: init
+	boot : init
 	+forward: @forward_pressed
 	-forward: @forward_not_pressed
 	+back: @back_pressed

@@ -1,5 +1,6 @@
 sandbox weapon_state
 map{
+	boot: @init
 	slot1: @switch_to_1
 	slot2: @switch_to_2
 	slot3: @switch_to_3

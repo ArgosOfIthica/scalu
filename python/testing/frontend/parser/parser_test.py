@@ -152,3 +152,7 @@ class TestParsing(unittest.TestCase):
 	def test_less_than_or_equal(self):
 		program = self.blueprint_two_chain + '{a = 7 if (a <= 5) {[echo true]} else {[echo false]}}'
 		self.compiler.text_compile(program)
+
+	def test_bifurcation(self):
+		program = 'sandbox test map {+test_event : @test_service -test_event : @test_service_2} service test_service {[echo 1]} service test_service_2 {[echo 2]}'
+		self.compiler.text_compile(program)

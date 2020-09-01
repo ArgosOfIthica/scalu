@@ -32,7 +32,12 @@ def build_events(global_object):
 	uni = global_object.universe
 	for event in global_object.maps.maps:
 		event_def = uni.new_def('event')
-		event_def.alias.string = '$' + event.string
+		if event.string[0] == '+':
+			event_def.alias.string = '+$' + event.string[1:]
+		elif event.string[0] == '-':
+			event_def.alias.string = '-$' + event.string[1:]
+		else:
+			event_def.alias.string = '$' + event.string
 		if event.string == 'boot':
 			uni.root.extend(event_def.alias)
 		uni.constructs[event] = event_def
@@ -66,6 +71,3 @@ def build_service(global_object, service, definition):
 		else:
 			raise Exception('bad statement')
 	return definition
-
-
-
