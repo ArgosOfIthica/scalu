@@ -23,11 +23,11 @@ condition = '==' | '!=' | '>' | '<' | '>=' | '<='
 """
 import src.model.structure as model
 import src.frontend.utility.utility as utility
-import src.model.consumer as consumer
+import src.model.consumer as consume
 import re
 
 def parse(tokens):
-	consumer_obj =  consumer.consumer(tokens)
+	consumer_obj =  consume.consumer(tokens)
 	return global_context(consumer_obj)
 
 
@@ -41,7 +41,7 @@ def global_context(consumer):
 		new_global_object.resolve()
 		return new_global_object
 	else:
-		model.parsing_error(consumer)
+		consume.parsing_error(consumer)
 
 
 def expect_sandbox(consumer):
@@ -61,7 +61,7 @@ def expect_sandbox(consumer):
 		elif block_type == 'file':
 			new_block = expect_file_block(consumer)
 		else:
-			model.parsing_error(consumer)
+			consume.parsing_error(consumer, 'invalid block type error')
 	return new_sandbox
 
 
@@ -134,7 +134,7 @@ def expect_service_block(consumer, named=True):
 			new_if = expect_if(consumer)
 			new_block.sequence.append(new_if)
 		else:
-			model.parsing_error(consumer)
+			consume.parsing_error(consumer, 'invalid statement error')
 	consumer.consume('}')
 	consumer.current_sandbox.services.append(new_block)
 	return new_block
@@ -169,7 +169,7 @@ def expect_call(consumer):
 	elif consumer.is_source_call():
 		return expect_source_call(consumer)
 	else:
-		model.parsing_error(consumer)
+		consume.parsing_error(consumer, 'invalid call error')
 
 def expect_source_call(consumer):
 	new_source_call = model.source_call()
@@ -220,7 +220,7 @@ def expect_expression_atomic(consumer):
 	elif consumer.is_literal_value():
 		return expect_literal_value(consumer)
 	else:
-		model.parsing_error(consumer)
+		consume.parsing_error(consumer, 'invalid expression atomic error')
 
 def expect_expression(consumer):
 	new_expression = expect_expression_atomic(consumer)
@@ -230,9 +230,7 @@ def expect_expression(consumer):
 
 
 def expect_literal_value(consumer):
-	new_literal_value = model.literal_value()
-	new_literal_value.arg[0] = expect_value(consumer)
-	return new_literal_value
+	return expect_value(consumer)
 
 
 def expect_value(consumer):
@@ -249,7 +247,7 @@ def expect_value(consumer):
 			res.constant_lookup[value] = new_constant
 			return new_constant
 	else:
-		model.parsing_error(consumer)
+		consume.parsing_error(consumer, 'invalid variable error')
 
 def expect_conditional(consumer):
 	new_cond = model.conditional()

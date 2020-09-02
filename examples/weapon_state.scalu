@@ -1,11 +1,24 @@
 sandbox weapon_state
+
+bind {
+	1: slot1
+	2: slot2
+	3: slot3
+	4: slot4
+	5: slot5
+	q: previous
+	MWHEELUP: previous
+	MWHEELDOWN: next
+}
+
 map{
 	boot: @init
 	slot1: @switch_to_1
 	slot2: @switch_to_2
 	slot3: @switch_to_3
-	next: @switch_up
-	previous: @switch_down
+	previous: @switch_up
+	next: @switch_down
+	last: @switch_last
 }
 
 service init{
@@ -15,6 +28,7 @@ service init{
 }
 
 service switch_to_1 {
+	[slot1]
 	if current_weapon != 1 {
 		last_weapon = current_weapon
 		current_weapon = 1
@@ -22,6 +36,7 @@ service switch_to_1 {
 }
 
 service switch_to_2 {
+	[slot2]
 	if current_weapon != 2 {
 		last_weapon = current_weapon
 		current_weapon = 2
@@ -29,6 +44,7 @@ service switch_to_2 {
 }
 
 service switch_to_3 {
+	[slot3]
 	if current_weapon != 3 {
 		last_weapon = current_weapon
 		current_weapon = 3
@@ -36,6 +52,7 @@ service switch_to_3 {
 }
 
 service switch_up {
+	[invprev]
 	previous_weapon = current_weapon
 	if current_weapon == max_slot {
 		current_weapon = 1
@@ -46,6 +63,7 @@ service switch_up {
 }
 
 service switch_down {
+	[invnext]
 	previous_weapon = current_weapon
 	if current_weapon == 1 {
 		current_weapon = max_slot
@@ -53,4 +71,11 @@ service switch_down {
 	else {
 		current_weapon = current_weapon - 1
 	}
+}
+
+service switch_last {
+	[lastinv]
+	store_var = last_weapon
+	last_weapon = current_weapon
+	current_weapon = store_var
 }

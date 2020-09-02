@@ -3,7 +3,7 @@ import src.backend.model.universe as universe
 
 
 def handle_instruction(global_object, compute, statement):
-	operator_map = {'literal' : icopy,
+	operator_map = {'copy' : icopy,
 				'binary_print' : ibinary_print,
 				'bitwise_neg' : ibitwise_neg,
 				'bitwise_or' : ibitwise_or,

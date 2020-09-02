@@ -2,9 +2,6 @@
 import src.frontend.utility.utility as utility
 import src.backend.model.universe as universe
 
-def parsing_error(parser):
-	raise Exception('did not expect token # ' + str(parser.count) + ' : """' + parser.token() + '""" at line ' + str(parser.current_line()))
-
 class global_object():
 
 	def __init__(self):
@@ -102,7 +99,7 @@ class constant(variable):
 		if int(value) < 2**int(self.word_size) and int(value) >= 0:
 			self.value = value
 		else:
-			raise Exception('illegal value declaration')
+			raise Exception('illegal value declaration:' + value + ' . Number not within bounds of the word size')
 
 class service():
 
@@ -186,12 +183,6 @@ class binary_operator(operator):
 
 	def __init__(self):
 		self.arg =  [None] * 2
-
-class literal_value(operator):
-
-	def __init__(self):
-		self.identity = 'literal'
-		self.arg = [None]
 
 class conditional(operator):
 

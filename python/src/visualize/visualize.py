@@ -1,29 +1,29 @@
 import src.model.structure as model
 
 def visualize(global_object):
-	print('GLOBAL KEYBINDS: ')
-	for bind in global_object.bind:
-		print('BIND IS KEY "' + bind.value + '" BOUND TO EVENT "' + global_object.bind[bind].value + '"')
 	print('GLOBAL MAPPINGS: ')
-	for mapping in global_object.map:
-		print('EVENT IS "' + mapping.value + '" MAPPED TO SERVICES: ' )
-		for service in global_object.map[mapping]:
+	for event in global_object.maps.maps:
+		if event.key is not None:
+			print('EVENT IS "' + event.string + '"BOUND TO "' + event.key + '"')
+		print('EVENT IS "' + event.string + '" MAPPED TO SERVICES: ' )
+		for service in event.services:
 			print(service.identifier)
 	for sandbox in global_object.sandbox:
 		print('SANDBOX : ' + sandbox.name)
 		print('WITH SERVICES:')
-		for service in sandbox.service:
+		for service in sandbox.services:
 			print(service.name)
 			print('WITH SEQUENCING:')
 			for statement in service.sequence:
-				print('STATEMENT ON "' + statement.identifier.name + '"')
-				for arg in statement.arg:
-					visualize_subexpression(arg)
+				if model.is_assignment(statement):
+					print('STATEMENT ON "' + statement.identifier.name + '"')
+					for arg in statement.arg:
+						visualize_subexpression(arg)
 
 def visualize_unwrapping(global_object):
 	for sandbox in global_object.sandbox:
 		print('SANDBOX: ' + sandbox.name)
-		for service in sandbox.service:
+		for service in sandbox.services:
 			print('	SERVICE: ' + service.name)
 			for ele in service.sequence:
 				if model.is_unary_operator(ele):

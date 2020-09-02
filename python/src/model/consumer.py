@@ -1,7 +1,13 @@
 import src.frontend.utility.utility as utility
 
-def parsing_error(parser):
-	raise Exception('did not expect token # ' + str(parser.count) + ' : """' + parser.token() + '""" at line ' + str(parser.current_line()))
+def parsing_error(parser, error_message=''):
+	ERROR_FALLBACK = 5
+	context_string = ''
+	if parser.count > ERROR_FALLBACK:
+		for i in range(ERROR_FALLBACK, 0, -1):
+			if parser.tokens[i].line == parser.current_line():
+				context_string += parser.token(i) + ' '
+	raise Exception(error_message + '::: did not expect token """' + parser.token() + '""",  # ' + str(parser.count) + ' ::: ...' + context_string + ' """' + parser.token() + '""" ... at line ' + str(parser.current_line()))
 
 class consumer():
 
@@ -42,9 +48,9 @@ class consumer():
 
 	def consume(self, verify_token = None):
 		if verify_token is not None and self.token() != verify_token:
-			parsing_error(self)
+			parsing_error(self, 'consume error. Expected "' + verify_token + '", but recieved "' + self.token() + '"')
 		elif self.count >= len(self.tokens):
-			parsing_error(self)
+			parsing_error(self, 'count error')
 		else:
 			self.count += 1
 
@@ -67,7 +73,7 @@ class consumer():
 			self.consume()
 			return token_s
 		else:
-			parsing_error(self)
+			parsing_error(self, 'invalid name error')
 
 	def is_variable_assignment(self):
 		return self.token(1) == '='
@@ -118,7 +124,7 @@ class consumer():
 			self.consume()
 			return self.binary_symbol_map[token]
 		else:
-			parsing_error(self)
+			parsing_error(self, 'unknown binary identifier')
 
 	def retrieve_and_use_unary_identity(self):
 		token = self.token()
@@ -126,7 +132,7 @@ class consumer():
 			self.consume()
 			return self.unary_symbol_map[token]
 		else:
-			parsing_error(self)
+			parsing_error(self, 'unknown unary identifier')
 
 	def retrieve_and_use_conditional(self):
 		token = self.token()
@@ -134,4 +140,4 @@ class consumer():
 			self.consume()
 			return self.conditional_symbol_map[token]
 		else:
-			parsing_error(self)
+			parsing_error(self, 'unknown conditional identifier')

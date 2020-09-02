@@ -32,7 +32,7 @@ class unwrapped_element():
 
 	def unwrap_assignment(self, assignment):
 		if model.is_variable(assignment.arg[0]):
-			icopy = unary_operator()
+			icopy = model.unary_operator()
 			icopy.identity = 'copy'
 			icopy.arg[0] = assignment.arg[0]
 			icopy.output = assignment.identifier
