@@ -99,7 +99,7 @@ class constant(variable):
 		self.name = value
 		self.type = 'int'
 		self.word_size = '8'
-		if int(value) < 2**int(self.word_size) - 1 and int(value) >= 0:
+		if int(value) < 2**int(self.word_size) and int(value) >= 0:
 			self.value = value
 		else:
 			raise Exception('illegal value declaration')

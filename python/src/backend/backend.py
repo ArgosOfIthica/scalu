@@ -9,7 +9,7 @@ def compile(global_object):
 	gen.compile(global_object)
 	raw_program = emission.emission(global_object.universe)
 	if debug:
-		return raw_program
+		print(raw_program)
 	minified_program = minifier.minify(raw_program, global_object.universe)
 	file_directive = files.file_container(global_object, minified_program)
 	return file_directive

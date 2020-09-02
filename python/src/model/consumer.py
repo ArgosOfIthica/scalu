@@ -12,7 +12,9 @@ class consumer():
 		self.count = 0
 		self.binary_symbol_map = {
 		'|' : 'bitwise_or',
-		'&' : 'bitwise_and'
+		'&' : 'bitwise_and',
+		'+' : 'add',
+		'-' : 'subtract'
 		}
 		self.unary_symbol_map = {
 		'!' : 'bitwise_neg',

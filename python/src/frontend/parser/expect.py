@@ -1,22 +1,22 @@
 """
 EBNF
 
-sandbox = 'sandbox ' sname { bind_block | map_block | service_block | file_block }
-service_block = 'service' sname '{' block '}'
+sandbox = 'sandbox ' str { bind_block | map_block | service_block | file_block }
+service_block = 'service' str '{' block '}'
 block = { statement }
-bind_block = '{' { key ':' event } '}'
-map_block = '{' { event ':' call } '}'
-file_block = '{' { file_name ':' event } '}'
+bind_block = 'bind' '{' { str ':' str } '}'
+map_block = 'map' '{' { str ':' call } '}'
+file_block = 'file' '{' { str ':' str } '}'
 statement = assignment | call | if
 call = source_call | service_call
-source_call = '[' text ']'
-service_call = '@' ename
-assignment = vname '=' exp
+source_call = '[' str ']'
+service_call = '@' str
+assignment = str '=' exp
 if = 'if' '(' conditional ')' '{' block '}' [ '{' block '} ]
-conditional = vname condition vname
+conditional = str condition str
 exp = ( p_exp | exp binop exp | unop exp | value)
 p_exp = '(' exp ')'
-binop = '=' | '|' | '&'
+binop = '|' | '&' | '+' | '-'
 unop = '~' | '?'
 condition = '==' | '!=' | '>' | '<' | '>=' | '<='
 
