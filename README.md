@@ -1,3 +1,6 @@
+<p align="left">
+<img src="https://img.shields.io/github/issues/ArgosOfIthica/scalu" alt="issues shield">   <img src="https://img.shields.io/github/license/ArgosOfIthica/scalu" alt="issues shield">
+</p>
 <p align="center">
 <img src="/assets/logo.png" alt="scalu logo" width="400">
 
@@ -23,5 +26,9 @@ Linux users may need to run: <br>
 ```python3 scalu.py compile``` <br>
 
 The output will be located in a new directory called ```scalu_out```. Copy these into your configuration files; the exact location of these files will depend on platform and game.
+
+## Documentation
+
+You can find documentation in the Github wiki at https://github.com/ArgosOfIthica/scalu/wiki
 
 </p>
