@@ -1,11 +1,8 @@
 import re
 
 def tokenize(program):
-	cleaned_program = purge_comments(program)
-	split_program = split_on_word(cleaned_program)
+	split_program = split_on_word(program)
 	tokens = to_tokens(split_program)
-	tokens = filter_empty_tokens(tokens)
-	tokens = lower_tokens(tokens)
 	return tokens
 
 class token():
@@ -14,41 +11,36 @@ class token():
 		self.value = value
 		self.line = line
 
-def purge_comments(program):
-	return re.sub("\/\*[\s\S]*?\*\/", "", program)
 
 def split_on_word(program):
-	return re.split('(\W)', program)
+	return re.split('(\/\*[\s\S]*?\*\/|\[[\s\S]*?\]|-\w+|\+\w+|<=|>=|!=|==|\W)', program)
+	#this regex splits comments, console blocks, negative events, positive events, and various operators
+
 
 def to_tokens(split_program):
 	tokens = list()
 	newline_count = 1
-	source_mode = False
-	source_blob = ''
 	for token_string in split_program:
 		if token_string == '\n':
 			newline_count += 1
-		elif source_mode == False:
-			new_token = token(token_string, newline_count)
+		elif token_string.isspace() or token_string == '':
+			pass
+		elif token_string[0] == '[':
+			for char in token_string:
+				if char == '\n':
+					newline_count += 1
+			new_token = token(token_string[0], newline_count)
 			tokens.append(new_token)
-			if new_token.value == '[':
-				source_mode = True
-		elif source_mode == True:
-			if token_string == ']':
-				new_token = token(source_blob, newline_count)
-				tokens.append(new_token)
-				end_call = token(token_string, newline_count)
-				tokens.append(end_call)
-				source_blob = ''
-				source_mode = False
-			else:
-				source_blob += token_string
-	return tokens
-
-def filter_empty_tokens(tokens):
-	return list(filter(lambda x: (not(x.value.isspace())) and x.value != '', tokens))
-
-def lower_tokens(tokens):
-	for token in tokens:
-		token.value = token.value.lower()
+			new_token = token(token_string[1:-1], newline_count)
+			tokens.append(new_token)
+			new_token = token(token_string[-1], newline_count)
+			tokens.append(new_token)
+		elif token_string[0] == '/' and token_string[1] == '*':
+			for i in range(len(token_string)):
+				if token_string[i] == '\n':
+					newline_count += 1
+			if token_string[-1] != '/' or token_string[-2] != '*':
+				raise Exception('bad token')
+		else:
+			tokens.append(token(token_string, newline_count))
 	return tokens

@@ -1,7 +1,14 @@
 sandbox null_movement
 
+bind {
+	w : +forward
+	a: +left
+	s: +back
+	d: +right
+	}
+
 map {
-	self: init
+	boot : @init
 	+forward: @forward_pressed
 	-forward: @forward_not_pressed
 	+back: @back_pressed
@@ -42,33 +49,33 @@ service back_pressed {
 service back_not_pressed {
 	[-back]
 	back = NOT_PRESSED
-	if back == PRESSED {
-		[+back]
+	if forward == PRESSED {
+		[+forward]
 	}
 }
 
 service right_pressed {
-	[-left;+right]
+	[-moveleft;+moveright]
 	right = PRESSED
 }
 
 service right_not_pressed {
-	[-right]
+	[-moveright]
 	right = NOT_PRESSED
 	if left == PRESSED {
-		[+left]
+		[+moveleft]
 	}
 }
 
 service left_pressed {
-	[-right;+left]
+	[-moveright;+moveleft]
 	left = PRESSED
 }
 
 service left_not_pressed {
-	[-left]
+	[-moveleft]
 	left = NOT_PRESSED
 	if right == PRESSED {
-		[+right]
+		[+moveright]
 	}
 }

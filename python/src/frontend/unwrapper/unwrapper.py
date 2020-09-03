@@ -4,17 +4,15 @@ import copy
 
 def unwrap(global_object):
 	for sandbox in global_object.sandbox:
-		for service in sandbox.service:
+		for service in sandbox.services:
 			sequence_out = list()
 			for statement in service.sequence:
 				new_sequencing = None
 				unwrapped = unwrapped_element(sandbox.resolution)
 				if model.is_assignment(statement):
 					new_sequencing = unwrapped.unwrap_assignment(statement)
-				elif model.is_source_call(statement):
-					new_sequencing = [statement]
 				else:
-					unwrapper_error()
+					new_sequencing = [statement]
 				sequence_out = sequence_out + new_sequencing
 			service.sequence = sequence_out
 	return global_object
@@ -34,7 +32,7 @@ class unwrapped_element():
 
 	def unwrap_assignment(self, assignment):
 		if model.is_variable(assignment.arg[0]):
-			icopy = unary_operator()
+			icopy = model.unary_operator()
 			icopy.identity = 'copy'
 			icopy.arg[0] = assignment.arg[0]
 			icopy.output = assignment.identifier

@@ -7,62 +7,67 @@ import src.model.structure as structure
 def compile(global_object):
 	build_services(global_object)
 	build_events(global_object)
-	header = build_bindings(global_object)
-	return header
+	build_bindings(global_object)
+	return global_object.universe
 
 
 def build_services(global_object):
 	uni = global_object.universe
 	for sandbox in global_object.sandbox:
-		for service in sandbox.service:
-			service_compute = build_service(global_object, service)
-			uni.constructs[service] = service_compute
+		for service in sandbox.services:
+			prebuild_service(global_object, service)
+		for service in sandbox.services:
+			compute = uni.constructs[service]
+			compute = build_service(global_object, service, compute)
 
 
 def build_bindings(global_object):
 	uni = global_object.universe
-	header = uni.add_computation('header')
-	for key in global_object.bind:
-		bind_compute = uni.extend_add_computation(header, 'bind')
-		uni.constructs[key] = bind_compute
-		exclusive_event = uni.constructs[global_object.bind[key]]
-		new_bind = model.bind(key.value, exclusive_event)
-		bind_compute.extend(new_bind)
-	return uni
+	for event in global_object.maps.maps:
+		if event.key is not None:
+			event_compute = uni.constructs[event]
+			uni.root.extend(model.bind(event.key, event_compute))
 
 def build_events(global_object):
 	uni = global_object.universe
-	for event in global_object.map:
-		event_compute = uni.add_computation('event')
-		uni.constructs[event] = event_compute
-		for service_call in global_object.map[event]:
+	for event in global_object.maps.maps:
+		event_def = uni.new_def('event')
+		if event.string[0] == '+':
+			event_def.alias.string = '+$' + event.string[1:]
+		elif event.string[0] == '-':
+			event_def.alias.string = '-$' + event.string[1:]
+		else:
+			event_def.alias.string = '$' + event.string
+		if event.string == 'boot':
+			uni.root.extend(event_def.alias)
+		uni.constructs[event] = event_def
+		for service_call in event.services:
 			if structure.is_source_call(service_call):
 				new_source_command = model.source_command(service_call.arg[0])
-				event_compute.extend(new_source_command)
+				event_def.extend(new_source_command)
 			else:
-				event_compute.extend(uni.constructs[service_call.identifier])
+				event_def.extend(uni.constructs[service_call.identifier].alias)
 
-def build_service(global_object, service):
+def prebuild_service(global_object, service):
 	uni = global_object.universe
-	service_compute = uni.add_computation('service')
+	service_def = uni.new_def('service')
+	uni.constructs[service] = service_def
+	return service_def
+
+
+def build_service(global_object, service, definition):
+	uni = global_object.universe
 	for statement in service.sequence:
 		if structure.is_source_call(statement):
 			new_source_command = model.source_command(statement.arg[0])
-			service_compute.extend(new_source_command)
+			definition.extend(new_source_command)
+		elif structure.is_service_call(statement):
+			call_compute = uni.constructs[statement.identifier]
+			definition.extend(call_compute.alias)
+		elif structure.is_operator(statement):
+			instr_handler.handle_instruction(global_object, definition, statement)
+		elif structure.is_if_statement(statement):
+			instr_handler.handle_conditional(global_object, definition, statement)
 		else:
-			instr_handler.handle_instruction(global_object, service_compute, statement)
-	return service_compute
-
-
-def unwrap_compute(compute, indentation):
-	if model.is_computation(compute):
-		print(indentation + compute.alias.string + ' : ' + compute.alias.type)
-		for command in compute.commands:
-			unwrap_compute(command, indentation + ' ')
-	elif model.is_alias(compute):
-		print(indentation + 'ALIAS -> ' + compute.string + ' : ' + compute.type)
-	else:
-		print(indentation + str(compute))
-
-
-
+			raise Exception('bad statement')
+	return definition

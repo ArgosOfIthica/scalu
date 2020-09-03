@@ -6,17 +6,17 @@ import src.backend.model.universe as universe
 def minify(cfg_string, uni):
 	blob = alias_blob(uni)
 	blob.alias_tuples = to_tuple_list(cfg_string)
-	output_text = minify_names(blob)
+	root_computation = blob.alias_convert[blob.alias_tuples[0][0]]
+	output_text = minify_names(blob) + root_computation
 	output_text = clean_output(output_text)
 	output_text = reallocate(output_text, blob)
 	output_text = clean_output(output_text)
 	return output_text
 
-def clean_output(output):
-	output_text = output
-	output_text = re.sub(';(\s+)', ';', output_text)
+def clean_output(output_text):
 	output_text = re.sub(';(\s*)\"', '"', output_text)
 	output_text = re.sub('\";', '"', output_text)
+	output_text = re.sub('\n{2,}', '\n', output_text)
 	return output_text
 
 def minify_names(blob):
@@ -62,7 +62,7 @@ def reallocate(output_text, blob):
 
 def compute_reallocation(text, blob):
 	command_split = re.split(';', text)
-	line_count = math.ceil(len(text) / blob.CONSOLE_MAX_BUFFER)
+	line_count = math.ceil(len(text) / blob.CONSOLE_MAX_BUFFER) + 1
 	new_aliases = blob.pick.new_alias_list(line_count)
 	lines = [''] * line_count
 	command = 0
@@ -79,6 +79,7 @@ def compute_reallocation(text, blob):
 				break
 	return lines
 
+
 def to_tuple_list(cfg_string):
 	return list(re.findall('alias\s(\S+)\s\"(.*)\"', cfg_string))
 
@@ -91,11 +92,14 @@ def minify_word(word, alias_convert):
 class alias_blob():
 
 	def __init__(self, uni=None):
-		self.CONSOLE_MAX_BUFFER = 434 #limit determined by trial and error in HL:Source
+		self.CONSOLE_MAX_BUFFER = 510 #limit determined by trial and error in HL:Source
 		self.alias_tuples = tuple()
 		self.alias_convert = dict()
 		self.pick = universe.picker()
 		if uni is not None:
 			for alias in uni.known_aliases:
-				self.alias_convert[alias.identity] = self.pick.new_alias()
+				if alias.type == 'event':
+					self.alias_convert[alias.identity] = alias.string
+				else:
+					self.alias_convert[alias.identity] = self.pick.new_alias()
 
