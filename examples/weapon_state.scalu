@@ -1,5 +1,18 @@
 sandbox weapon_state
 
+file {
+	scout: scout
+	soldier: soldier
+	pyro: pyro
+	demoman: demoman
+	heavyweapons: heavyweapons
+	engineer: engineer
+	medic: medic
+	sniper: sniper
+	spy: spy
+}
+
+
 bind {
 	1: slot1
 	2: slot2
@@ -11,6 +24,20 @@ bind {
 	MWHEELDOWN: next
 }
 
+map {
+	scout: @set_max_3
+	soldier: @set_max_3
+	pyro: @set_max_3
+	demoman: @set_max_3
+	heavyweapons: @set_max_3
+	engineer: @set_max_5
+	medic: @set_max_3
+	sniper: @set_max_3
+	spy: @set_max_4
+}
+
+
+
 map{
 	boot: @init
 	slot1: @switch_to_1
@@ -20,6 +47,8 @@ map{
 	next: @switch_down
 	last: @switch_last
 }
+
+
 
 service init{
 	current_weapon = 1
@@ -53,7 +82,7 @@ service switch_to_3 {
 
 service switch_up {
 	[invprev]
-	previous_weapon = current_weapon
+	last_weapon = current_weapon
 	if current_weapon == max_slot {
 		current_weapon = 1
 	}
@@ -64,7 +93,7 @@ service switch_up {
 
 service switch_down {
 	[invnext]
-	previous_weapon = current_weapon
+	last_weapon = current_weapon
 	if current_weapon == 1 {
 		current_weapon = max_slot
 	}
@@ -79,3 +108,17 @@ service switch_last {
 	last_weapon = current_weapon
 	current_weapon = store_var
 }
+
+service set_max_3 {
+	max_slot = 3
+}
+
+service set_max_4 {
+	max_slot = 4
+}
+
+service set_max_5 {
+	max_slot = 5
+}
+
+
