@@ -15,8 +15,6 @@ class global_object():
 			sandbox.resolve()
 		self.maps.resolve()
 
-
-
 class resolution_block():
 	variable_lookup = dict()
 	constant_lookup = dict()

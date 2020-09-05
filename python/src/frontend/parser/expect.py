@@ -109,8 +109,6 @@ def expect_file_block(consumer):
 	consumer.consume('}')
 	return file_map
 
-
-
 def expect_service_block(consumer, named=True):
 	new_block = model.service()
 	if named == True:

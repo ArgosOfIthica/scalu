@@ -4,10 +4,13 @@ import src.compiler as compiler
 class TestParsing(unittest.TestCase):
 
 	def setUp(self):
+		self.declaration = False
 		self.compiler = compiler.compiler()
 		self.blueprint_full_chain = 'sandbox test1 bind {k: test_event} map {test_event: @test_service} service test_service {} '
 		self.blueprint_two_chain = 'sandbox test1 bind {k: test_event} map {test_event: @test_service} service test_service '
 		self.blueprint_one_chain = 'sandbox test1 bind{k: test_event} map '
+		if self.declaration:
+			print(self._testMethodName)
 
 	def test_empty_program(self):
 		program = 'sandbox test'
