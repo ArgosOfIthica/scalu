@@ -1,6 +1,6 @@
 
 import src.frontend.utility.utility as utility
-import src.backend.model.universe as universe
+import src.model.universe as universe
 
 class global_object():
 

@@ -17,11 +17,6 @@ def unwrap(global_object):
 			service.sequence = sequence_out
 	return global_object
 
-
-def unwrapper_error():
-	raise Exception('unwrapper error')
-
-
 class unwrapped_element():
 
 	def __init__(self, res):
@@ -54,9 +49,8 @@ class unwrapped_element():
 		else:
 			return item
 
-
 	def generate_temporary_variable(self):
-		name = 'temp' + str(self.var_counter)
+		name = '_temp' + str(self.var_counter)
 		if name in self.res.variable_lookup:
 			self.var_counter += 1
 			return self.res.variable_lookup[name]

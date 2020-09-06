@@ -1,5 +1,5 @@
 import src.model.structure as model
-import src.backend.model.universe as universe
+import src.model.universe as universe
 
 
 def handle_instruction(global_object, compute, statement):
@@ -63,13 +63,13 @@ class instruction():
 		if compute_for == None:
 			compute_for = self.identity_compute
 		true_vb_alias = self.output.set_true[bit].alias
-		compute_for.extend(self.uni.set_var(set_compute, true_vb_alias).alias)
+		self.uni.set_var(compute_for, set_compute, true_vb_alias)
 
 	def set_false_return(self, set_compute, bit, compute_for=None):
 		if compute_for == None:
 			compute_for = self.identity_compute
 		false_vb_alias = self.output.set_false[bit].alias
-		compute_for.extend(self.uni.set_var(set_compute, false_vb_alias).alias)
+		self.uni.set_var(compute_for, set_compute, false_vb_alias)
 
 	def execute_alpha(self, bit, compute_for=None):
 		if compute_for == None:
@@ -110,14 +110,14 @@ class ibinary_print(instruction):
 			self.execute_alpha(bit)
 
 	def echo_true(self):
-		set_true_computation = self.uni.host_def(self.identity_compute, 'code')
+		set_true_compute = self.uni.host_def(self.identity_compute, 'code')
 		echo = universe.source_command('echo 1')
-		set_true_computation.extend(self.uni.set_var(self.uni.true, echo).alias)
+		self.uni.set_var(set_true_compute, self.uni.true, echo)
 
 	def echo_false(self):
-		set_false_computation = self.uni.host_def(self.identity_compute, 'code')
+		set_false_compute = self.uni.host_def(self.identity_compute, 'code')
 		echo = universe.source_command('echo 0')
-		set_false_computation.extend(self.uni.set_var(self.uni.false, echo).alias)
+		self.uni.set_var(set_false_compute, self.uni.false, echo)
 
 
 class ibitwise_neg(instruction):
@@ -138,8 +138,8 @@ class ibitwise_and(instruction):
 
 	def set_true_branch(self, bit):
 		true_branch = self.compile_true_branch(bit)
-		set_true_to_true_branch = self.uni.host_def(self.identity_compute, 'code')
-		set_true_to_true_branch.extend(self.uni.set_var(self.uni.true, true_branch.alias).alias)
+		set_true = self.uni.host_def(self.identity_compute, 'code')
+		self.uni.set_var(set_true, self.uni.true, true_branch)
 
 	def compile_true_branch(self, bit):
 		true_branch_compute = self.uni.new_def('code')
@@ -159,8 +159,8 @@ class ibitwise_or(instruction):
 
 	def set_false_branch(self, bit):
 		false_branch = self.compile_false_branch(bit)
-		set_false_to_false_branch = self.uni.host_def(self.identity_compute, 'code')
-		set_false_to_false_branch.extend(self.uni.set_var(self.uni.false, false_branch.alias).alias)
+		set_false = self.uni.host_def(self.identity_compute, 'code')
+		self.uni.set_var(set_false, self.uni.false, false_branch)
 
 	def compile_false_branch(self, bit):
 		false_branch_compute = self.uni.new_def('code')
@@ -173,7 +173,7 @@ class arithmetic_instruction(instruction):
 
 	def compile(self):
 		self.carry_bit = self.uni.new_var()
-		self.identity_compute.extend(self.uni.set_var(self.carry_bit, self.uni.false).alias)
+		self.uni.set_var(self.identity_compute, self.carry_bit, self.uni.false)
 		for bit in reversed(range(int(self.statement.output.word_size))):
 			self.identity_compute.extend(self.subbranch(bit, '1'))
 			self.identity_compute.extend(self.subbranch(bit, '0'))
@@ -190,7 +190,8 @@ class arithmetic_instruction(instruction):
 	def subbranch(self, bit, branch_state):
 		new_branch = self.compile_branch(bit, branch_state)
 		set_new_branch = self.uni.new_def('code')
-		set_new_branch.extend(self.uni.set_var(self.state_to_compute(branch_state), new_branch).alias)
+		new_state = self.state_to_compute(branch_state)
+		self.uni.set_var(set_new_branch, new_state, new_branch)
 		return set_new_branch.alias
 
 	def compile_branch(self, bit, branch_state):
@@ -215,28 +216,30 @@ class iadd(arithmetic_instruction):
 		compute = self.uni.new_def('code')
 		if branch_state == '000':
 			compute.extend(self.output.set_false[bit].alias)
-			compute.extend(self.uni.set_var(self.carry_bit, self.uni.false).alias)
+			self.uni.set_var(compute, self.carry_bit, self.uni.false)
 		elif branch_state == '001':
 			compute.extend(self.output.set_true[bit].alias)
-			compute.extend(self.uni.set_var(self.carry_bit, self.uni.false).alias)
+			self.uni.set_var(compute, self.carry_bit, self.uni.false)
 		elif branch_state == '010':
 			compute.extend(self.output.set_true[bit].alias)
-			compute.extend(self.uni.set_var(self.carry_bit, self.uni.false).alias)
+			self.uni.set_var(compute, self.carry_bit, self.uni.false)
 		elif branch_state == '011':
 			compute.extend(self.output.set_false[bit].alias)
-			compute.extend(self.uni.set_var(self.carry_bit, self.uni.true).alias)
+			self.uni.set_var(compute, self.carry_bit, self.uni.true)
 		elif branch_state == '100':
 			compute.extend(self.output.set_true[bit].alias)
-			compute.extend(self.uni.set_var(self.carry_bit, self.uni.false).alias)
+			self.uni.set_var(compute, self.carry_bit, self.uni.false)
 		elif branch_state == '101':
 			compute.extend(self.output.set_false[bit].alias)
-			compute.extend(self.uni.set_var(self.carry_bit, self.uni.true).alias)
+			self.uni.set_var(compute, self.carry_bit, self.uni.true)
 		elif branch_state == '110':
 			compute.extend(self.output.set_false[bit].alias)
-			compute.extend(self.uni.set_var(self.carry_bit, self.uni.true).alias)
+			self.uni.set_var(compute, self.carry_bit, self.uni.true)
 		elif branch_state == '111':
 			compute.extend(self.output.set_true[bit].alias)
-			compute.extend(self.uni.set_var(self.carry_bit, self.uni.true).alias)
+			self.uni.set_var(compute, self.carry_bit, self.uni.true)
+		else:
+			raise Exception('bad branch state')
 		return compute
 
 class isubtract(arithmetic_instruction):
@@ -245,28 +248,30 @@ class isubtract(arithmetic_instruction):
 		compute = self.uni.new_def('code')
 		if branch_state == '000':
 			compute.extend(self.output.set_false[bit].alias)
-			compute.extend(self.uni.set_var(self.carry_bit, self.uni.false).alias)
+			self.uni.set_var(compute, self.carry_bit, self.uni.false)
 		elif branch_state == '001':
 			compute.extend(self.output.set_true[bit].alias)
-			compute.extend(self.uni.set_var(self.carry_bit, self.uni.true).alias)
+			self.uni.set_var(compute, self.carry_bit, self.uni.true)
 		elif branch_state == '010':
 			compute.extend(self.output.set_true[bit].alias)
-			compute.extend(self.uni.set_var(self.carry_bit, self.uni.true).alias)
+			self.uni.set_var(compute, self.carry_bit, self.uni.true)
 		elif branch_state == '011':
 			compute.extend(self.output.set_false[bit].alias)
-			compute.extend(self.uni.set_var(self.carry_bit, self.uni.true).alias)
+			self.uni.set_var(compute, self.carry_bit, self.uni.true)
 		elif branch_state == '100':
 			compute.extend(self.output.set_true[bit].alias)
-			compute.extend(self.uni.set_var(self.carry_bit, self.uni.false).alias)
+			self.uni.set_var(compute, self.carry_bit, self.uni.false)
 		elif branch_state == '101':
 			compute.extend(self.output.set_false[bit].alias)
-			compute.extend(self.uni.set_var(self.carry_bit, self.uni.false).alias)
+			self.uni.set_var(compute, self.carry_bit, self.uni.false)
 		elif branch_state == '110':
 			compute.extend(self.output.set_false[bit].alias)
-			compute.extend(self.uni.set_var(self.carry_bit, self.uni.false).alias)
+			self.uni.set_var(compute, self.carry_bit, self.uni.false)
 		elif branch_state == '111':
 			compute.extend(self.output.set_true[bit].alias)
-			compute.extend(self.uni.set_var(self.carry_bit, self.uni.true).alias)
+			self.uni.set_var(compute, self.carry_bit, self.uni.true)
+		else:
+			raise Exception('bad branch state')
 		return compute
 
 
@@ -294,12 +299,12 @@ class conditional(instruction):
 	def set_true_branch(self, bit):
 		compute = self.uni.host_def(self.iteration_list[bit], 'code')
 		true_branch = self.compile_true_branch(bit)
-		compute.extend(self.uni.set_var(self.uni.true, true_branch.alias).alias)
+		self.uni.set_var(compute, self.uni.true, true_branch)
 
 	def set_false_branch(self, bit):
 		compute = self.uni.host_def(self.iteration_list[bit], 'code')
 		false_branch = self.compile_false_branch(bit)
-		compute.extend(self.uni.set_var(self.uni.false, false_branch.alias).alias)
+		self.uni.set_var(compute, self.uni.false, false_branch)
 
 	def get_next_iteration(self, bit):
 		if self.next_bit(bit) in range(self.word_size):
@@ -309,21 +314,21 @@ class conditional(instruction):
 
 	def compile_true_branch_template(self, bit, triple):
 		root_compute = self.uni.new_def('code')
-		root_compute.extend(self.uni.set_var(self.uni.false, triple[0].alias).alias)
+		self.uni.set_var(root_compute, self.uni.false, triple.opposite)
 		if self.next_bit(bit) != self.end_bit():
-			root_compute.extend(self.uni.set_var(self.uni.true, triple[1].alias).alias)
+			self.uni.set_var(root_compute, self.uni.true, triple.same)
 		else:
-			root_compute.extend(self.uni.set_var(self.uni.true, triple[2].alias).alias)
+			self.uni.set_var(root_compute, self.uni.true, triple.same_final)
 		self.execute_beta(bit, root_compute)
 		return root_compute
 
 	def compile_false_branch_template(self, bit, triple):
 		root_compute = self.uni.new_def('code')
-		root_compute.extend(self.uni.set_var(self.uni.true, triple[0].alias).alias)
+		self.uni.set_var(root_compute, self.uni.true, triple.opposite)
 		if self.next_bit(bit) != self.end_bit():
-			root_compute.extend(self.uni.set_var(self.uni.false, triple[1].alias).alias)
+			self.uni.set_var(root_compute, self.uni.false, triple.same)
 		else:
-			root_compute.extend(self.uni.set_var(self.uni.false, triple[2].alias).alias)
+			self.uni.set_var(root_compute, self.uni.false, triple.same_final)
 		self.execute_beta(bit, root_compute)
 		return root_compute
 
@@ -361,68 +366,99 @@ class little_endian_conditional(conditional):
 	def end_bit(self):
 		return -1
 
+class triple():
+
+	def __init__(self, same):
+		self.opposite = None
+		self.same = same
+		self.same_final = None
+
 class iequality(little_endian_conditional):
 
 	def compile_true_branch(self, bit):
-		triple = (self.false_service_compute, self.get_next_iteration(bit), self.true_service_compute)
-		return self.compile_true_branch_template(bit, triple)
+		tri = triple(self.get_next_iteration(bit))
+		tri.opposite = self.false_service_compute
+		tri.same_final = self.true_service_compute
+		return self.compile_true_branch_template(bit, tri)
 
 	def compile_false_branch(self, bit):
-		triple = (self.false_service_compute, self.get_next_iteration(bit), self.true_service_compute)
-		return self.compile_false_branch_template(bit, triple)
+		tri = triple(self.get_next_iteration(bit))
+		tri.opposite = self.false_service_compute
+		tri.same_final = self.true_service_compute
+		return self.compile_false_branch_template(bit, tri)
 
 
 class iinequality(little_endian_conditional):
 
 	def compile_true_branch(self, bit):
-		triple = (self.true_service_compute, self.get_next_iteration(bit), self.false_service_compute)
-		return self.compile_true_branch_template(bit, triple)
+		tri = triple(self.get_next_iteration(bit))
+		tri.opposite = self.true_service_compute
+		tri.same_final = self.false_service_compute
+		return self.compile_true_branch_template(bit, tri)
 
 	def compile_false_branch(self, bit):
-		triple = (self.true_service_compute, self.get_next_iteration(bit), self.false_service_compute)
-		return self.compile_false_branch_template(bit, triple)
+		tri = triple(self.get_next_iteration(bit))
+		tri.opposite = self.true_service_compute
+		tri.same_final = self.false_service_compute
+		return self.compile_false_branch_template(bit, tri)
 
 
 class igreater_than(big_endian_conditional):
 
 	def compile_true_branch(self, bit):
-		triple = (self.true_service_compute, self.get_next_iteration(bit), self.false_service_compute)
-		return self.compile_true_branch_template(bit, triple)
+		tri = triple(self.get_next_iteration(bit))
+		tri.opposite = self.true_service_compute
+		tri.same_final = self.false_service_compute
+		return self.compile_true_branch_template(bit, tri)
 
 	def compile_false_branch(self, bit):
-		triple = (self.false_service_compute, self.get_next_iteration(bit), self.false_service_compute)
-		return self.compile_false_branch_template(bit, triple)
+		tri = triple(self.get_next_iteration(bit))
+		tri.opposite = self.false_service_compute
+		tri.same_final = self.false_service_compute
+		return self.compile_false_branch_template(bit, tri)
 
 
 class iless_than(big_endian_conditional):
 
 	def compile_true_branch(self, bit):
-		triple = (self.false_service_compute, self.get_next_iteration(bit), self.false_service_compute)
-		return self.compile_true_branch_template(bit, triple)
+		tri = triple(self.get_next_iteration(bit))
+		tri.opposite = self.false_service_compute
+		tri.same_final = self.false_service_compute
+		return self.compile_true_branch_template(bit, tri)
 
 	def compile_false_branch(self, bit):
-		triple = (self.true_service_compute, self.get_next_iteration(bit), self.false_service_compute)
-		return self.compile_false_branch_template(bit, triple)
+		tri = triple(self.get_next_iteration(bit))
+		tri.opposite = self.true_service_compute
+		tri.same_final = self.false_service_compute
+		return self.compile_false_branch_template(bit, tri)
 
 
 class igreater_than_or_equal(big_endian_conditional):
 
 	def compile_true_branch(self, bit):
-		triple = (self.true_service_compute, self.get_next_iteration(bit), self.true_service_compute)
-		return self.compile_true_branch_template(bit, triple)
+		tri = triple(self.get_next_iteration(bit))
+		tri.opposite = self.true_service_compute
+		tri.same_final = self.true_service_compute
+		return self.compile_true_branch_template(bit, tri)
 
 	def compile_false_branch(self, bit):
-		triple = (self.false_service_compute, self.get_next_iteration(bit), self.true_service_compute)
-		return self.compile_false_branch_template(bit, triple)
+		tri = triple(self.get_next_iteration(bit))
+		tri.opposite = self.false_service_compute
+		tri.same_final = self.true_service_compute
+		return self.compile_false_branch_template(bit, tri)
 
 
 class iless_than_or_equal(big_endian_conditional):
 
 	def compile_true_branch(self, bit):
-		triple = (self.false_service_compute, self.get_next_iteration(bit), self.true_service_compute)
-		return self.compile_true_branch_template(bit, triple)
+		tri = triple(self.get_next_iteration(bit))
+		tri.opposite = self.false_service_compute
+		tri.same_final = self.true_service_compute
+		return self.compile_true_branch_template(bit, tri)
 
 	def compile_false_branch(self, bit):
-		triple = (self.true_service_compute, self.get_next_iteration(bit), self.true_service_compute)
-		return self.compile_false_branch_template(bit, triple)
+		tri = triple(self.get_next_iteration(bit))
+		tri.opposite = self.true_service_compute
+		tri.same_final = self.true_service_compute
+		return self.compile_false_branch_template(bit, tri)
 

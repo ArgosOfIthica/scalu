@@ -1,4 +1,4 @@
-import src.backend.model.universe as model
+import src.model.universe as model
 import src.backend.instructions.instruction as instr_handler
 import src.model.structure as structure
 
@@ -32,12 +32,7 @@ def build_events(global_object):
 	uni = global_object.universe
 	for event in global_object.maps.maps:
 		event_def = uni.new_def('event')
-		if event.string[0] == '+':
-			event_def.alias.string = '+$' + event.string[1:]
-		elif event.string[0] == '-':
-			event_def.alias.string = '-$' + event.string[1:]
-		else:
-			event_def.alias.string = '$' + event.string
+		build_event_prefix(event, event_def)
 		if event.string == 'boot':
 			uni.root.extend(event_def.alias)
 		uni.constructs[event] = event_def
@@ -47,6 +42,14 @@ def build_events(global_object):
 				event_def.extend(new_source_command)
 			else:
 				event_def.extend(uni.constructs[service_call.identifier].alias)
+
+def build_event_prefix(event, event_def):
+		if event.string[0] == '+':
+			event_def.alias.string = '+$' + event.string[1:]
+		elif event.string[0] == '-':
+			event_def.alias.string = '-$' + event.string[1:]
+		else:
+			event_def.alias.string = '$' + event.string
 
 def prebuild_service(global_object, service):
 	uni = global_object.universe
@@ -69,5 +72,5 @@ def build_service(global_object, service, definition):
 		elif structure.is_if_statement(statement):
 			instr_handler.handle_conditional(global_object, definition, statement)
 		else:
-			raise Exception('bad statement')
+			raise Exception('error: an impossible statement has been created')
 	return definition

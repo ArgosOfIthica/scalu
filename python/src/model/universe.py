@@ -47,7 +47,12 @@ class universe():
 		host.extend(new_computation.alias)
 		return new_computation
 
-	def set_var(self, var, target):
+	def set_var(self, host_compute, var, target):
+		if is_definition(target):
+			target = target.alias
+		host_compute.extend(self.set_variable_internal(var, target).alias)
+
+	def set_variable_internal(self, var, target):
 		if target not in self.vars:
 			target_wrapper = self.new_def('set_target')
 			target_wrapper.extend(target)
@@ -118,9 +123,9 @@ class variable():
 		for bit in range(int(var.word_size)):
 			self.bits.append( uni.new_var())
 			self.set_true.append(uni.new_def('set_true'))
-			self.set_true[bit].extend(uni.set_var(self.bits[bit], uni.true).alias)
+			uni.set_var(self.set_true[bit], self.bits[bit], uni.true)
 			self.set_false.append(uni.new_def('set_false'))
-			self.set_false[bit].extend(uni.set_var(self.bits[bit], uni.false).alias)
+			uni.set_var(self.set_false[bit], self.bits[bit], uni.false)
 			if bool_string[bit] == '0':
 				uni.root.extend(self.set_false[bit].alias)
 			elif bool_string[bit] == '1':

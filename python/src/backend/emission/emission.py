@@ -1,6 +1,5 @@
-
 import src.model.structure as model
-import src.backend.model.universe as universe
+import src.model.universe as universe
 
 class emission_queue_obj():
 

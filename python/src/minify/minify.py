@@ -1,7 +1,7 @@
 
 import re
 import math
-import src.backend.model.universe as universe
+import src.model.universe as universe
 
 def minify(cfg_string, uni):
 	blob = alias_blob(uni)
