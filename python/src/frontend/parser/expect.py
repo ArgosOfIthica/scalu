@@ -1,26 +1,3 @@
-"""
-EBNF
-
-sandbox = 'sandbox ' str { bind_block | map_block | service_block | file_block }
-service_block = 'service' str '{' block '}'
-block = { statement }
-bind_block = 'bind' '{' { str ':' str } '}'
-map_block = 'map' '{' { str ':' call } '}'
-file_block = 'file' '{' { str ':' str } '}'
-statement = assignment | call | if
-call = source_call | service_call
-source_call = '[' str ']'
-service_call = '@' str
-assignment = str '=' exp
-if = 'if' '(' conditional ')' '{' block '}' [ '{' block '} ]
-conditional = str condition str
-exp = ( p_exp | exp binop exp | unop exp | value)
-p_exp = '(' exp ')'
-binop = '|' | '&' | '+' | '-'
-unop = '~' | '?'
-condition = '==' | '!=' | '>' | '<' | '>=' | '<='
-
-"""
 import src.model.structure as model
 import src.frontend.utility.utility as utility
 import src.model.consumer as consume
@@ -215,8 +192,8 @@ def expect_expression_atomic(consumer):
 		return expect_unop(consumer)
 	elif consumer.is_subexpression():
 		return expect_p_expression(consumer)
-	elif consumer.is_literal_value():
-		return expect_literal_value(consumer)
+	elif consumer.token_is_value():
+		return expect_value(consumer)
 	else:
 		consume.parsing_error(consumer, 'invalid expression atomic error')
 
@@ -225,11 +202,6 @@ def expect_expression(consumer):
 	if consumer.is_binop():
 		new_expression = expect_binop(consumer, new_expression)
 	return new_expression
-
-
-def expect_literal_value(consumer):
-	return expect_value(consumer)
-
 
 def expect_value(consumer):
 	value = consumer.token()

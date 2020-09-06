@@ -87,44 +87,8 @@ class TestParsing(unittest.TestCase):
 		program = self.blueprint_two_chain + '{ a = 7 [echo test_console_command_in_service] }'
 		self.compiler.text_compile(program)
 
-	def test_basic_binary_print(self):
-		program = self.blueprint_two_chain + '{ a = 3 [echo is this 3?]}'
-		self.compiler.text_compile(program)
-
-	def test_binary_print(self):
-		program = self.blueprint_two_chain + '{ a = 3 [echo is this 5?] a = ?5 [echo is this 7?] a = ?7 a = 9 [echo is this 9?] a = ?a }'
-		self.compiler.text_compile(program)
-
 	def test_service_call(self):
 		program = self.blueprint_two_chain + '{ a = 3 @test_service2} service test_service2 { [echo old input was] a = ?a [echo new ouput is] a = ?5 }'
-		self.compiler.text_compile(program)
-
-	def test_bitwise_negation(self):
-		program = self.blueprint_two_chain + '{ [echo input is] old_number = ?73  [echo output is] new_number = ?(!old_number) }'
-		self.compiler.text_compile(program)
-
-	def test_bitwise_and(self):
-		program = self.blueprint_two_chain + '{ [echo input1 is] input1 = ?15 [echo input2 is] input2 = ?62 [echo output is] output = ?(input1 & input2) }'
-		self.compiler.text_compile(program)
-
-	def test_bitwise_or(self):
-		program = self.blueprint_two_chain + '{ [echo input1 is] input1 = ?15 [echo input2 is] input2 = ?62 [echo output is] output = ?(input1 | input2) }'
-		self.compiler.text_compile(program)
-
-	def test_full_jump(self):
-		program = self.blueprint_two_chain + '{ a = 6 if (a == 5) {a = ?4 @true_branch} else {a = ?6 @false_branch}} service true_branch { [echo this is true] } service false_branch { [echo this is false]}'
-		self.compiler.text_compile(program)
-
-	def test_partial_jump(self):
-		program = self.blueprint_two_chain + '{ a = 5 if (a == 5) {a = ?4 @true_branch}} service true_branch { [echo this is true] }'
-		self.compiler.text_compile(program)
-
-	def test_nested_jump(self):
-		program = self.blueprint_two_chain + '{ a = 6 if (a == 5) {a = ?4 @true_branch} else \n{ if (a == 6) { @false_branch} else {[echo wrong answer 2]}}} \n service true_branch { [echo wrong answer 1] } service false_branch { [echo correct answer]}'
-		self.compiler.text_compile(program)
-
-	def test_inequality(self):
-		program = self.blueprint_two_chain + '{ a = 4 if (a != 2) { [echo correct]} else {[echo wrong]}}'
 		self.compiler.text_compile(program)
 
 	def test_event_file(self):
@@ -135,35 +99,11 @@ class TestParsing(unittest.TestCase):
 		program = 'sandbox test map { boot: @test_service } service test_service {[test]}'
 		self.compiler.text_compile(program)
 
-	@unittest.expectedFailure
-	def test_number_too_large(self):
-		program = self.blueprint_two_chain + '{a = 512}'
-		self.compiler.text_compile(program)
-
-	def test_greater_than(self):
-		program = self.blueprint_two_chain + '{a = 7 if (a > 5) {[echo true]} else {[echo false]}}'
-		self.compiler.text_compile(program)
-
-	def test_less_than(self):
-		program = self.blueprint_two_chain + '{a = 7 if (a < 5) {[echo true]} else {[echo false]}}'
-		self.compiler.text_compile(program)
-
-	def test_greater_than_or_equal(self):
-		program = self.blueprint_two_chain + '{a = 7 if (a >= 5) {[echo true]} else {[echo false]}}'
-		self.compiler.text_compile(program)
-
-	def test_less_than_or_equal(self):
-		program = self.blueprint_two_chain + '{a = 7 if (a <= 5) {[echo true]} else {[echo false]}}'
-		self.compiler.text_compile(program)
-
 	def test_bifurcation(self):
 		program = 'sandbox test map {+test_event : @test_service -test_event : @test_service_2} service test_service {[echo 1]} service test_service_2 {[echo 2]}'
 		self.compiler.text_compile(program)
 
-	def test_addition(self):
-		program = self.blueprint_two_chain + '{a = 12 + 10}'
-		self.compiler.text_compile(program)
-
-	def test_subtraction(self):
-		program = self.blueprint_two_chain + '{a = 32 - 7}'
+	@unittest.expectedFailure
+	def test_lexer_comments_terminate(self):
+		program = '/*'
 		self.compiler.text_compile(program)

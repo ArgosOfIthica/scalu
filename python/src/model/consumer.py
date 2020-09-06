@@ -109,9 +109,6 @@ class consumer():
 	def is_subexpression(self):
 		return self.token() == '('
 
-	def is_literal_value(self):
-		return self.token_is_value()
-
 	def is_unop(self, lookahead=0):
 		return self.token(lookahead) in self.unary_symbol_map
 

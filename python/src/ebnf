@@ -1,0 +1,18 @@
+sandbox = 'sandbox ' str { bind_block | map_block | service_block | file_block }
+service_block = 'service' str '{' block '}'
+block = { statement }
+bind_block = 'bind' '{' { str ':' str } '}'
+map_block = 'map' '{' { str ':' call } '}'
+file_block = 'file' '{' { str ':' str } '}'
+statement = assignment | call | if
+call = source_call | service_call
+source_call = '[' str ']'
+service_call = '@' str
+assignment = str '=' exp
+if = 'if' '(' conditional ')' '{' block '}' [ '{' block '} ]
+conditional = str condition str
+exp = ( p_exp | exp binop exp | unop exp | value)
+p_exp = '(' exp ')'
+binop = '|' | '&' | '+' | '-'
+unop = '~' | '?'
+condition = '==' | '!=' | '>' | '<' | '>=' | '<='
