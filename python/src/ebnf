@@ -9,7 +9,7 @@ call = source_call | service_call
 source_call = '[' str ']'
 service_call = '@' str
 assignment = str '=' exp
-if = 'if' '(' conditional ')' '{' block '}' [ '{' block '} ]
+if = 'if' '(' conditional ')' '{' block '}' [ 'else' '{' block '}' ]
 conditional = str condition str
 exp = ( p_exp | exp binop exp | unop exp | value)
 p_exp = '(' exp ')'

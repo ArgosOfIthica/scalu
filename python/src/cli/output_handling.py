@@ -10,3 +10,4 @@ def handle(output_files):
 		output = Path('../scalu_out/' + cfg.name + '.' + cfg.type)
 		output.touch()
 		output.write_text(cfg.content)
+
