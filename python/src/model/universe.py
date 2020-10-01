@@ -1,6 +1,5 @@
 import math
 
-
 class universe():
 
 	def __init__(self):
@@ -10,6 +9,7 @@ class universe():
 		self.alias_to_def = dict()
 		self.picker = picker()
 		self.constructs = dict()
+		self.constant_constructs = list()
 		self.initialized = False
 
 	def initialize(self):
@@ -115,7 +115,9 @@ def get_bin(value, word_size):
 class variable():
 
 	def __init__(self, global_object, var):
+		debug = False
 		uni = global_object.universe
+		self.value = var.value
 		bool_string = get_bin(var.value, var.word_size)
 		self.bits = list()
 		self.set_true = list()
@@ -132,6 +134,8 @@ class variable():
 				uni.root.extend(self.set_true[bit].alias)
 			else:
 				raise Exception('is not valid boolean string')
+		if debug:
+			print('creating var ' + var.name)
 
 class picker():
 

@@ -27,6 +27,7 @@ class file_container():
 				self.files[i].name = name
 			if i != len(self.files) - 1:
 				self.files[i].content += '\nexec ' + name + str(i + 1)
+		return self.files
 
 
 	def recursively_create_content(self, raw_string):

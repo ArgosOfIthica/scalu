@@ -12,5 +12,6 @@ def compile(program_string):
 		visualize.visualize(syntax_tree)
 	unwrapped_ast = unwrapper.unwrap(syntax_tree)
 	if debug:
+		print('**********')
 		visualize.visualize_unwrapping(unwrapped_ast)
 	return syntax_tree

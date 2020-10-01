@@ -3,12 +3,13 @@ import src.model.structure as model
 import copy
 
 def unwrap(global_object):
+	temporary_vars = list()
 	for sandbox in global_object.sandbox:
 		for service in sandbox.services:
 			sequence_out = list()
 			for statement in service.sequence:
 				new_sequencing = None
-				unwrapped = unwrapped_element(sandbox.resolution)
+				unwrapped = unwrapped_element(temporary_vars)
 				if model.is_assignment(statement):
 					new_sequencing = unwrapped.unwrap_assignment(statement)
 				else:
@@ -19,9 +20,9 @@ def unwrap(global_object):
 
 class unwrapped_element():
 
-	def __init__(self, res):
+	def __init__(self, temporary_vars):
 		self.instr_order = list()
-		self.res = res
+		self.temps = temporary_vars
 		self.var_counter = 0
 
 
@@ -50,14 +51,14 @@ class unwrapped_element():
 			return item
 
 	def generate_temporary_variable(self):
-		name = '_temp' + str(self.var_counter)
-		if name in self.res.variable_lookup:
+		if self.var_counter < len(self.temps) :
+			temp = self.temps[self.var_counter]
 			self.var_counter += 1
-			return self.res.variable_lookup[name]
+			return temp
 		else:
 			temp = model.variable()
-			temp.name = name
-			self.res.variable_lookup[temp.name] = temp
+			temp.name = '_temp' + str(self.var_counter)
+			self.temps.append(temp)
 			self.var_counter += 1
 			return temp
 

@@ -78,6 +78,9 @@ class consumer():
 	def is_variable_assignment(self):
 		return self.token(1) == '='
 
+	def is_sandboxed_assignment(self):
+		return self.token(1) == '.'
+
 	def is_service_call(self):
 		return self.token() == '@'
 

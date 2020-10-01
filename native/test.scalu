@@ -274,3 +274,29 @@ service subtraction {
 	if (c == 236) {[echo passed]} else {[echo failed]}
 }
 
+sandbox test_reference1
+
+map {
+	test_event : @test
+}
+
+service test {
+	[echo testing references]
+	[echo test 1]
+	a = 27
+}
+
+sandbox test_reference2
+
+map {
+	test_event: @test
+}
+
+service test {
+	b = test_reference1.a
+	if (b == 27) {[echo passed]} else {[echo failed]}
+	test_reference1.a = 7
+	[echo test 2]
+	if (test_reference1.a == 7) {[echo passed]} else {[echo failed]}
+}
+

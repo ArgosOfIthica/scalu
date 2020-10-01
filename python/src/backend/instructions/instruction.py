@@ -16,8 +16,7 @@ def handle_instruction(global_object, compute, statement):
 		uni.constructs[statement.output] = var
 	for arg in statement.arg:
 		if arg not in uni.constructs:
-			var = universe.variable(global_object, arg)
-			uni.constructs[arg] = var
+			generate_var(global_object, arg)
 	if model.is_operator(statement):
 		instr_class = operator_map[statement.identity](global_object, compute, statement)
 		instr_class.compile()
@@ -36,13 +35,29 @@ def handle_conditional(global_object, compute, statement):
 	uni = global_object.universe
 	for arg in statement.condition.arg:
 		if arg not in uni.constructs:
-			var_compute = universe.variable(global_object, arg)
-			uni.constructs[arg] = var_compute
+			generate_var(global_object, arg)
 	if model.is_conditional(statement.condition):
 		instr_class = operator_map[statement.condition.identity](global_object, compute, statement)
 		instr_class.compile()
 	else:
 		raise Exception('invalid conditional generation')
+
+
+def generate_var(global_object, arg):
+		uni = global_object.universe
+		if model.is_constant(arg):
+			conlist = [x.value for x in uni.constant_constructs]
+			unilist = [x for x in uni.constant_constructs]
+			if arg.value in conlist:
+				var = unilist[conlist.index(arg.value)]
+				uni.constructs[arg] = var
+			else:
+				var = universe.variable(global_object, arg)
+				uni.constant_constructs.append(var)
+				uni.constructs[arg] = var
+		else:
+			var = universe.variable(global_object, arg)
+			uni.constructs[arg] = var
 
 class instruction():
 

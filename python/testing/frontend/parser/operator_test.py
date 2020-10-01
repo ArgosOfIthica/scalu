@@ -15,7 +15,7 @@ class TestOperators(unittest.TestCase):
 	@unittest.expectedFailure
 	def test_number_too_large(self):
 		program = self.blueprint_two_chain + '{a = 512}'
-		self.compiler.text_compile(program)
+		print(self.compiler.text_compile(program))
 
 	def test_greater_than(self):
 		program = self.blueprint_two_chain + '{a = 7 if (a > 5) {[echo true]} else {[echo false]}}'
@@ -75,4 +75,13 @@ class TestOperators(unittest.TestCase):
 
 	def test_binary_print(self):
 		program = self.blueprint_two_chain + '{ a = 3 [echo is this 5?] a = ?5 [echo is this 7?] a = ?7 a = 9 [echo is this 9?] a = ?a }'
+		self.compiler.text_compile(program)
+
+	def test_sandbox_access(self):
+		program = 'sandbox one service s_one {var_one = two.var + 7} sandbox two service s_two {var = 7}'
+		self.compiler.text_compile(program)
+
+	@unittest.expectedFailure
+	def test_fake_sandbox_access(self):
+		program = 'sandbox one service s_one {var_one = three.var + 7} sandbox two service s_two {var = 7}'
 		self.compiler.text_compile(program)

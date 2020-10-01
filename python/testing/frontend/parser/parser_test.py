@@ -107,3 +107,8 @@ class TestParsing(unittest.TestCase):
 	def test_lexer_comments_terminate(self):
 		program = '/*'
 		self.compiler.text_compile(program)
+
+	@unittest.expectedFailure
+	def test_sandbox_name_collision(self):
+		program = 'sandbox one sandbox one'
+		self.compiler.text_compile(program)

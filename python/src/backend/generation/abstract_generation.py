@@ -14,11 +14,13 @@ def compile(global_object):
 def build_services(global_object):
 	uni = global_object.universe
 	for sandbox in global_object.sandbox:
+		global_object.current_sandbox = sandbox
 		for service in sandbox.services:
 			prebuild_service(global_object, service)
 		for service in sandbox.services:
 			compute = uni.constructs[service]
 			compute = build_service(global_object, service, compute)
+	global_object.current_sandbox = None
 
 
 def build_bindings(global_object):

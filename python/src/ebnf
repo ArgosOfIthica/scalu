@@ -8,7 +8,8 @@ statement = assignment | call | if
 call = source_call | service_call
 source_call = '[' str ']'
 service_call = '@' str
-assignment = str '=' exp
+assignment = var '=' exp
+var = [ str '.' ] str
 if = 'if' '(' conditional ')' '{' block '}' [ 'else' '{' block '}' ]
 conditional = str condition str
 exp = ( p_exp | exp binop exp | unop exp | value)
