@@ -100,13 +100,23 @@ class instruction():
 		compute_for.extend(exec_vb_alias)
 		return exec_vb_alias
 
+	def alpha_is_constant(self):
+		return model.is_constant(self.statement.arg[0])
+
 class icopy(instruction):
 
 	def compile(self):
-		for bit in range(int(self.statement.output.word_size)):
-			self.set_true_return(self.uni.true, bit)
-			self.set_false_return(self.uni.false, bit)
-			self.execute_alpha(bit)
+		if self.alpha_is_constant():
+			for bit in range(int(self.statement.output.word_size)):
+				if self.alpha.bool_string[bit] == '0':
+					self.identity_compute.extend(self.output.set_false[bit].alias)
+				elif self.alpha.bool_string[bit] == '1':
+					self.identity_compute.extend(self.output.set_true[bit].alias)
+		else:
+			for bit in range(int(self.statement.output.word_size)):
+				self.set_true_return(self.uni.true, bit)
+				self.set_false_return(self.uni.false, bit)
+				self.execute_alpha(bit)
 
 class ibinary_print(instruction):
 

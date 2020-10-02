@@ -118,7 +118,7 @@ class variable():
 		debug = False
 		uni = global_object.universe
 		self.value = var.value
-		bool_string = get_bin(var.value, var.word_size)
+		self.bool_string = get_bin(var.value, var.word_size)
 		self.bits = list()
 		self.set_true = list()
 		self.set_false = list()
@@ -128,9 +128,9 @@ class variable():
 			uni.set_var(self.set_true[bit], self.bits[bit], uni.true)
 			self.set_false.append(uni.new_def('set_false'))
 			uni.set_var(self.set_false[bit], self.bits[bit], uni.false)
-			if bool_string[bit] == '0':
+			if self.bool_string[bit] == '0':
 				uni.root.extend(self.set_false[bit].alias)
-			elif bool_string[bit] == '1':
+			elif self.bool_string[bit] == '1':
 				uni.root.extend(self.set_true[bit].alias)
 			else:
 				raise Exception('is not valid boolean string')
