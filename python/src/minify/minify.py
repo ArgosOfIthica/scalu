@@ -90,12 +90,12 @@ def minify_word(word, alias_convert):
 	else:
 		return word
 
-def replace_word(old_word, new_word, cfg):
+def replace_words(replacement_map, cfg):
 	words = list()
 	split_cfg = split_tail_word(cfg)
 	for word in split_cfg:
-		if word == old_word:
-			words.append(new_word)
+		if word in replacement_map:
+			words.append(replacement_map[word])
 		else:
 			words.append(word)
 	words = ''.join(words)
@@ -108,33 +108,27 @@ def deduplicate(cfg):
 	count = 0
 	redundant_heads = list()
 	running = True
-	while count < 5000 and running:
+	while count < 500:
 		count += 1
-		cfg, running = deduplicate_instance(cfg, redundant_heads)
+		new_cfg = deduplicate_instance(cfg)
+		if len(new_cfg) == len(cfg):
+			return cfg
+		cfg = new_cfg
 	return cfg
 
-
-def deduplicate_instance(cfg, redundant_heads):
+def deduplicate_instance(cfg):
 	HEAD = 0
 	TAIL = 1
 	tuple_list = to_tuple_list(cfg)
 	unique_tails = dict()
+	head_map = dict()
 	for ele in tuple_list:
 		if ele[TAIL] not in unique_tails:
 			unique_tails[ele[TAIL]] = ele[HEAD]
-		elif ele[HEAD] in redundant_heads:
-			pass
 		else:
-			redundant_heads.append(ele[HEAD])
-			#print('redundant head')
-			#print(ele[HEAD])
-			#print('cloned tail')
-			#print(ele[TAIL])
-			#print('replacement head')
-			#print(unique_tails[ele[TAIL]])
-			new_cfg = replace_word(ele[HEAD], unique_tails[ele[TAIL]], cfg)
-			return new_cfg, True
-	return cfg, False
+			head_map[ele[HEAD]] = unique_tails[ele[TAIL]]
+	new_cfg = replace_words(head_map, cfg)
+	return new_cfg
 
 
 class alias_blob():
