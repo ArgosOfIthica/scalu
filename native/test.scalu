@@ -65,7 +65,7 @@ service inequality {
 	[echo test 3]
 	if (a != 6) {[echo failed]} else {[echo passed]}
 	[echo test 4]
-	if (23 != 23) {[echo passed]} else {[echo failed]}
+	if (23 != 23) {[echo failed]} else {[echo passed]}
 }
 
 sandbox test_copy
@@ -308,5 +308,39 @@ service test {
 	test_reference1.a = 7
 	[echo test 2]
 	if (test_reference1.a == 7) {[echo passed]} else {[echo failed]}
+}
+
+sandbox test_left_shift
+
+map {
+	test_event : @test
+}
+
+service test {
+	[echo testing shift left]
+	[echo test 1]
+	a = 23
+	b = a << 2
+	if (b == 92) {[echo passed]} else {[echo failed]}
+	[echo test 2]
+	a = 7 << 5
+	if (a == 224) {[echo passed]} else {[echo failed]}
+}
+
+sandbox test_right_shift
+
+map {
+	test_event : @test
+}
+
+service test {
+	[echo testing right shift]
+	[echo test 1]
+	a = 92
+	b = a >> 2
+	if (b == 23) {[echo passed]} else {[echo failed]}
+	[echo test 2]
+	a = 224 >> 5
+	if (a == 7) {[echo passed]} else {[echo failed]}
 }
 

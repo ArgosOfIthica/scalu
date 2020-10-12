@@ -9,7 +9,9 @@ def handle_instruction(global_object, compute, statement):
 				'bitwise_or' : ibitwise_or,
 				'bitwise_and' : ibitwise_and,
 				'add' : iadd,
-				'subtract' : isubtract}
+				'subtract' : isubtract,
+				'left_shift' : ileft_shift,
+				'right_shift' : iright_shift}
 	uni = global_object.universe
 	if statement.output not in uni.constructs:
 		var = universe.variable(global_object, statement.output)
@@ -249,6 +251,56 @@ class ibitwise_or(instruction):
 		self.set_false_return(self.uni.false, bit, false_branch_compute)
 		self.execute_beta(bit, false_branch_compute)
 		return false_branch_compute
+
+
+class ileft_shift(instruction):
+
+	def compile(self):
+		shift = int(self.statement.arg[1].value)
+		if shift > int(self.statement.output.word_size):
+			raise Exception('impossible left shift')
+		if self.alpha_is_constant() and self.beta_is_constant():
+			for bit in reversed(range(int(self.statement.output.word_size))):
+				if bit > int(self.statement.output.word_size) - 1 - shift:
+					self.identity_compute.extend(self.output.set_false[bit].alias)
+				else:
+					if self.alpha.bool_string[bit + shift] == '1':
+						self.identity_compute.extend(self.output.set_true[bit].alias)
+					elif self.alpha.bool_string[bit + shift] == '0':
+						self.identity_compute.extend(self.output.set_false[bit].alias)
+		elif self.beta_is_constant():
+			for bit in reversed(range(int(self.statement.output.word_size))):
+				if bit > int(self.statement.output.word_size) - 1 - shift:
+					self.identity_compute.extend(self.output.set_false[bit].alias)
+				else:
+					self.set_true_return(self.uni.true, bit)
+					self.set_false_return(self.uni.false, bit)
+					self.execute_alpha(bit + shift)
+
+class iright_shift(instruction):
+
+	def compile(self):
+		shift = int(self.statement.arg[1].value)
+		if shift > int(self.statement.output.word_size):
+			raise Exception('impossible right shift')
+		if self.alpha_is_constant() and self.beta_is_constant():
+			for bit in range(int(self.statement.output.word_size)):
+				if bit < shift:
+					self.identity_compute.extend(self.output.set_false[bit].alias)
+				else:
+					if self.alpha.bool_string[bit - shift] == '1':
+						self.identity_compute.extend(self.output.set_true[bit].alias)
+					elif self.alpha.bool_string[bit - shift] == '0':
+						self.identity_compute.extend(self.output.set_false[bit].alias)
+		elif self.beta_is_constant():
+			for bit in reversed(range(int(self.statement.output.word_size))):
+				if bit < shift:
+					self.identity_compute.extend(self.output.set_false[bit].alias)
+				else:
+					self.set_true_return(self.uni.true, bit)
+					self.set_false_return(self.uni.false, bit)
+					self.execute_alpha(bit - shift)
+		
 
 class arithmetic_instruction(instruction):
 

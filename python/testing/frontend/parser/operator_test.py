@@ -85,3 +85,17 @@ class TestOperators(unittest.TestCase):
 	def test_fake_sandbox_access(self):
 		program = 'sandbox one service s_one {var_one = three.var + 7} sandbox two service s_two {var = 7}'
 		self.compiler.text_compile(program)
+
+	def test_bitshift_left(self):
+		program = self.blueprint_two_chain + '{ a = 4 << 3 }'
+		self.compiler.text_compile(program)
+
+	def test_bitshift_right(self):
+		program = self.blueprint_two_chain + '{ a = 4 >> 3 }'
+		self.compiler.text_compile(program)
+
+	@unittest.expectedFailure
+	def test_bitshift_left_overflow(self):
+		program = self.blueprint_two_chain + '{ a = 4 << 10 }'
+		self.compiler.text_compile(program)
+	

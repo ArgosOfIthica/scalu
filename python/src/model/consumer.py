@@ -20,7 +20,9 @@ class consumer():
 		'|' : 'bitwise_or',
 		'&' : 'bitwise_and',
 		'+' : 'add',
-		'-' : 'subtract'
+		'-' : 'subtract',
+		'<<': 'left_shift',
+		'>>': 'right_shift'
 		}
 		self.unary_symbol_map = {
 		'!' : 'bitwise_neg',
