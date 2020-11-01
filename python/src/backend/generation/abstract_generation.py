@@ -73,6 +73,8 @@ def build_service(global_object, service, definition):
 			instr_handler.handle_instruction(global_object, definition, statement)
 		elif structure.is_if_statement(statement):
 			instr_handler.handle_conditional(global_object, definition, statement)
+		elif structure.is_jump_statement(statement):
+			instr_handler.handle_jump(global_object, definition, statement)
 		else:
 			raise Exception('error: an impossible statement has been created')
 	return definition

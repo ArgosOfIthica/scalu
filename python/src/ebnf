@@ -4,14 +4,15 @@ block = { statement }
 bind_block = 'bind' '{' { str ':' str } '}'
 map_block = 'map' '{' { str ':' call } '}'
 file_block = 'file' '{' { str ':' str } '}'
-statement = assignment | call | if
+statement = assignment | call | if | jump
 call = source_call | service_call
 source_call = '[' str ']'
 service_call = '@' str
 assignment = var '=' exp
 var = [ str '.' ] str
 if = 'if' '(' conditional ')' '{' block '}' [ 'else' '{' block '}' ]
-conditional = str condition str
+jump = 'jump' '(' var ')' '{' { '{' block '}' } '}'
+conditional = var condition var
 exp = ( p_exp | exp binop exp | unop exp | value)
 p_exp = '(' exp ')'
 binop = '|' | '&' | '+' | '-' | '<<' | '>>'

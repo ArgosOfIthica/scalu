@@ -200,6 +200,12 @@ class if_statement():
 		self.false_service = None
 		self.condition = None
 
+class jump_statement():
+
+	def __init__(self):
+		self.var = None
+		self.services = list()
+
 class operator():
 
 	def __init__(self):
@@ -257,6 +263,9 @@ def is_key(arg):
 
 def is_if_statement(arg):
 	return isinstance(arg, if_statement)
+
+def is_jump_statement(arg):
+	return isinstance(arg, jump_statement)
 
 def is_conditional(arg):
 	return isinstance(arg, conditional)

@@ -33,7 +33,6 @@ def handle_conditional(global_object, compute, statement):
 				'less_than' : iless_than,
 				'greater_than_or_equal' : igreater_than_or_equal,
 				'less_than_or_equal' : iless_than_or_equal}
-
 	uni = global_object.universe
 	for arg in statement.condition.arg:
 		if arg not in uni.constructs:
@@ -44,6 +43,12 @@ def handle_conditional(global_object, compute, statement):
 	else:
 		raise Exception('invalid conditional generation')
 
+def handle_jump(global_object, compute, statement):
+	uni = global_object.universe
+	if statement.var not in uni.constructs:
+		generate_var(global_object, statement.var)
+	jump_class = jump(global_object, compute, statement)
+	jump_class.compile()
 
 def generate_var(global_object, arg):
 		uni = global_object.universe
@@ -60,6 +65,64 @@ def generate_var(global_object, arg):
 		else:
 			var = universe.variable(global_object, arg)
 			uni.constructs[arg] = var
+
+
+class jump():
+
+	def __init__(self, global_object, container_compute, statement):
+		self.uni = global_object.universe
+		self.container_compute = container_compute
+		self.identity_compute = self.uni.host_def(container_compute, 'instruction')
+		self.statement = statement
+		self.word_size = int(self.statement.var.word_size)
+		self.jump_count = self.word_size - len(self.statement.services).bit_length()
+		self.services = statement.services
+		self.var_compute = self.uni.constructs[statement.var]
+
+	def service_compute(self, index):
+		return self.uni.constructs[self.services[index]]
+
+	def state_to_compute(self, branch_state):
+		if branch_state[0] == '1':
+			return self.uni.true
+		elif branch_state[0] == '0':
+			return self.uni.false
+		else:
+			raise Exception('invalid state')
+
+	def subbranch(self, branch_state):
+		new_branch = self.compile_branch(branch_state)
+		set_new_branch = self.uni.new_def('code')
+		new_state = self.state_to_compute(branch_state)
+		self.uni.set_var(set_new_branch, new_state, new_branch)
+		return set_new_branch.alias
+	
+	def compile(self):
+		self.identity_compute.extend(self.compile_branch(''))
+
+	def compile_branch(self, branch_state):
+		compute = self.uni.new_def('code')
+		if len(branch_state) + 1 != self.jump_count:
+			compute.extend(self.subbranch('1' + branch_state))
+			compute.extend(self.subbranch('0' + branch_state))		
+		else:
+			compute.extend(self.compile_service('1' + branch_state))
+			compute.extend(self.compile_service('0' + branch_state))
+		vb_alias = self.var_compute.bits[self.word_size - len(branch_state) - 1]
+		compute.extend(vb_alias)
+		return compute.alias
+
+	def compile_service(self, branch_state):
+		new_branch = None
+		service_index = int(branch_state, 2)
+		if service_index < len(self.statement.services):
+			new_branch = self.service_compute(service_index)
+		else:
+			new_branch = self.service_compute(service_index % len(self.statement.services))
+		set_new_service = self.uni.new_def('code')
+		new_state = self.state_to_compute(branch_state)
+		self.uni.set_var(set_new_service, new_state, new_branch)
+		return set_new_service.alias
 
 class instruction():
 
@@ -276,6 +339,8 @@ class ileft_shift(instruction):
 					self.set_true_return(self.uni.true, bit)
 					self.set_false_return(self.uni.false, bit)
 					self.execute_alpha(bit + shift)
+		else:
+			raise Exception('Illegal shift by variable quantity')
 
 class iright_shift(instruction):
 
@@ -300,6 +365,8 @@ class iright_shift(instruction):
 					self.set_true_return(self.uni.true, bit)
 					self.set_false_return(self.uni.false, bit)
 					self.execute_alpha(bit - shift)
+		else:
+			raise Exception('Illegal shift by variable quantity')
 		
 
 class arithmetic_instruction(instruction):

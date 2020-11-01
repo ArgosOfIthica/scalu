@@ -112,3 +112,7 @@ class TestParsing(unittest.TestCase):
 	def test_sandbox_name_collision(self):
 		program = 'sandbox one sandbox one'
 		self.compiler.text_compile(program)
+
+	def test_jump(self):
+		program = self.blueprint_two_chain + '{ a = 1 jump (a) { {[echo service 0]} {[echo service 1]} {[echo service 2]}}}'
+		self.compiler.text_compile(program)

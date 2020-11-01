@@ -107,6 +107,9 @@ class consumer():
 	def is_if(self):
 		return self.token() == 'if'
 
+	def is_jump(self):
+		return self.token() == 'jump'
+
 	def is_block(self):
 		block_types = ('service', 'map', 'bind', 'file')
 		return self.token() in block_types

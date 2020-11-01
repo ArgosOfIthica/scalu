@@ -110,6 +110,9 @@ def expect_service_block(consumer, named=True):
 		elif consumer.is_if():
 			new_if = expect_if(consumer)
 			new_block.sequence.append(new_if)
+		elif consumer.is_jump():
+			new_jump = expect_jump(consumer)
+			new_block.sequence.append(new_jump)
 		else:
 			consume.parsing_error(consumer, 'invalid statement error')
 	consumer.consume('}')
@@ -140,6 +143,36 @@ def expect_if(consumer):
 	else:
 		new_if.false_service = empty_service(consumer)
 	return new_if
+
+def expect_jump(consumer):
+	new_jump = model.jump_statement()
+	consumer.consume('jump')
+	if consumer.is_subexpression():
+		consumer.consume('(')
+		new_jump.var = expect_jump_identifier(consumer)
+		consumer.consume(')')
+	else:
+		new_jump.var = expect_jump_identifier(consumer)
+	consumer.consume('{')
+	while consumer.is_not_end_block():
+		new_jump.services.append(expect_service_block(consumer, False))
+	consumer.consume('}')
+	return new_jump
+
+
+def expect_jump_identifier(consumer):
+	sandbox = ''
+	if consumer.is_sandboxed_assignment():
+		sandbox = consumer.use_if_name()
+		consumer.consume('.')
+	if sandbox == '':
+		sandbox = consumer.current_sandbox
+	else:
+		sandbox = consumer.global_object.sandbox.reference(sandbox)
+	identifier = consumer.use_if_name()
+	var = sandbox.variables.reference(identifier)
+	return var
+
 
 def expect_call(consumer):
 	if consumer.is_service_call():
@@ -185,7 +218,7 @@ def expect_assignment_identifier(consumer):
 	identifier = consumer.use_if_name()
 	var = sandbox.variables.reference(identifier)
 	if not var.declared:
-		return consumer.current_sandbox.variables.declare(identifier)
+		return sandbox.variables.declare(identifier)
 	else:
 		return var
 

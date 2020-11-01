@@ -344,3 +344,21 @@ service test {
 	if (a == 7) {[echo passed]} else {[echo failed]}
 }
 
+sandbox test_jump_statement
+
+map {
+	test_event : @test
+}
+
+service test {
+	[echo testing jumps]
+	[echo test 1]
+	a = 3
+	jump (a) { {[echo failed]} {[echo failed]} {[echo failed]} {[echo passed]} {[echo failed]} }
+	[echo test 2]
+	a = 3
+	jump (a) { {[echo passed]} {[echo failed]} {[echo failed]} }
+	[echo test 3]
+	a = 6
+	jump (a) { {[echo failed]} {[echo failed]}  {[echo passed]} {[echo failed]}} 
+}
