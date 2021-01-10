@@ -102,7 +102,7 @@ class jump():
 
 	def compile_branch(self, branch_state):
 		compute = self.uni.new_def('code')
-		if len(branch_state) + 1 != self.jump_count:
+		if len(branch_state) - 1 != self.jump_count:
 			compute.extend(self.subbranch('1' + branch_state))
 			compute.extend(self.subbranch('0' + branch_state))		
 		else:
