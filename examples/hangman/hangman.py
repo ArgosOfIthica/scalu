@@ -1,10 +1,7 @@
-'''NOTE: This was merely used in part of the generation of the scripts here. The output of this script was hand edited to make the final product
-
-#macro iterate { expand 8 replace a index }
-#macro iterate_letter { expand 26 replace y letter}
+'''NOTE: This was merely used in part of the generation of the scripts here. The output of this script was hand edited to make the final product'''
 
 letters = ['_', 'a', 'b', 'c', 'd', 'e', 'f', 'g', 'h', 'i', 'j', 'k', 'l', 'm', 'n', 'o', 'p', 'q', 'r', 's', 't', 'u', 'v', 'w', 'x', 'y', 'z', ' ']
-#yes, I'm purposefully not using ord() here
+
 words = ['granary', 'badlands', 'badwater', 'dustbowl', 'well', 'turbine', 'freight', 'process', 'steel', 'borneo', 'frontier', 'hoodoo', 'upward', 'pipeline', 'nucleus', 'brazil', 'harvest', 'lakeside', 'gorge', 'foundry', 'decoy', 'bigrock', 'doomsday', 'lazarus', 'highpass', 'sawmill', 'offblast', 'hydro', 'standin', 'mossrock','junction', 'yukon', 'sunshine', 'fastlane', 'snowplow', 'ravine', 'byre', 'decoy', 'district', 'hellfire', 'landfall', 'viaduct', 'suijin']
 
 program = '''
