@@ -1,109 +1,247 @@
 from enum import Enum
 import re
 
-def tokenize(prog_string):
-    for char in prog_string:
-        pass
-
 
 def preprocess(prog_string):
-    tokens = tokenize(prog_string)
-    proc = Preprocessor(tokens)
-    print(tokens)
-    iter_count = 0
-    ITER_MAX = 10000
-    process_token(proc)
-    while len(proc.tokens) > 1 and iter_count < ITER_MAX:
-        proc.delete()
-        iter_count += 1
-        process_token(proc)
+    token_col = Tokenizer().tokenize(prog_string)
+    proc = Sable(token_col)
+    result = proc.compute()
     return ''.join(proc.cleared_tokens)
 
-def process_token(proc):
-    if proc.is_nominal():
-        proc.process()
-    elif proc.mode == '#clear':
-        process_clear(proc)
-    elif proc.mode == '#deep':
-        process_deep(proc)
-    elif proc.mode == '#wide':
-        process_wide(proc)
 
-def process_clear(proc):
-    if proc.token() in proc.builtins:
-        proc.mode = proc.token()
-        process_builtin(proc)
-    else:
-        proc.tokens = proc.spawn_user_macro() + proc.tokens
+class Tokenizer():
 
-def process_deep(proc):
-    if proc.token() != '#save':
-        proc.queue += proc.spawn_user_macro()
-    elif proc.token() == '#save':
-        proc.macros[proc.active_macro] = proc.queue
-        proc_queue = list()
-        proc.mode = '#clear'
+    def tokenize(self, prog_string):
+        self.WHITESPACE = (' ', '\t', '\n')
+        self.SYMBOL = '#'
+        self.prog_string = prog_string
+        self.tc = Token_Collection(prog_string)
+        self.string_collector = ''
+        self.macro_stage = 0
+        self.type_collector = ''
+        for char in prog_string:
+            if self.macro_stage == 0:
+                self.detect_symbol(char)
+            elif self.macro_stage == 1:
+                self.detect_escape(char)
+            elif self.macro_stage == 2:
+                self.detect_macro_end(char)
+        self.tc.append(Token(self.string_collector, self.type_collector))
+        return self.tc
 
-def process_wide(proc):
-    max_macro_size = 1
-    if proc.token() != '#save':
-        proc.queue.append(proc.spawn_user_macro())
-    elif proc.token() == '#save':
+    def detect_symbol(self, char):
+        self.type_collector = 'string'
+        if char != self.SYMBOL:
+            self.string_collector += char
+        elif char == self.SYMBOL:
+            self.macro_stage = 1
+
+    def detect_escape(self, char):
+        if char != self.SYMBOL:
+            self.tc.add_token(string_collector, 'string')
+            self.string_collector = self.SYMBOL + char
+            self.type_collector = 'macro'
+            self.macro_stage = 2
+        elif char == self.SYMBOL or char in self.WHITESPACE:
+            self.string_collector.append(char)
+            self.macro_stage = 0
+
+    def detect_macro_end(self, char):
+            if char in self.WHITESPACE:
+                tc.add_token(string_collector, 'macro')
+                string_collector = char
+                self.macro_stage = 0
+            elif char == '#':
+                string_collector.append(char)
+                tc.add_token(string_collector, 'macro')
+                string_collector = str()
+                self.macro_stage = 0
+            else:
+                string_collector.append(char)
+
+
+class Token_Collection(list):
+
+    def add_token(self, value, token_type):
+        self.append(Token(value, token_type))
+
+class Token():
+
+    def __init__(self, value, token_type):
+        self.value = value
+        self.token_type = token_type
+
+class Sable_State():
+
+    def __init__(self, proc):
+        self.proc = proc
+
+    def update_state(self):
+        self.proc.previous_state = self.proc.current_state
+        self.proc.current_state = self
+
+    def process(self):
+        if self.proc.is_nominal():
+            self.process_nominal()
+        elif self.proc.is_macro():
+            self.process_macro()
+
+    def process_nominal():
+        self.proc.process()
+    
+    def process_macro(self):
+        self.proc.match(proc.token()).update_state()
+    
+    def transition(self):
+        allowed = self.allowed()
+        if self.proc.previous_state in allowed:
+            self.initial_process()
+            while len(self.proc.tokens != 0) and self.proc.current_state == self:
+                self.process()
+        else:
+            raise Exception('an exception')
+
+    def initial_process(self):
         pass
 
-def process_builtin(proc):
-    if proc.mode == '#wide' or proc.mode == '#deep':
-        proc.delete()
-        if not proc.is_nominal() and proc.token() not in proc.builtins and proc.token() not in proc.macros:
-            proc.active_macro = proc.token()
+class Clear(Sable_State):
+
+    def allowed(self):
+        return (Save, Clear)
+
+class Macro(Sable_State):
+
+    def process_nominal():
+        self.proc.forward()
+
+    def initial_process(self):
+        if self.proc.token().token_type == 'macro' and not self.proc.token().value[0].is_numeric():
+            self.proc.active_macro = self.proc.current_token()
+            self.proc.delete()
         else:
-            raise Exception('bad macro')
-    elif proc.mode == '#save':
-        raise Exception('cannot use #save here')
+            raise Exception('macro declaration not properly named')
+    
+    def allowed(self):
+        return (Clear)
 
-class Preprocessor():
+class Deep(Macro):
+    pass
 
-    def __init__(self, tokens):
-        self.builtins = ('#deep', '#wide', '#save', '#clear')
-        self.mode = '#clear'
-        self.tokens = tokens
+class Wide(Macro):
+    pass
+
+class Unprocessed(Sable_State):
+
+    def initial_process(self):
+        self.proc.tokens = self.value + self.proc.tokens
+        self.proc.current_state = self.proc.previous_state
+        self.proc.previous_state = self.proc.clear
+    
+    def process(self):
+        raise Exception('process should be unreachable from custom macro')
+
+class Custom(Unprocessed):
+
+    def __init__(self, value):
+        super.__init__()
+        self.value = Tokenizer().tokenize(value)
+
+
+class Sequence(Unprocessed):
+
+    def __init__(self, recipe):
+        super.__init__()
+        self.recipe = recipe
+        self.value = None
+    
+    def initial_process(self):
+        if self.value is None:
+            self.construct_value()
+
+
+class Sequence_Construct():
+
+    def __init__(self, recipe):
+        self.recipe = recipe
+        self.empty = False
+        self.reversed = False
+
+    def build_sequence(self):
+        self.parse()
+        return self.create()
+
+    def parse(self):
+        extracted_number = ''
+        for char in self.recipe:
+            if char.is_numeric():
+                extracted_number.append(char)
+            else:
+                break
+        for char in self.recipe:
+            if char == 'e':
+                self.empty = True
+            elif char == 'r':
+                self.reversed = True
+    
+    def create(self):
+        iterable = [_ for _ in range(int(extracted_number))]
+        if self.reversed:
+            iterable = iterable.reverse()
+        
+            
+
+
+class Sable():
+
+    def __init__(self, tc):
+        #setup builtins
+        self.clear = Clear()
+        self.deep = Deep()
+        self.wide = Wide()
+        self.save = Save()
+        self.macros = {
+            'deep' : self.deep,
+            'wide' : self.wide,
+            'save' : self.save
+        }
+        #FSM machinery
+        self.previous_state = self.clear
+        self.current_state = self.clear
+        #tokens
+        self.tokens = tc
         self.cleared_tokens = list()
-        self.macros = dict()
         self.active_macro = ''
         self.queue = list()
+    
+    def compute(self):
+        while len(self.tokens) != 0:
+            self.mode.transition()
 
     def is_nominal(self):
-        if len(self.token()) > 1:
-            return self.tokens[0] != '#' or self.tokens[1] == '#'
-        else:
-            return True
+        return self.current_token().token_type == 'string'
 
-    def token(self):
+    def is_macro(self):
+        return self.current_token().token_type == 'macro'
+
+    def current_token(self):
         return self.tokens[0]
 
     def delete(self):
         del self.tokens[0]
     
     def process(self):
-        self.clear(self.token())
-    
-    def clear(self, nominal_token):
-        if len(self.token()) > 1 and nominal_token[0] == '#' and nominal_token[1] == '#':
-            nominal_token = nominal_token[1:]
-        self.cleared_tokens.append(nominal_token) 
+        self.cleared_tokens.append(self.current_token().value)
+        self.delete()
     
     def forward(self):
-        self.queue.append(self.tokens[0])
+        self.queue.append(self.current_token())
+        self.delete()
     
-    def spawn_user_macro(self):
-        macro_list = self.macros[self.token()]
-        computed_list = list()
-        for ele in macro_list:
-            if len(self.token()) > 1 and ele[0] == '#' and ele[1] == '#':
-                computed_list.append(ele[:1])
-            elif len(self.token()) > 1 and ele[0] == '#':
-                computed_list.append(self.macros[ele]) #check for exceptions
-            else:
-                computed_list.append(ele)
-        return computed_list
-  
+    def match(self, token):
+        if token.value in self.macros:
+            return self.macros[token.value]
+        if token.value[0].is_numeric():
+            pass
+        else:
+            raise Exception('cannot find')
+        

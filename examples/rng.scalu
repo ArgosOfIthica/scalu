@@ -1,0 +1,24 @@
+sandbox rng
+
+map {
+boot: @init
+rng_cycle: @cycle
+rng_entropy: @entropy
+}
+
+service init {
+	rng = 1
+}
+
+/* request a new random number */
+service cycle {
+    rng = rng + 1
+	rng = rng ^ (rng << 7)
+    rng = rng ^ (rng >> 5)
+    rng = rng ^ (rng << 3)
+}
+
+/* optional means of adding entropy to rng value
+service entropy {
+    rng = rng + 1
+}

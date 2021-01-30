@@ -1,0 +1,8 @@
+
+sandbox variable_bitshift
+
+
+service example {
+/* c = a >> b is an illegal operation, but.... */
+    jump (b) { {c = alpha >> 0} {c = alpha >> 1} {c = alpha >> 2} {c = alpha >> 3} {c = alpha >> 4} {c = alpha >> 5} {c = alpha >> 6} {c = alpha >> 7} }
+}
