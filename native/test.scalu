@@ -45,6 +45,8 @@ service equality{
 	if (a == 5) {[echo passed]} else {[echo failed]}
 	[echo test 3]
 	if (a == 6) {[echo failed]} else {[echo passed]}
+	[echo test 4]
+	if (23 == 23) {[echo passed]} else {[echo failed]}
 }
 
 sandbox test_inequality
@@ -62,6 +64,8 @@ service inequality {
 	if (a != 5) {[echo passed]} else {[echo failed]}
 	[echo test 3]
 	if (a != 6) {[echo failed]} else {[echo passed]}
+	[echo test 4]
+	if (23 != 23) {[echo failed]} else {[echo passed]}
 }
 
 sandbox test_copy
@@ -79,6 +83,9 @@ service copy {
 	[echo test 2]
 	a = 7
 	if (a == 7) {[echo passed]} else {[echo failed]}
+	b = 23
+	a = b
+	if (a == 23) {[echo passed]} else {[echo failed]}
 }
 
 
@@ -97,6 +104,9 @@ service bitwise_not {
 	[echo test 2]
 	b = !b
 	if (b == 43) {[echo passed]} else {[echo failed]}
+	[echo test 3]
+	b = !255
+	if (b == 0) {[echo passed]} else {[echo failed]}
 }
 
 sandbox test_bitwise_and
@@ -274,3 +284,81 @@ service subtraction {
 	if (c == 236) {[echo passed]} else {[echo failed]}
 }
 
+sandbox test_reference1
+
+map {
+	test_event : @test
+}
+
+service test {
+	[echo testing references]
+	[echo test 1]
+	a = 27
+}
+
+sandbox test_reference2
+
+map {
+	test_event: @test
+}
+
+service test {
+	b = test_reference1.a
+	if (b == 27) {[echo passed]} else {[echo failed]}
+	test_reference1.a = 7
+	[echo test 2]
+	if (test_reference1.a == 7) {[echo passed]} else {[echo failed]}
+}
+
+sandbox test_left_shift
+
+map {
+	test_event : @test
+}
+
+service test {
+	[echo testing shift left]
+	[echo test 1]
+	a = 23
+	b = a << 2
+	if (b == 92) {[echo passed]} else {[echo failed]}
+	[echo test 2]
+	a = 7 << 5
+	if (a == 224) {[echo passed]} else {[echo failed]}
+}
+
+sandbox test_right_shift
+
+map {
+	test_event : @test
+}
+
+service test {
+	[echo testing right shift]
+	[echo test 1]
+	a = 92
+	b = a >> 2
+	if (b == 23) {[echo passed]} else {[echo failed]}
+	[echo test 2]
+	a = 224 >> 5
+	if (a == 7) {[echo passed]} else {[echo failed]}
+}
+
+sandbox test_jump_statement
+
+map {
+	test_event : @test
+}
+
+service test {
+	[echo testing jumps]
+	[echo test 1]
+	a = 3
+	jump (a) { {[echo failed]} {[echo failed]} {[echo failed]} {[echo passed]} {[echo failed]} }
+	[echo test 2]
+	a = 3
+	jump (a) { {[echo passed]} {[echo failed]} {[echo failed]} }
+	[echo test 3]
+	a = 6
+	jump (a) { {[echo failed]} {[echo failed]}  {[echo passed]} {[echo failed]}} 
+}

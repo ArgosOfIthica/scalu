@@ -1,33 +1,10 @@
-"""
-EBNF
-
-sandbox = 'sandbox ' str { bind_block | map_block | service_block | file_block }
-service_block = 'service' str '{' block '}'
-block = { statement }
-bind_block = 'bind' '{' { str ':' str } '}'
-map_block = 'map' '{' { str ':' call } '}'
-file_block = 'file' '{' { str ':' str } '}'
-statement = assignment | call | if
-call = source_call | service_call
-source_call = '[' str ']'
-service_call = '@' str
-assignment = str '=' exp
-if = 'if' '(' conditional ')' '{' block '}' [ '{' block '} ]
-conditional = str condition str
-exp = ( p_exp | exp binop exp | unop exp | value)
-p_exp = '(' exp ')'
-binop = '|' | '&' | '+' | '-'
-unop = '~' | '?'
-condition = '==' | '!=' | '>' | '<' | '>=' | '<='
-
-"""
 import src.model.structure as model
 import src.frontend.utility.utility as utility
 import src.model.consumer as consume
 import re
 
 def parse(tokens):
-	consumer_obj =  consume.consumer(tokens)
+	consumer_obj = consume.consumer(tokens)
 	return global_context(consumer_obj)
 
 
@@ -36,20 +13,19 @@ def global_context(consumer):
 	consumer.global_object = new_global_object
 	while consumer.is_sandbox():
 		new_sandbox = expect_sandbox(consumer)
-		new_global_object.sandbox.append(new_sandbox)
 	if consumer.token() == '':
 		new_global_object.resolve()
+		new_global_object.current_sandbox = None
 		return new_global_object
 	else:
 		consume.parsing_error(consumer)
 
 
 def expect_sandbox(consumer):
-	new_sandbox = model.sandbox()
-	consumer.current_sandbox = new_sandbox #this lets us cheat and
-	#see the resolution of the sandbox without passing the sandbox as a argument
 	consumer.consume('sandbox')
-	new_sandbox.name = consumer.use_if_name()
+	new_sandbox = consumer.global_object.sandbox.declare(consumer.token())
+	consumer.current_sandbox = new_sandbox
+	consumer.consume()
 	while consumer.is_block():
 		block_type = consumer.token()
 		if block_type == 'service':
@@ -109,19 +85,20 @@ def expect_file_block(consumer):
 	consumer.consume('}')
 	return file_map
 
-
-
 def expect_service_block(consumer, named=True):
-	new_block = model.service()
-	if named == True:
+	new_block = None
+	if named:
 		consumer.consume('service')
-		new_block.name = consumer.use_if_name()
+		new_block = consumer.current_sandbox.services.declare(consumer.use_if_name())
 	else:
+		new_block = model.service()
 		new_block.name = ''
 		new_block.is_anonymous = True
+		new_block.declared = True
+		consumer.current_sandbox.services.append(new_block)
 	consumer.consume('{')
 	while consumer.is_not_end_block():
-		if consumer.is_variable_assignment():
+		if consumer.is_variable_assignment() or consumer.is_sandboxed_assignment():
 			new_assignment = expect_assignment(consumer)
 			new_block.sequence.append(new_assignment)
 		elif consumer.is_service_call():
@@ -133,16 +110,19 @@ def expect_service_block(consumer, named=True):
 		elif consumer.is_if():
 			new_if = expect_if(consumer)
 			new_block.sequence.append(new_if)
+		elif consumer.is_jump():
+			new_jump = expect_jump(consumer)
+			new_block.sequence.append(new_jump)
 		else:
 			consume.parsing_error(consumer, 'invalid statement error')
 	consumer.consume('}')
-	consumer.current_sandbox.services.append(new_block)
 	return new_block
 
 def empty_service(consumer):
 	new_block = model.service()
 	new_block.name = ''
 	new_block.is_anonymous = True
+	new_block.declared = True
 	consumer.current_sandbox.services.append(new_block)
 	return new_block
 
@@ -159,9 +139,40 @@ def expect_if(consumer):
 	if consumer.is_else():
 		consumer.consume('else')
 		new_if.false_service = expect_service_block(consumer, False)
+
 	else:
 		new_if.false_service = empty_service(consumer)
 	return new_if
+
+def expect_jump(consumer):
+	new_jump = model.jump_statement()
+	consumer.consume('jump')
+	if consumer.is_subexpression():
+		consumer.consume('(')
+		new_jump.var = expect_jump_identifier(consumer)
+		consumer.consume(')')
+	else:
+		new_jump.var = expect_jump_identifier(consumer)
+	consumer.consume('{')
+	while consumer.is_not_end_block():
+		new_jump.services.append(expect_service_block(consumer, False))
+	consumer.consume('}')
+	return new_jump
+
+
+def expect_jump_identifier(consumer):
+	sandbox = ''
+	if consumer.is_sandboxed_assignment():
+		sandbox = consumer.use_if_name()
+		consumer.consume('.')
+	if sandbox == '':
+		sandbox = consumer.current_sandbox
+	else:
+		sandbox = consumer.global_object.sandbox.reference(sandbox)
+	identifier = consumer.use_if_name()
+	var = sandbox.variables.reference(identifier)
+	return var
+
 
 def expect_call(consumer):
 	if consumer.is_service_call():
@@ -181,10 +192,9 @@ def expect_source_call(consumer):
 	return new_source_call
 
 def expect_service_call(consumer):
-	new_service_call = model.service_call(consumer.current_sandbox)
 	consumer.consume('@')
-	new_service_call.identifier = consumer.use_if_name()
-	new_service_call.sandbox = consumer.current_sandbox
+	new_service_call = model.service_call()
+	new_service_call.identifier = consumer.current_sandbox.services.reference(consumer.use_if_name())
 	return new_service_call
 
 
@@ -197,14 +207,20 @@ def expect_assignment(consumer):
 
 
 def expect_assignment_identifier(consumer):
-	identifier = consumer.use_if_name()
-	res = consumer.current_sandbox.resolution
-	if identifier in res.variable_lookup:
-		return res.variable_lookup[identifier]
+	sandbox = ''
+	if consumer.is_sandboxed_assignment():
+		sandbox = consumer.use_if_name()
+		consumer.consume('.')
+	if sandbox == '':
+		sandbox = consumer.current_sandbox
 	else:
-		new_variable = model.variable(identifier)
-		res.variable_lookup[identifier] = new_variable
-		return new_variable
+		sandbox = consumer.global_object.sandbox.reference(sandbox)
+	identifier = consumer.use_if_name()
+	var = sandbox.variables.reference(identifier)
+	if not var.declared:
+		return sandbox.variables.declare(identifier)
+	else:
+		return var
 
 def expect_p_expression(consumer):
 	consumer.consume('(')
@@ -217,10 +233,10 @@ def expect_expression_atomic(consumer):
 		return expect_unop(consumer)
 	elif consumer.is_subexpression():
 		return expect_p_expression(consumer)
-	elif consumer.is_literal_value():
-		return expect_literal_value(consumer)
+	elif consumer.token_is_value():
+		return expect_value(consumer)
 	else:
-		consume.parsing_error(consumer, 'invalid expression atomic error')
+		consumer.parsing_error(consumer, 'invalid expression atomic error')
 
 def expect_expression(consumer):
 	new_expression = expect_expression_atomic(consumer)
@@ -228,24 +244,24 @@ def expect_expression(consumer):
 		new_expression = expect_binop(consumer, new_expression)
 	return new_expression
 
-
-def expect_literal_value(consumer):
-	return expect_value(consumer)
-
-
 def expect_value(consumer):
+	sandbox = ''
+	if consumer.is_sandboxed_assignment():
+		sandbox = consumer.use_if_name()
+		consumer.consume('.')
+	if sandbox == '':
+		sandbox = consumer.current_sandbox
+	else:
+		sandbox = consumer.global_object.sandbox.reference(sandbox)
 	value = consumer.token()
 	consumer.consume()
-	res = consumer.current_sandbox.resolution
-	if value in res.variable_lookup:
-		return res.variable_lookup[value]
+	if utility.token_is_name(value):
+		return sandbox.variables.reference(value)
 	elif utility.token_is_numeric(value):
-		if value in res.constant_lookup:
-			return res.constant_lookup[value]
-		else:
-			new_constant = model.constant(value)
-			res.constant_lookup[value] = new_constant
-			return new_constant
+		v_const = sandbox.variables.reference(value, model.constant)
+		v_const.set_value(value)
+		v_const.declared = True
+		return v_const
 	else:
 		consume.parsing_error(consumer, 'invalid variable error')
 

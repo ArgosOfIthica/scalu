@@ -1,7 +1,7 @@
 
 import re
 import math
-import src.backend.model.universe as universe
+import src.model.universe as universe
 
 def minify(cfg_string, uni):
 	blob = alias_blob(uni)
@@ -11,6 +11,7 @@ def minify(cfg_string, uni):
 	output_text = clean_output(output_text)
 	output_text = reallocate(output_text, blob)
 	output_text = clean_output(output_text)
+	output_text = deduplicate(output_text)
 	return output_text
 
 def clean_output(output_text):
@@ -20,24 +21,24 @@ def clean_output(output_text):
 	return output_text
 
 def minify_names(blob):
-	HEAD_INDEX = 0
-	TAIL_INDEX = 1
+	HEAD = 0
+	TAIL = 1
 	output_text = ''
 	for alias in blob.alias_tuples:
-		new_head = blob.alias_convert[alias[HEAD_INDEX]]
-		new_tail = minify_payload(alias[TAIL_INDEX], blob)
+		new_head = blob.alias_convert[alias[HEAD]]
+		new_tail = minify_payload(alias[TAIL], blob)
 		output_text += 'alias ' + new_head + ' "' + new_tail + '"\n'
 	return output_text
 
 
 def minify_payload(tail, blob):
-	split_tail = re.split('(\W)', tail)
-	split_value = clean_split(split_tail)
+	split_value = split_tail_word(tail)
 	updated_value = [ minify_word(word, blob.alias_convert) for word in split_value]
 	updated_value = ''.join(updated_value)
 	return updated_value
 
-def clean_split(split_tail):
+def split_tail_word(tail):
+	split_tail = re.split('(\W)', tail)
 	for token in range(len(split_tail)):
 		if split_tail[token] == '%':
 			split_tail[token] = ''
@@ -89,10 +90,51 @@ def minify_word(word, alias_convert):
 	else:
 		return word
 
+def replace_words(replacement_map, cfg):
+	words = list()
+	split_cfg = split_tail_word(cfg)
+	for word in split_cfg:
+		if word in replacement_map:
+			words.append(replacement_map[word])
+		else:
+			words.append(word)
+	words = ''.join(words)
+	line_split = re.split('\n', words)
+	line_split = list(dict.fromkeys(line_split))
+	return '\n'.join(line_split)
+
+
+def deduplicate(cfg):
+	count = 0
+	redundant_heads = list()
+	running = True
+	while count < 500:
+		count += 1
+		new_cfg = deduplicate_instance(cfg)
+		if len(new_cfg) == len(cfg):
+			return cfg
+		cfg = new_cfg
+	return cfg
+
+def deduplicate_instance(cfg):
+	HEAD = 0
+	TAIL = 1
+	tuple_list = to_tuple_list(cfg)
+	unique_tails = dict()
+	head_map = dict()
+	for ele in tuple_list:
+		if ele[TAIL] not in unique_tails:
+			unique_tails[ele[TAIL]] = ele[HEAD]
+		else:
+			head_map[ele[HEAD]] = unique_tails[ele[TAIL]]
+	new_cfg = replace_words(head_map, cfg)
+	return new_cfg
+
+
 class alias_blob():
 
 	def __init__(self, uni=None):
-		self.CONSOLE_MAX_BUFFER = 510 #limit determined by trial and error in HL:Source
+		self.CONSOLE_MAX_BUFFER = 510 #determined by engine
 		self.alias_tuples = tuple()
 		self.alias_convert = dict()
 		self.pick = universe.picker()
@@ -102,4 +144,3 @@ class alias_blob():
 					self.alias_convert[alias.identity] = alias.string
 				else:
 					self.alias_convert[alias.identity] = self.pick.new_alias()
-

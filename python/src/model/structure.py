@@ -1,25 +1,79 @@
 
 import src.frontend.utility.utility as utility
-import src.backend.model.universe as universe
+import src.model.universe as universe
+
+
+class rd_obj():
+
+	def __init__(self):
+		self.name = ''
+		self.declared = False
+
+	def declaration_collision(self):
+		pass
+
+class rd_list(list):
+
+	def setup(self, obj_constructor):
+		self.obj_constructor = obj_constructor
+		return self
+
+	def reference(self, obj_string, constructor_override=None):
+		if obj_string in [x.name for x in self]:
+			return self.get_object(obj_string)
+		else:
+			if constructor_override is not None:
+				new_obj = constructor_override()
+			else:
+				new_obj = self.obj_constructor()
+			new_obj.name = obj_string
+			new_obj.declared = False
+			self.append(new_obj)
+			return new_obj
+
+	def declare(self, obj_string, constructor_override=None):
+		if obj_string in [x.name for x in self]:
+			declared_obj = self.get_object(obj_string)
+			if declared_obj.declared:
+				declared_obj.declaration_collision()
+				raise Exception('object collision')
+			else:
+				declared_obj.declared = True
+				return declared_obj
+		else:
+			if constructor_override is not None:
+				new_obj = constructor_override()
+			else:
+				new_obj = self.obj_constructor()
+			new_obj.name = obj_string
+			new_obj.declared = True
+			self.append(new_obj)
+			return new_obj
+
+	def get_object(self, obj_string):
+		for obj in self:
+			if obj_string == obj.name:
+				return obj
+		raise Exception('object not accessible')
+
+	def validate(self):
+		for obj in self:
+			if not obj.declared:
+				raise Exception(obj.name + ' has not been declared')
 
 class global_object():
 
 	def __init__(self):
-		self.sandbox = list()
+		self.sandbox = rd_list().setup(sandbox)
 		self.maps = map_collection()
 		self.universe = universe.universe()
 		self.universe.initialize()
 
 	def resolve(self):
+		self.sandbox.validate()
 		for sandbox in self.sandbox:
-			sandbox.resolve()
-		self.maps.resolve()
-
-
-
-class resolution_block():
-	variable_lookup = dict()
-	constant_lookup = dict()
+			sandbox.variables.validate()
+			sandbox.services.validate()
 
 
 class map_collection():
@@ -61,51 +115,40 @@ class map_collection():
 			old_event.file = new_event.file
 		old_event.services = old_event.services + new_event.services
 
-	def resolve(self):
-		for event in self.maps:
-			for service_call in event.services:
-				if is_service_call(service_call):
-					service_call.resolve()
-
-
-class sandbox():
+class sandbox(rd_obj):
 
 	def __init__(self):
-		self.name = ''
-		self.resolution = resolution_block()
-		self.services = list()
+		rd_obj.__init__(self)
+		self.variables = rd_list().setup(variable)
+		self.services = rd_list().setup(service)
 
-
-	def resolve(self):
-		for service in self.services:
-			for statement in service.sequence:
-				if is_service_call(statement):
-					statement.resolve()
-
-class variable():
+class variable(rd_obj):
 
 	def __init__(self, name=''):
+		rd_obj.__init__(self)
 		self.name = name
 		self.type = 'int'
 		self.value = '0'
 		self.word_size = '8'
 
-class constant(variable):
-
-	def __init__(self, value='0'):
-		self.name = value
-		self.type = 'int'
-		self.word_size = '8'
+	def set_value(self, value):
 		if int(value) < 2**int(self.word_size) and int(value) >= 0:
 			self.value = value
 		else:
 			raise Exception('illegal value declaration:' + value + ' . Number not within bounds of the word size')
 
-class service():
+class constant(variable):
+
+	def __init__(self, value='0'):
+		variable.__init__(self, value)
+		self.set_value(value)
+
+class service(rd_obj):
 
 	def __init__(self):
-		self.name = ''
+		rd_obj.__init__(self)
 		self.sequence = list()
+		self.is_anonymous = False
 
 class event():
 
@@ -142,25 +185,13 @@ class assignment(statement):
 class service_call(statement):
 
 
-	def __init__(self, sandbox):
-		self.sandbox = sandbox
-
-	def resolve(self):
-		matching_service = self.get_service()
-		self.identifier = matching_service
-
-	def get_service(self):
-		for service in self.sandbox.services:
-			if self.identifier == service.name:
-				return service
-		raise Exception('service call cannot be resolved')
+	def __init__(self):
+		self.identifier = ''
 
 class source_call(statement):
 
 	def __init__(self):
 		self.arg = [None]
-
-
 
 class if_statement():
 
@@ -169,24 +200,35 @@ class if_statement():
 		self.false_service = None
 		self.condition = None
 
+class jump_statement():
+
+	def __init__(self):
+		self.var = None
+		self.services = list()
+
 class operator():
-	identity = ''
-	output = ''
-	arg = list()
+
+	def __init__(self):
+		identity = ''
+		output = ''
+		arg = list()
 
 class unary_operator(operator):
 
 	def __init__(self):
+		operator.__init__(self)
 		self.arg = [None]
 
 class binary_operator(operator):
 
 	def __init__(self):
+		operator.__init__(self)
 		self.arg =  [None] * 2
 
 class conditional(operator):
 
 	def __init__(self):
+		operator.__init__(self)
 		self.arg = [None] * 2
 
 def is_assignment(arg):
@@ -221,6 +263,9 @@ def is_key(arg):
 
 def is_if_statement(arg):
 	return isinstance(arg, if_statement)
+
+def is_jump_statement(arg):
+	return isinstance(arg, jump_statement)
 
 def is_conditional(arg):
 	return isinstance(arg, conditional)

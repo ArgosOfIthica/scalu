@@ -20,7 +20,9 @@ class consumer():
 		'|' : 'bitwise_or',
 		'&' : 'bitwise_and',
 		'+' : 'add',
-		'-' : 'subtract'
+		'-' : 'subtract',
+		'<<': 'left_shift',
+		'>>': 'right_shift'
 		}
 		self.unary_symbol_map = {
 		'!' : 'bitwise_neg',
@@ -78,6 +80,9 @@ class consumer():
 	def is_variable_assignment(self):
 		return self.token(1) == '='
 
+	def is_sandboxed_assignment(self):
+		return self.token(1) == '.'
+
 	def is_service_call(self):
 		return self.token() == '@'
 
@@ -102,15 +107,15 @@ class consumer():
 	def is_if(self):
 		return self.token() == 'if'
 
+	def is_jump(self):
+		return self.token() == 'jump'
+
 	def is_block(self):
 		block_types = ('service', 'map', 'bind', 'file')
 		return self.token() in block_types
 
 	def is_subexpression(self):
 		return self.token() == '('
-
-	def is_literal_value(self):
-		return self.token_is_value()
 
 	def is_unop(self, lookahead=0):
 		return self.token(lookahead) in self.unary_symbol_map

@@ -1,0 +1,1206 @@
+
+sandbox hangman
+
+map {
+boot : @start
+hangman : @start
+a : @a
+b : @b
+c : @c
+d : @d
+e : @e
+f : @f
+g : @g
+h : @h
+i : @i
+j : @j
+k : @k
+l : @l
+m : @m
+n : @n
+o : @o
+p : @p
+q : @q
+r : @r
+s : @s
+t : @t
+u : @u
+v : @v
+w : @w
+x : @x
+y : @y
+z : @z
+word0 : @word0
+word1 : @word1
+word2 : @word2
+word3 : @word3
+word4 : @word4
+word5 : @word5
+word6 : @word6
+word7 : @word7
+word8 : @word8
+word9 : @word9
+word10 : @word10
+word11 : @word11
+word12 : @word12
+word13 : @word13
+word14 : @word14
+word15 : @word15
+word16 : @word16
+word17 : @word17
+word18 : @word18
+word19 : @word19
+word20 : @word20
+word21 : @word21
+word22 : @word22
+word23 : @word23
+word24 : @word24
+word25 : @word25
+word26 : @word26
+word27 : @word27
+word28 : @word28
+word29 : @word29
+word30 : @word30
+word31 : @word31
+word32 : @word32
+word33 : @word33
+word34 : @word34
+word35 : @word35
+word36 : @word36
+word37 : @word37
+word38 : @word38
+word39 : @word39
+word40 : @word40
+word41 : @word41
+word42 : @word42
+}
+
+service init {
+	guess = 0			/* letter index for a player guess*/
+	guess_value = 0		/* stores round result. 0 is none, 1 is at least 1 good guess, 2 is new round */
+	current_letter = 0	/* used for printing by index */
+	hangman_state = 7
+reveal_state0 = 0 /* bitmask for determining which letters get revealed */
+letter_value0 = 0 /* the solution by index */
+reveal_state1 = 0 /* bitmask for determining which letters get revealed */
+letter_value1 = 0 /* the solution by index */
+reveal_state2 = 0 /* bitmask for determining which letters get revealed */
+letter_value2 = 0 /* the solution by index */
+reveal_state3 = 0 /* bitmask for determining which letters get revealed */
+letter_value3 = 0 /* the solution by index */
+reveal_state4 = 0 /* bitmask for determining which letters get revealed */
+letter_value4 = 0 /* the solution by index */
+reveal_state5 = 0 /* bitmask for determining which letters get revealed */
+letter_value5 = 0 /* the solution by index */
+reveal_state6 = 0 /* bitmask for determining which letters get revealed */
+letter_value6 = 0 /* the solution by index */
+reveal_state7 = 0 /* bitmask for determining which letters get revealed */
+letter_value7 = 0 /* the solution by index */
+	}
+
+service start {
+		[echo hey! welcome to hangman!]
+		[echo this hangman game is meant to demonstrate scalu, ]
+		[echo a programming language for the Source engine console]
+		[echo to begin, choose a word by typing]
+		[echo $word0]
+		[echo $word1]
+		[echo $word2]
+		[echo ...etc]
+		[echo into the console. This version of the game has 43 words to choose from]
+		[echo you can guess the letter A by typing]
+		[echo $a]
+		[echo the letter B by typing]
+		[echo $b]
+		[echo etc etc]
+}
+
+service new_round {
+	[echo lets play!]
+	hangman_state = 7
+	guess_value = 2
+	@round
+}
+
+service round {
+	if (guess_value == 0) {[echo sorry, that wasn't it!] hangman_state = hangman_state - 1} else {
+		if (guess_value == 1) {[echo nice job!]} else { [echo initializing!]}
+	}
+	@draw
+	guess_value = 0
+	if (hangman_state == 0) {
+		[echo game over!]
+reveal_state0 = 63
+reveal_state1 = 63
+reveal_state2 = 63
+reveal_state3 = 63
+reveal_state4 = 63
+reveal_state5 = 63
+reveal_state6 = 63
+reveal_state7 = 63
+	}
+	else{
+		win_check = reveal_state0 & reveal_state1 & reveal_state2 & reveal_state3 & reveal_state4 & reveal_state5 & reveal_state6 & reveal_state7
+		if (win_check != 0) {
+			[echo you win!]
+		}
+	}
+
+current_letter = reveal_state0 & letter_value0
+@render_letter
+current_letter = reveal_state1 & letter_value1
+@render_letter
+current_letter = reveal_state2 & letter_value2
+@render_letter
+current_letter = reveal_state3 & letter_value3
+@render_letter
+current_letter = reveal_state4 & letter_value4
+@render_letter
+current_letter = reveal_state5 & letter_value5
+@render_letter
+current_letter = reveal_state6 & letter_value6
+@render_letter
+current_letter = reveal_state7 & letter_value7
+@render_letter
+
+}
+
+service render_letter {
+jump (current_letter) { {[echo _]}{[echo a]}{[echo b]}{[echo c]}{[echo d]}{[echo e]}{[echo f]}{[echo g]}{[echo h]}{[echo i]}{[echo j]}{[echo k]}{[echo l]}{[echo m]}{[echo n]}{[echo o]}{[echo p]}{[echo q]}{[echo r]}{[echo s]}{[echo t]}{[echo u]}{[echo v]}{[echo w]}{[echo x]}{[echo y]}{[echo z]} {[echo #]}}
+}
+
+service guess_process {
+		if (guess == letter_value0) {
+			guess_value = 1
+			reveal_state0 = 63
+		}
+		if (guess == letter_value1) {
+			guess_value = 1
+			reveal_state1 = 63
+		}
+		if (guess == letter_value2) {
+			guess_value = 1
+			reveal_state2 = 63
+		}
+		if (guess == letter_value3) {
+			guess_value = 1
+			reveal_state3 = 63
+		}
+		if (guess == letter_value4) {
+			guess_value = 1
+			reveal_state4 = 63
+		}
+		if (guess == letter_value5) {
+			guess_value = 1
+			reveal_state5 = 63
+		}
+		if (guess == letter_value6) {
+			guess_value = 1
+			reveal_state6 = 63
+		}
+		if (guess == letter_value7) {
+			guess_value = 1
+			reveal_state7 = 63
+		}
+	@round
+}
+service a {
+		guess = 1
+		@guess_process
+	}service b {
+		guess = 2
+		@guess_process
+	}service c {
+		guess = 3
+		@guess_process
+	}service d {
+		guess = 4
+		@guess_process
+	}service e {
+		guess = 5
+		@guess_process
+	}service f {
+		guess = 6
+		@guess_process
+	}service g {
+		guess = 7
+		@guess_process
+	}service h {
+		guess = 8
+		@guess_process
+	}service i {
+		guess = 9
+		@guess_process
+	}service j {
+		guess = 10
+		@guess_process
+	}service k {
+		guess = 11
+		@guess_process
+	}service l {
+		guess = 12
+		@guess_process
+	}service m {
+		guess = 13
+		@guess_process
+	}service n {
+		guess = 14
+		@guess_process
+	}service o {
+		guess = 15
+		@guess_process
+	}service p {
+		guess = 16
+		@guess_process
+	}service q {
+		guess = 17
+		@guess_process
+	}service r {
+		guess = 18
+		@guess_process
+	}service s {
+		guess = 19
+		@guess_process
+	}service t {
+		guess = 20
+		@guess_process
+	}service u {
+		guess = 21
+		@guess_process
+	}service v {
+		guess = 22
+		@guess_process
+	}service w {
+		guess = 23
+		@guess_process
+	}service x {
+		guess = 24
+		@guess_process
+	}service y {
+		guess = 25
+		@guess_process
+	}service z {
+		guess = 26
+		@guess_process
+	}
+
+service draw {
+	jump (hangman_state) {
+	{
+		[echo ===]
+		[echo .O]
+		[echo \|/]
+		[echo ./\]
+		[echo ===]
+	}
+	{
+		[echo ===]
+		[echo ]
+		[echo \|/]
+		[echo ./\]
+		[echo ===]
+	}
+	{
+		[echo ===]
+		[echo ]
+		[echo \|]
+		[echo ./\]
+		[echo ===]
+	}
+	{
+		[echo ===]
+		[echo ]
+		[echo .|]
+		[echo ./\]
+		[echo ===]
+	}
+	{
+		[echo ===]
+		[echo ]
+		[echo ]
+		[echo ./\]
+		[echo ===]
+	}
+	{
+		[echo ===]
+		[echo ]
+		[echo ]
+		[echo ./]
+		[echo ===]
+	}
+	{
+		[echo ===]
+		[echo ]
+		[echo ]
+		[echo ]
+		[echo ===]
+	}
+	{
+		[echo ]
+		[echo ]
+		[echo ]
+		[echo ]
+		[echo ]
+	}
+}}
+
+	service word0{
+letter_value0 = 7
+reveal_state0 = 0
+letter_value1 = 18
+reveal_state1 = 0
+letter_value2 = 1
+reveal_state2 = 0
+letter_value3 = 14
+reveal_state3 = 0
+letter_value4 = 1
+reveal_state4 = 0
+letter_value5 = 18
+reveal_state5 = 0
+letter_value6 = 25
+reveal_state6 = 0
+letter_value7 = 27
+reveal_state7 = 63
+	@new_round
+	}
+
+	service word1{
+letter_value0 = 2
+reveal_state0 = 0
+letter_value1 = 1
+reveal_state1 = 0
+letter_value2 = 4
+reveal_state2 = 0
+letter_value3 = 12
+reveal_state3 = 0
+letter_value4 = 1
+reveal_state4 = 0
+letter_value5 = 14
+reveal_state5 = 0
+letter_value6 = 4
+reveal_state6 = 0
+letter_value7 = 19
+reveal_state7 = 0
+	@new_round
+	}
+
+	service word2{
+letter_value0 = 2
+reveal_state0 = 0
+letter_value1 = 1
+reveal_state1 = 0
+letter_value2 = 4
+reveal_state2 = 0
+letter_value3 = 23
+reveal_state3 = 0
+letter_value4 = 1
+reveal_state4 = 0
+letter_value5 = 20
+reveal_state5 = 0
+letter_value6 = 5
+reveal_state6 = 0
+letter_value7 = 18
+reveal_state7 = 0
+	@new_round
+	}
+
+	service word3{
+letter_value0 = 4
+reveal_state0 = 0
+letter_value1 = 21
+reveal_state1 = 0
+letter_value2 = 19
+reveal_state2 = 0
+letter_value3 = 20
+reveal_state3 = 0
+letter_value4 = 2
+reveal_state4 = 0
+letter_value5 = 15
+reveal_state5 = 0
+letter_value6 = 23
+reveal_state6 = 0
+letter_value7 = 12
+reveal_state7 = 0
+	@new_round
+	}
+
+	service word4{
+letter_value0 = 23
+reveal_state0 = 0
+letter_value1 = 5
+reveal_state1 = 0
+letter_value2 = 12
+reveal_state2 = 0
+letter_value3 = 12
+reveal_state3 = 0
+letter_value4 = 27
+reveal_state4 = 63
+letter_value5 = 27
+reveal_state5 = 63
+letter_value6 = 27
+reveal_state6 = 63
+letter_value7 = 27
+reveal_state7 = 63
+	@new_round
+	}
+
+	service word5{
+letter_value0 = 20
+reveal_state0 = 0
+letter_value1 = 21
+reveal_state1 = 0
+letter_value2 = 18
+reveal_state2 = 0
+letter_value3 = 2
+reveal_state3 = 0
+letter_value4 = 9
+reveal_state4 = 0
+letter_value5 = 14
+reveal_state5 = 0
+letter_value6 = 5
+reveal_state6 = 0
+letter_value7 = 27
+reveal_state7 = 63
+	@new_round
+	}
+
+	service word6{
+letter_value0 = 6
+reveal_state0 = 0
+letter_value1 = 18
+reveal_state1 = 0
+letter_value2 = 5
+reveal_state2 = 0
+letter_value3 = 9
+reveal_state3 = 0
+letter_value4 = 7
+reveal_state4 = 0
+letter_value5 = 8
+reveal_state5 = 0
+letter_value6 = 20
+reveal_state6 = 0
+letter_value7 = 27
+reveal_state7 = 63
+	@new_round
+	}
+
+	service word7{
+letter_value0 = 16
+reveal_state0 = 0
+letter_value1 = 18
+reveal_state1 = 0
+letter_value2 = 15
+reveal_state2 = 0
+letter_value3 = 3
+reveal_state3 = 0
+letter_value4 = 5
+reveal_state4 = 0
+letter_value5 = 19
+reveal_state5 = 0
+letter_value6 = 19
+reveal_state6 = 0
+letter_value7 = 27
+reveal_state7 = 63
+	@new_round
+	}
+
+	service word8{
+letter_value0 = 19
+reveal_state0 = 0
+letter_value1 = 20
+reveal_state1 = 0
+letter_value2 = 5
+reveal_state2 = 0
+letter_value3 = 5
+reveal_state3 = 0
+letter_value4 = 12
+reveal_state4 = 0
+letter_value5 = 27
+reveal_state5 = 63
+letter_value6 = 27
+reveal_state6 = 63
+letter_value7 = 27
+reveal_state7 = 63
+	@new_round
+	}
+
+	service word9{
+letter_value0 = 2
+reveal_state0 = 0
+letter_value1 = 15
+reveal_state1 = 0
+letter_value2 = 18
+reveal_state2 = 0
+letter_value3 = 14
+reveal_state3 = 0
+letter_value4 = 5
+reveal_state4 = 0
+letter_value5 = 15
+reveal_state5 = 0
+letter_value6 = 27
+reveal_state6 = 63
+letter_value7 = 27
+reveal_state7 = 63
+	@new_round
+	}
+
+	service word10{
+letter_value0 = 6
+reveal_state0 = 0
+letter_value1 = 18
+reveal_state1 = 0
+letter_value2 = 15
+reveal_state2 = 0
+letter_value3 = 14
+reveal_state3 = 0
+letter_value4 = 20
+reveal_state4 = 0
+letter_value5 = 9
+reveal_state5 = 0
+letter_value6 = 5
+reveal_state6 = 0
+letter_value7 = 18
+reveal_state7 = 0
+	@new_round
+	}
+
+	service word11{
+letter_value0 = 8
+reveal_state0 = 0
+letter_value1 = 15
+reveal_state1 = 0
+letter_value2 = 15
+reveal_state2 = 0
+letter_value3 = 4
+reveal_state3 = 0
+letter_value4 = 15
+reveal_state4 = 0
+letter_value5 = 15
+reveal_state5 = 0
+letter_value6 = 27
+reveal_state6 = 63
+letter_value7 = 27
+reveal_state7 = 63
+	@new_round
+	}
+
+	service word12{
+letter_value0 = 21
+reveal_state0 = 0
+letter_value1 = 16
+reveal_state1 = 0
+letter_value2 = 23
+reveal_state2 = 0
+letter_value3 = 1
+reveal_state3 = 0
+letter_value4 = 18
+reveal_state4 = 0
+letter_value5 = 4
+reveal_state5 = 0
+letter_value6 = 27
+reveal_state6 = 63
+letter_value7 = 27
+reveal_state7 = 63
+	@new_round
+	}
+
+	service word13{
+letter_value0 = 16
+reveal_state0 = 0
+letter_value1 = 9
+reveal_state1 = 0
+letter_value2 = 16
+reveal_state2 = 0
+letter_value3 = 5
+reveal_state3 = 0
+letter_value4 = 12
+reveal_state4 = 0
+letter_value5 = 9
+reveal_state5 = 0
+letter_value6 = 14
+reveal_state6 = 0
+letter_value7 = 5
+reveal_state7 = 0
+	@new_round
+	}
+
+	service word14{
+letter_value0 = 14
+reveal_state0 = 0
+letter_value1 = 21
+reveal_state1 = 0
+letter_value2 = 3
+reveal_state2 = 0
+letter_value3 = 12
+reveal_state3 = 0
+letter_value4 = 5
+reveal_state4 = 0
+letter_value5 = 21
+reveal_state5 = 0
+letter_value6 = 19
+reveal_state6 = 0
+letter_value7 = 27
+reveal_state7 = 63
+	@new_round
+	}
+
+	service word15{
+letter_value0 = 2
+reveal_state0 = 0
+letter_value1 = 18
+reveal_state1 = 0
+letter_value2 = 1
+reveal_state2 = 0
+letter_value3 = 26
+reveal_state3 = 0
+letter_value4 = 9
+reveal_state4 = 0
+letter_value5 = 12
+reveal_state5 = 0
+letter_value6 = 27
+reveal_state6 = 63
+letter_value7 = 27
+reveal_state7 = 63
+	@new_round
+	}
+
+	service word16{
+letter_value0 = 8
+reveal_state0 = 0
+letter_value1 = 1
+reveal_state1 = 0
+letter_value2 = 18
+reveal_state2 = 0
+letter_value3 = 22
+reveal_state3 = 0
+letter_value4 = 5
+reveal_state4 = 0
+letter_value5 = 19
+reveal_state5 = 0
+letter_value6 = 20
+reveal_state6 = 0
+letter_value7 = 27
+reveal_state7 = 63
+	@new_round
+	}
+
+	service word17{
+letter_value0 = 12
+reveal_state0 = 0
+letter_value1 = 1
+reveal_state1 = 0
+letter_value2 = 11
+reveal_state2 = 0
+letter_value3 = 5
+reveal_state3 = 0
+letter_value4 = 19
+reveal_state4 = 0
+letter_value5 = 9
+reveal_state5 = 0
+letter_value6 = 4
+reveal_state6 = 0
+letter_value7 = 5
+reveal_state7 = 0
+	@new_round
+	}
+
+	service word18{
+letter_value0 = 7
+reveal_state0 = 0
+letter_value1 = 15
+reveal_state1 = 0
+letter_value2 = 18
+reveal_state2 = 0
+letter_value3 = 7
+reveal_state3 = 0
+letter_value4 = 5
+reveal_state4 = 0
+letter_value5 = 27
+reveal_state5 = 63
+letter_value6 = 27
+reveal_state6 = 63
+letter_value7 = 27
+reveal_state7 = 63
+	@new_round
+	}
+
+	service word19{
+letter_value0 = 6
+reveal_state0 = 0
+letter_value1 = 15
+reveal_state1 = 0
+letter_value2 = 21
+reveal_state2 = 0
+letter_value3 = 14
+reveal_state3 = 0
+letter_value4 = 4
+reveal_state4 = 0
+letter_value5 = 18
+reveal_state5 = 0
+letter_value6 = 25
+reveal_state6 = 0
+letter_value7 = 27
+reveal_state7 = 63
+	@new_round
+	}
+
+	service word20{
+letter_value0 = 4
+reveal_state0 = 0
+letter_value1 = 5
+reveal_state1 = 0
+letter_value2 = 3
+reveal_state2 = 0
+letter_value3 = 15
+reveal_state3 = 0
+letter_value4 = 25
+reveal_state4 = 0
+letter_value5 = 27
+reveal_state5 = 63
+letter_value6 = 27
+reveal_state6 = 63
+letter_value7 = 27
+reveal_state7 = 63
+	@new_round
+	}
+
+	service word21{
+letter_value0 = 2
+reveal_state0 = 0
+letter_value1 = 9
+reveal_state1 = 0
+letter_value2 = 7
+reveal_state2 = 0
+letter_value3 = 18
+reveal_state3 = 0
+letter_value4 = 15
+reveal_state4 = 0
+letter_value5 = 3
+reveal_state5 = 0
+letter_value6 = 11
+reveal_state6 = 0
+letter_value7 = 27
+reveal_state7 = 63
+	@new_round
+	}
+
+	service word22{
+letter_value0 = 4
+reveal_state0 = 0
+letter_value1 = 15
+reveal_state1 = 0
+letter_value2 = 15
+reveal_state2 = 0
+letter_value3 = 13
+reveal_state3 = 0
+letter_value4 = 19
+reveal_state4 = 0
+letter_value5 = 4
+reveal_state5 = 0
+letter_value6 = 1
+reveal_state6 = 0
+letter_value7 = 25
+reveal_state7 = 0
+	@new_round
+	}
+
+	service word23{
+letter_value0 = 12
+reveal_state0 = 0
+letter_value1 = 1
+reveal_state1 = 0
+letter_value2 = 26
+reveal_state2 = 0
+letter_value3 = 1
+reveal_state3 = 0
+letter_value4 = 18
+reveal_state4 = 0
+letter_value5 = 21
+reveal_state5 = 0
+letter_value6 = 19
+reveal_state6 = 0
+letter_value7 = 27
+reveal_state7 = 63
+	@new_round
+	}
+
+	service word24{
+letter_value0 = 8
+reveal_state0 = 0
+letter_value1 = 9
+reveal_state1 = 0
+letter_value2 = 7
+reveal_state2 = 0
+letter_value3 = 8
+reveal_state3 = 0
+letter_value4 = 16
+reveal_state4 = 0
+letter_value5 = 1
+reveal_state5 = 0
+letter_value6 = 19
+reveal_state6 = 0
+letter_value7 = 19
+reveal_state7 = 0
+	@new_round
+	}
+
+	service word25{
+letter_value0 = 19
+reveal_state0 = 0
+letter_value1 = 1
+reveal_state1 = 0
+letter_value2 = 23
+reveal_state2 = 0
+letter_value3 = 13
+reveal_state3 = 0
+letter_value4 = 9
+reveal_state4 = 0
+letter_value5 = 12
+reveal_state5 = 0
+letter_value6 = 12
+reveal_state6 = 0
+letter_value7 = 27
+reveal_state7 = 63
+	@new_round
+	}
+
+	service word26{
+letter_value0 = 15
+reveal_state0 = 0
+letter_value1 = 6
+reveal_state1 = 0
+letter_value2 = 6
+reveal_state2 = 0
+letter_value3 = 2
+reveal_state3 = 0
+letter_value4 = 12
+reveal_state4 = 0
+letter_value5 = 1
+reveal_state5 = 0
+letter_value6 = 19
+reveal_state6 = 0
+letter_value7 = 20
+reveal_state7 = 0
+	@new_round
+	}
+
+	service word27{
+letter_value0 = 8
+reveal_state0 = 0
+letter_value1 = 25
+reveal_state1 = 0
+letter_value2 = 4
+reveal_state2 = 0
+letter_value3 = 18
+reveal_state3 = 0
+letter_value4 = 15
+reveal_state4 = 0
+letter_value5 = 27
+reveal_state5 = 63
+letter_value6 = 27
+reveal_state6 = 63
+letter_value7 = 27
+reveal_state7 = 63
+	@new_round
+	}
+
+	service word28{
+letter_value0 = 19
+reveal_state0 = 0
+letter_value1 = 20
+reveal_state1 = 0
+letter_value2 = 1
+reveal_state2 = 0
+letter_value3 = 14
+reveal_state3 = 0
+letter_value4 = 4
+reveal_state4 = 0
+letter_value5 = 9
+reveal_state5 = 0
+letter_value6 = 14
+reveal_state6 = 0
+letter_value7 = 27
+reveal_state7 = 63
+	@new_round
+	}
+
+	service word29{
+letter_value0 = 13
+reveal_state0 = 0
+letter_value1 = 15
+reveal_state1 = 0
+letter_value2 = 19
+reveal_state2 = 0
+letter_value3 = 19
+reveal_state3 = 0
+letter_value4 = 18
+reveal_state4 = 0
+letter_value5 = 15
+reveal_state5 = 0
+letter_value6 = 3
+reveal_state6 = 0
+letter_value7 = 11
+reveal_state7 = 0
+	@new_round
+	}
+
+	service word30{
+letter_value0 = 10
+reveal_state0 = 0
+letter_value1 = 21
+reveal_state1 = 0
+letter_value2 = 14
+reveal_state2 = 0
+letter_value3 = 3
+reveal_state3 = 0
+letter_value4 = 20
+reveal_state4 = 0
+letter_value5 = 9
+reveal_state5 = 0
+letter_value6 = 15
+reveal_state6 = 0
+letter_value7 = 14
+reveal_state7 = 0
+	@new_round
+	}
+
+	service word31{
+letter_value0 = 25
+reveal_state0 = 0
+letter_value1 = 21
+reveal_state1 = 0
+letter_value2 = 11
+reveal_state2 = 0
+letter_value3 = 15
+reveal_state3 = 0
+letter_value4 = 14
+reveal_state4 = 0
+letter_value5 = 27
+reveal_state5 = 63
+letter_value6 = 27
+reveal_state6 = 63
+letter_value7 = 27
+reveal_state7 = 63
+	@new_round
+	}
+
+	service word32{
+letter_value0 = 19
+reveal_state0 = 0
+letter_value1 = 21
+reveal_state1 = 0
+letter_value2 = 14
+reveal_state2 = 0
+letter_value3 = 19
+reveal_state3 = 0
+letter_value4 = 8
+reveal_state4 = 0
+letter_value5 = 9
+reveal_state5 = 0
+letter_value6 = 14
+reveal_state6 = 0
+letter_value7 = 5
+reveal_state7 = 0
+	@new_round
+	}
+
+	service word33{
+letter_value0 = 6
+reveal_state0 = 0
+letter_value1 = 1
+reveal_state1 = 0
+letter_value2 = 19
+reveal_state2 = 0
+letter_value3 = 20
+reveal_state3 = 0
+letter_value4 = 12
+reveal_state4 = 0
+letter_value5 = 1
+reveal_state5 = 0
+letter_value6 = 14
+reveal_state6 = 0
+letter_value7 = 5
+reveal_state7 = 0
+	@new_round
+	}
+
+	service word34{
+letter_value0 = 19
+reveal_state0 = 0
+letter_value1 = 14
+reveal_state1 = 0
+letter_value2 = 15
+reveal_state2 = 0
+letter_value3 = 23
+reveal_state3 = 0
+letter_value4 = 16
+reveal_state4 = 0
+letter_value5 = 12
+reveal_state5 = 0
+letter_value6 = 15
+reveal_state6 = 0
+letter_value7 = 23
+reveal_state7 = 0
+	@new_round
+	}
+
+	service word35{
+letter_value0 = 18
+reveal_state0 = 0
+letter_value1 = 1
+reveal_state1 = 0
+letter_value2 = 22
+reveal_state2 = 0
+letter_value3 = 9
+reveal_state3 = 0
+letter_value4 = 14
+reveal_state4 = 0
+letter_value5 = 5
+reveal_state5 = 0
+letter_value6 = 27
+reveal_state6 = 63
+letter_value7 = 27
+reveal_state7 = 63
+	@new_round
+	}
+
+	service word36{
+letter_value0 = 2
+reveal_state0 = 0
+letter_value1 = 25
+reveal_state1 = 0
+letter_value2 = 18
+reveal_state2 = 0
+letter_value3 = 5
+reveal_state3 = 0
+letter_value4 = 27
+reveal_state4 = 63
+letter_value5 = 27
+reveal_state5 = 63
+letter_value6 = 27
+reveal_state6 = 63
+letter_value7 = 27
+reveal_state7 = 63
+	@new_round
+	}
+
+	service word37{
+letter_value0 = 4
+reveal_state0 = 0
+letter_value1 = 5
+reveal_state1 = 0
+letter_value2 = 3
+reveal_state2 = 0
+letter_value3 = 15
+reveal_state3 = 0
+letter_value4 = 25
+reveal_state4 = 0
+letter_value5 = 27
+reveal_state5 = 63
+letter_value6 = 27
+reveal_state6 = 63
+letter_value7 = 27
+reveal_state7 = 63
+	@new_round
+	}
+
+	service word38{
+letter_value0 = 4
+reveal_state0 = 0
+letter_value1 = 9
+reveal_state1 = 0
+letter_value2 = 19
+reveal_state2 = 0
+letter_value3 = 20
+reveal_state3 = 0
+letter_value4 = 18
+reveal_state4 = 0
+letter_value5 = 9
+reveal_state5 = 0
+letter_value6 = 3
+reveal_state6 = 0
+letter_value7 = 20
+reveal_state7 = 0
+	@new_round
+	}
+
+	service word39{
+letter_value0 = 8
+reveal_state0 = 0
+letter_value1 = 5
+reveal_state1 = 0
+letter_value2 = 12
+reveal_state2 = 0
+letter_value3 = 12
+reveal_state3 = 0
+letter_value4 = 6
+reveal_state4 = 0
+letter_value5 = 9
+reveal_state5 = 0
+letter_value6 = 18
+reveal_state6 = 0
+letter_value7 = 5
+reveal_state7 = 0
+	@new_round
+	}
+
+	service word40{
+letter_value0 = 12
+reveal_state0 = 0
+letter_value1 = 1
+reveal_state1 = 0
+letter_value2 = 14
+reveal_state2 = 0
+letter_value3 = 4
+reveal_state3 = 0
+letter_value4 = 6
+reveal_state4 = 0
+letter_value5 = 1
+reveal_state5 = 0
+letter_value6 = 12
+reveal_state6 = 0
+letter_value7 = 12
+reveal_state7 = 0
+	@new_round
+	}
+
+	service word41{
+letter_value0 = 22
+reveal_state0 = 0
+letter_value1 = 9
+reveal_state1 = 0
+letter_value2 = 1
+reveal_state2 = 0
+letter_value3 = 4
+reveal_state3 = 0
+letter_value4 = 21
+reveal_state4 = 0
+letter_value5 = 3
+reveal_state5 = 0
+letter_value6 = 20
+reveal_state6 = 0
+letter_value7 = 27
+reveal_state7 = 63
+	@new_round
+	}
+
+	service word42{
+letter_value0 = 19
+reveal_state0 = 0
+letter_value1 = 21
+reveal_state1 = 0
+letter_value2 = 9
+reveal_state2 = 0
+letter_value3 = 10
+reveal_state3 = 0
+letter_value4 = 9
+reveal_state4 = 0
+letter_value5 = 14
+reveal_state5 = 0
+letter_value6 = 27
+reveal_state6 = 63
+letter_value7 = 27
+reveal_state7 = 63
+	@new_round
+	}
+
