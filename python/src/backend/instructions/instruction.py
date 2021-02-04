@@ -75,7 +75,7 @@ class jump():
 		self.identity_compute = self.uni.host_def(container_compute, 'instruction')
 		self.statement = statement
 		self.word_size = int(self.statement.var.word_size)
-		self.jump_count = self.word_size - len(self.statement.services).bit_length()
+		self.jump_count = len(self.statement.services).bit_length() - 1
 		self.services = statement.services
 		self.var_compute = self.uni.constructs[statement.var]
 
@@ -102,7 +102,7 @@ class jump():
 
 	def compile_branch(self, branch_state):
 		compute = self.uni.new_def('code')
-		if len(branch_state) - 1 != self.jump_count:
+		if len(branch_state) != self.jump_count:
 			compute.extend(self.subbranch('1' + branch_state))
 			compute.extend(self.subbranch('0' + branch_state))		
 		else:
