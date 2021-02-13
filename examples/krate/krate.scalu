@@ -1,0 +1,511 @@
+
+sandbox crate
+
+map {boot: @init}
+/*initialize utility vars and register vars*/
+service init {
+    writer = 0
+    alpha = 0
+    beta = 0
+    status = 0
+    a = 0
+    b = 0
+    c = 0
+    d = 0
+    e = 0
+    f = 0
+    g = 0
+    h = 0
+    i = 0
+    j = 0
+    k = 0
+    l = 0
+    m = 0
+    n = 0
+    o = 0
+    p = 0
+    q = 0
+    r = 0
+    s = 0
+    t = 0
+    u = 0
+    v = 0
+    w = 0
+    x = 0
+    y = 0
+    z = 0
+}
+
+/*map operator service to exec jump table*/
+
+map {
+    copy: @copy
+    add: @add
+    sub: @sub
+    not: @not
+    or: @or
+    and: @and
+    eq: @eq
+    ne: @ne
+    gt: @gt
+    lt: @lt
+    gte: @gte
+    lte: @lte
+    unary: @status_alpha
+}
+
+service copy { @status_zero alpha = beta @writer}
+
+service add { @status_zero alpha = alpha + beta @writer}
+
+service sub { @status_zero alpha = alpha - beta  @writer}
+
+service not { @status_zero alpha = !beta  @writer}
+
+service or { @status_zero alpha = alpha | beta  @writer}
+
+service and { @status_zero alpha = alpha & beta @writer}
+
+service eq { @status_zero if (alpha == beta) {[true]} else {[false]}}
+
+service ne { @status_zero if (alpha != beta) {[true]} else {[false]}}
+
+service gt { @status_zero if (alpha > beta) {[true]} else {[false]}}
+
+service lt { @status_zero if (alpha < beta) {[true]} else {[false]}}
+
+service gte { @status_zero if (alpha >= beta) {[true]} else {[false]}}
+
+service lte { @status_zero if (alpha <= beta) {[true]} else {[false]}}
+
+service status_zero {
+    status = 0
+}
+
+service status_alpha {
+    status = 1
+}
+
+service status_beta {
+    status = 2
+}
+
+service writer {
+    jump (writer) {{ a = alpha } { b = alpha } { c = alpha } { d = alpha } { e = alpha } { f = alpha } { g = alpha } { h = alpha } { i = alpha } { j = alpha } { k = alpha } { l = alpha } { m = alpha } { n = alpha } { o = alpha } { p = alpha } { q = alpha } { r = alpha } { s = alpha } { t = alpha } { u = alpha } { v = alpha } { w = alpha } { x = alpha } { y = alpha } { z = alpha } }
+}
+
+map {jump: @jump}
+service jump {
+    jump (z) {{ [ jump0] } { [ jump1] } { [ jump2] } { [ jump3] } { [ jump4] } { [ jump5] } { [ jump6] } { [ jump7] } { [ jump8] } { [ jump9] } { [ jump10] } { [ jump11] } { [ jump12] } { [ jump13] } { [ jump14] } { [ jump15] } { [ jump16] } { [ jump17] } { [ jump18] } { [ jump19] } { [ jump20] } { [ jump21] } { [ jump22] } { [ jump23] } { [ jump24] } { [ jump25] } { [ jump26] } { [ jump27] } { [ jump28] } { [ jump29] } { [ jump30] } { [ jump31] } }
+}
+
+
+map {printme : @printme}
+service printme { [alias jump0 echo 0;alias jump1 echo 1;alias jump2 echo 2;alias jump3 echo 3;alias jump4 echo 4;alias jump5 echo 5;alias jump6 echo 6;alias jump7 echo 7;alias jump8 echo 8;alias jump9 echo 9;alias jump10 echo 10;alias jump11 echo 11;alias jump12 echo 12;alias jump13 echo 13;alias jump14 echo 14;alias jump15 echo 15;alias jump16 echo 16;alias jump17 echo 17;alias jump18 echo 18;alias jump19 echo 19;alias jump20 echo 20;alias jump21 echo 21;alias jump22 echo 22;alias jump23 echo 23;alias jump24 echo 24;alias jump25 echo 25;alias jump26 echo 26;alias jump27 echo 27;alias jump28 echo 28;alias jump29 echo 29;alias jump30 echo 30;alias jump31 echo 31;jump]
+}
+map {a : @a}
+service a { jump (status) {
+        { alpha = a @status_alpha}
+        { beta = a @status_beta}
+        { writer = 0 }
+    }  
+}
+map {b : @b}
+service b { jump (status) {
+        { alpha = b @status_alpha}
+        { beta = b @status_beta}
+        { writer = 1 }
+    }  
+}
+map {c : @c}
+service c { jump (status) {
+        { alpha = c @status_alpha}
+        { beta = c @status_beta}
+        { writer = 2 }
+    }  
+}
+map {d : @d}
+service d { jump (status) {
+        { alpha = d @status_alpha}
+        { beta = d @status_beta}
+        { writer = 3 }
+    }  
+}
+map {e : @e}
+service e { jump (status) {
+        { alpha = e @status_alpha}
+        { beta = e @status_beta}
+        { writer = 4 }
+    }  
+}
+map {f : @f}
+service f { jump (status) {
+        { alpha = f @status_alpha}
+        { beta = f @status_beta}
+        { writer = 5 }
+    }  
+}
+map {g : @g}
+service g { jump (status) {
+        { alpha = g @status_alpha}
+        { beta = g @status_beta}
+        { writer = 6 }
+    }  
+}
+map {h : @h}
+service h { jump (status) {
+        { alpha = h @status_alpha}
+        { beta = h @status_beta}
+        { writer = 7 }
+    }  
+}
+map {i : @i}
+service i { jump (status) {
+        { alpha = i @status_alpha}
+        { beta = i @status_beta}
+        { writer = 8 }
+    }  
+}
+map {j : @j}
+service j { jump (status) {
+        { alpha = j @status_alpha}
+        { beta = j @status_beta}
+        { writer = 9 }
+    }  
+}
+map {k : @k}
+service k { jump (status) {
+        { alpha = k @status_alpha}
+        { beta = k @status_beta}
+        { writer = 10 }
+    }  
+}
+map {l : @l}
+service l { jump (status) {
+        { alpha = l @status_alpha}
+        { beta = l @status_beta}
+        { writer = 11 }
+    }  
+}
+map {m : @m}
+service m { jump (status) {
+        { alpha = m @status_alpha}
+        { beta = m @status_beta}
+        { writer = 12 }
+    }  
+}
+map {n : @n}
+service n { jump (status) {
+        { alpha = n @status_alpha}
+        { beta = n @status_beta}
+        { writer = 13 }
+    }  
+}
+map {o : @o}
+service o { jump (status) {
+        { alpha = o @status_alpha}
+        { beta = o @status_beta}
+        { writer = 14 }
+    }  
+}
+map {p : @p}
+service p { jump (status) {
+        { alpha = p @status_alpha}
+        { beta = p @status_beta}
+        { writer = 15 }
+    }  
+}
+map {q : @q}
+service q { jump (status) {
+        { alpha = q @status_alpha}
+        { beta = q @status_beta}
+        { writer = 16 }
+    }  
+}
+map {r : @r}
+service r { jump (status) {
+        { alpha = r @status_alpha}
+        { beta = r @status_beta}
+        { writer = 17 }
+    }  
+}
+map {s : @s}
+service s { jump (status) {
+        { alpha = s @status_alpha}
+        { beta = s @status_beta}
+        { writer = 18 }
+    }  
+}
+map {t : @t}
+service t { jump (status) {
+        { alpha = t @status_alpha}
+        { beta = t @status_beta}
+        { writer = 19 }
+    }  
+}
+map {u : @u}
+service u { jump (status) {
+        { alpha = u @status_alpha}
+        { beta = u @status_beta}
+        { writer = 20 }
+    }  
+}
+map {v : @v}
+service v { jump (status) {
+        { alpha = v @status_alpha}
+        { beta = v @status_beta}
+        { writer = 21 }
+    }  
+}
+map {w : @w}
+service w { jump (status) {
+        { alpha = w @status_alpha}
+        { beta = w @status_beta}
+        { writer = 22 }
+    }  
+}
+map {x : @x}
+service x { jump (status) {
+        { alpha = x @status_alpha}
+        { beta = x @status_beta}
+        { writer = 23 }
+    }  
+}
+map {y : @y}
+service y { jump (status) {
+        { alpha = y @status_alpha}
+        { beta = y @status_beta}
+        { writer = 24 }
+    }  
+}
+map {z : @z}
+service z { jump (status) {
+        { alpha = z @status_alpha}
+        { beta = z @status_beta}
+        { writer = 25 }
+    }  
+}
+map {delete0 : @delete0}
+service delete0 { jump (status) {
+        { alpha = 0 @status_alpha}
+        { beta = 0 @status_beta}
+        { }
+    }
+}
+map {delete1 : @delete1}
+service delete1 { jump (status) {
+        { alpha = 1 @status_alpha}
+        { beta = 1 @status_beta}
+        { }
+    }
+}
+map {delete2 : @delete2}
+service delete2 { jump (status) {
+        { alpha = 2 @status_alpha}
+        { beta = 2 @status_beta}
+        { }
+    }
+}
+map {delete3 : @delete3}
+service delete3 { jump (status) {
+        { alpha = 3 @status_alpha}
+        { beta = 3 @status_beta}
+        { }
+    }
+}
+map {delete4 : @delete4}
+service delete4 { jump (status) {
+        { alpha = 4 @status_alpha}
+        { beta = 4 @status_beta}
+        { }
+    }
+}
+map {delete5 : @delete5}
+service delete5 { jump (status) {
+        { alpha = 5 @status_alpha}
+        { beta = 5 @status_beta}
+        { }
+    }
+}
+map {delete6 : @delete6}
+service delete6 { jump (status) {
+        { alpha = 6 @status_alpha}
+        { beta = 6 @status_beta}
+        { }
+    }
+}
+map {delete7 : @delete7}
+service delete7 { jump (status) {
+        { alpha = 7 @status_alpha}
+        { beta = 7 @status_beta}
+        { }
+    }
+}
+map {delete8 : @delete8}
+service delete8 { jump (status) {
+        { alpha = 8 @status_alpha}
+        { beta = 8 @status_beta}
+        { }
+    }
+}
+map {delete9 : @delete9}
+service delete9 { jump (status) {
+        { alpha = 9 @status_alpha}
+        { beta = 9 @status_beta}
+        { }
+    }
+}
+map {delete10 : @delete10}
+service delete10 { jump (status) {
+        { alpha = 10 @status_alpha}
+        { beta = 10 @status_beta}
+        { }
+    }
+}
+map {delete11 : @delete11}
+service delete11 { jump (status) {
+        { alpha = 11 @status_alpha}
+        { beta = 11 @status_beta}
+        { }
+    }
+}
+map {delete12 : @delete12}
+service delete12 { jump (status) {
+        { alpha = 12 @status_alpha}
+        { beta = 12 @status_beta}
+        { }
+    }
+}
+map {delete13 : @delete13}
+service delete13 { jump (status) {
+        { alpha = 13 @status_alpha}
+        { beta = 13 @status_beta}
+        { }
+    }
+}
+map {delete14 : @delete14}
+service delete14 { jump (status) {
+        { alpha = 14 @status_alpha}
+        { beta = 14 @status_beta}
+        { }
+    }
+}
+map {delete15 : @delete15}
+service delete15 { jump (status) {
+        { alpha = 15 @status_alpha}
+        { beta = 15 @status_beta}
+        { }
+    }
+}
+map {delete16 : @delete16}
+service delete16 { jump (status) {
+        { alpha = 16 @status_alpha}
+        { beta = 16 @status_beta}
+        { }
+    }
+}
+map {delete17 : @delete17}
+service delete17 { jump (status) {
+        { alpha = 17 @status_alpha}
+        { beta = 17 @status_beta}
+        { }
+    }
+}
+map {delete18 : @delete18}
+service delete18 { jump (status) {
+        { alpha = 18 @status_alpha}
+        { beta = 18 @status_beta}
+        { }
+    }
+}
+map {delete19 : @delete19}
+service delete19 { jump (status) {
+        { alpha = 19 @status_alpha}
+        { beta = 19 @status_beta}
+        { }
+    }
+}
+map {delete20 : @delete20}
+service delete20 { jump (status) {
+        { alpha = 20 @status_alpha}
+        { beta = 20 @status_beta}
+        { }
+    }
+}
+map {delete21 : @delete21}
+service delete21 { jump (status) {
+        { alpha = 21 @status_alpha}
+        { beta = 21 @status_beta}
+        { }
+    }
+}
+map {delete22 : @delete22}
+service delete22 { jump (status) {
+        { alpha = 22 @status_alpha}
+        { beta = 22 @status_beta}
+        { }
+    }
+}
+map {delete23 : @delete23}
+service delete23 { jump (status) {
+        { alpha = 23 @status_alpha}
+        { beta = 23 @status_beta}
+        { }
+    }
+}
+map {delete24 : @delete24}
+service delete24 { jump (status) {
+        { alpha = 24 @status_alpha}
+        { beta = 24 @status_beta}
+        { }
+    }
+}
+map {delete25 : @delete25}
+service delete25 { jump (status) {
+        { alpha = 25 @status_alpha}
+        { beta = 25 @status_beta}
+        { }
+    }
+}
+map {delete26 : @delete26}
+service delete26 { jump (status) {
+        { alpha = 26 @status_alpha}
+        { beta = 26 @status_beta}
+        { }
+    }
+}
+map {delete27 : @delete27}
+service delete27 { jump (status) {
+        { alpha = 27 @status_alpha}
+        { beta = 27 @status_beta}
+        { }
+    }
+}
+map {delete28 : @delete28}
+service delete28 { jump (status) {
+        { alpha = 28 @status_alpha}
+        { beta = 28 @status_beta}
+        { }
+    }
+}
+map {delete29 : @delete29}
+service delete29 { jump (status) {
+        { alpha = 29 @status_alpha}
+        { beta = 29 @status_beta}
+        { }
+    }
+}
+map {delete30 : @delete30}
+service delete30 { jump (status) {
+        { alpha = 30 @status_alpha}
+        { beta = 30 @status_beta}
+        { }
+    }
+}
+map {delete31 : @delete31}
+service delete31 { jump (status) {
+        { alpha = 31 @status_alpha}
+        { beta = 31 @status_beta}
+        { }
+    }
+}
