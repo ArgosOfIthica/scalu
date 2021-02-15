@@ -83,6 +83,7 @@ service copy {
 	[echo test 2]
 	a = 7
 	if (a == 7) {[echo passed]} else {[echo failed]}
+	[echo test 3]
 	b = 23
 	a = b
 	if (a == 23) {[echo passed]} else {[echo failed]}

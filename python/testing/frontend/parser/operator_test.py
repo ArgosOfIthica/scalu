@@ -18,31 +18,66 @@ class TestOperators(unittest.TestCase):
 		print(self.compiler.text_compile(program))
 
 	def test_greater_than(self):
-		program = self.blueprint_two_chain + '{a = 7 if (a > 5) {[echo true]} else {[echo false]}}'
+		program = self.blueprint_two_chain + '''{a = 7 b = 5 
+													if (7 > 5) {[echo true]} else {[echo false]}
+													if (a > 5) {[echo true]} else {[echo false]}
+													if (7 > b) {[echo true]} else {[echo false]}
+													if (a > b) {[echo true]} else {[echo false]}
+													}'''
 		self.compiler.text_compile(program)
 
 	def test_less_than(self):
-		program = self.blueprint_two_chain + '{a = 7 if (a < 5) {[echo true]} else {[echo false]}}'
+		program = self.blueprint_two_chain + '''{a = 7 b = 5 
+													if (7 < 5) {[echo true]} else {[echo false]}
+													if (a < 5) {[echo true]} else {[echo false]}
+													if (7 < b) {[echo true]} else {[echo false]}
+													if (a < b) {[echo true]} else {[echo false]}
+													}'''
 		self.compiler.text_compile(program)
 
 	def test_greater_than_or_equal(self):
-		program = self.blueprint_two_chain + '{a = 7 if (a >= 5) {[echo true]} else {[echo false]}}'
+		program = self.blueprint_two_chain + '''{a = 7 b = 5 
+													if (7 >= 5) {[echo true]} else {[echo false]}
+													if (a >= 5) {[echo true]} else {[echo false]}
+													if (7 >= b) {[echo true]} else {[echo false]}
+													if (a >= b) {[echo true]} else {[echo false]}
+													}'''
 		self.compiler.text_compile(program)
 
 	def test_less_than_or_equal(self):
-		program = self.blueprint_two_chain + '{a = 7 if (a <= 5) {[echo true]} else {[echo false]}}'
+		program = self.blueprint_two_chain + '''{a = 7 b = 5 
+													if (7 <= 5) {[echo true]} else {[echo false]}
+													if (a <= 5) {[echo true]} else {[echo false]}
+													if (7 <= b) {[echo true]} else {[echo false]}
+													if (a <= b) {[echo true]} else {[echo false]}
+													}'''
 		self.compiler.text_compile(program)
 
 	def test_bitwise_negation(self):
-		program = self.blueprint_two_chain + '{ [echo input is] old_number = ?73  [echo output is] new_number = ?(!old_number) }'
+		program = self.blueprint_two_chain + '''{a = 7 b = 5 
+													if (7 <= 5) {[echo true]} else {[echo false]}
+													if (a <= 5) {[echo true]} else {[echo false]}
+													if (7 <= b) {[echo true]} else {[echo false]}
+													if (a <= b) {[echo true]} else {[echo false]}
+													}'''
 		self.compiler.text_compile(program)
 
 	def test_bitwise_and(self):
-		program = self.blueprint_two_chain + '{ [echo input1 is] input1 = ?15 [echo input2 is] input2 = ?62 [echo output is] output = ?(input1 & input2) }'
+		program = self.blueprint_two_chain + '''{a = 7 b = 5 
+													c = 7 & 5
+													c = a & 5
+													c = 7 & b
+													c = a & b
+													}'''
 		self.compiler.text_compile(program)
 
 	def test_bitwise_or(self):
-		program = self.blueprint_two_chain + '{ [echo input1 is] input1 = ?15 [echo input2 is] input2 = ?62 [echo output is] output = ?(input1 | input2) }'
+		program = self.blueprint_two_chain + '''{a = 7 b = 5 
+													c = 7 | 5
+													c = a | 5
+													c = 7 | b
+													c = a | b
+													}'''
 		self.compiler.text_compile(program)
 
 	def test_full_if(self):
@@ -58,15 +93,30 @@ class TestOperators(unittest.TestCase):
 		self.compiler.text_compile(program)
 
 	def test_inequality(self):
-		program = self.blueprint_two_chain + '{ a = 4 if (a != 2) { [echo correct]} else {[echo wrong]}}'
+		program = self.blueprint_two_chain + '''{a = 7 b = 5 
+													if (7 != 5) {[echo true]} else {[echo false]}
+													if (a != 5) {[echo true]} else {[echo false]}
+													if (7 != b) {[echo true]} else {[echo false]}
+													if (a != b) {[echo true]} else {[echo false]}
+													}'''
 		self.compiler.text_compile(program)
 
 	def test_addition(self):
-		program = self.blueprint_two_chain + '{a = 12 + 10}'
+		program = self.blueprint_two_chain + '''{a = 7 b = 5 
+													c = 7 + 5
+													c = a + 5
+													c = 7 + b
+													c = a + b
+													}'''
 		self.compiler.text_compile(program)
 
 	def test_subtraction(self):
-		program = self.blueprint_two_chain + '{a = 32 - 7}'
+		program = self.blueprint_two_chain + '''{a = 7 b = 5 
+													c = 7 - 5
+													c = a - 5
+													c = 7 - b
+													c = a - b
+													}'''
 		self.compiler.text_compile(program)
 
 	def test_basic_binary_print(self):

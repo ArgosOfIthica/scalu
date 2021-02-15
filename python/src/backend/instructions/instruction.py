@@ -177,7 +177,7 @@ class instruction():
 		if self.alpha_is_constant() and not self.beta_is_constant():
 				constant = self.alpha
 				nonconstant = self.beta
-		elif self.beta_is_constant() and not self.alpha.is_constant():
+		elif self.beta_is_constant() and not self.alpha_is_constant():
 				constant = self.beta
 				nonconstant = self.alpha
 		else:
