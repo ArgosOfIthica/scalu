@@ -33,7 +33,7 @@ service file_test {
 sandbox test_equality
 
 map {
-	test_event : @equality
+	test_event1 : @equality
 }
 
 service equality{
@@ -52,7 +52,7 @@ service equality{
 sandbox test_inequality
 
 map {
-	test_event : @inequality
+	test_event1 : @inequality
 }
 
 service inequality {
@@ -71,7 +71,7 @@ service inequality {
 sandbox test_copy
 
 map {
-	test_event : @copy
+	test_event1 : @copy
 	}
 
 service copy {
@@ -93,7 +93,7 @@ service copy {
 sandbox test_bitwise_not
 
 map {
-	test_event : @bitwise_not
+	test_event1 : @bitwise_not
 }
 
 service bitwise_not {
@@ -113,7 +113,7 @@ service bitwise_not {
 sandbox test_bitwise_and
 
 map {
-	test_event : @bitwise_and
+	test_event1 : @bitwise_and
 }
 
 service bitwise_and {
@@ -140,7 +140,7 @@ service bitwise_and {
 sandbox test_bitwise_or
 
 map {
-	test_event : @bitwise_or
+	test_event1 : @bitwise_or
 	}
 
 service bitwise_or {
@@ -164,10 +164,30 @@ service bitwise_or {
 	if (c == d) {[echo passed]} else {[echo failed]}
 }
 
+sandbox test_bitwise_xor
+
+map {
+	test_event1 : @bitwise_xor
+}
+
+service bitwise_xor {
+	[echo running bitwise_xor test]
+	[echo test 1]
+	a = 10
+	b = 12
+	c = (a ^ b)
+	if (c == 6) {[echo passed]} else {[echo failed]}
+	[echo test 2]
+	c = (b ^ a)
+	if (c == 6) {[echo passed]} else {[echo failed]}
+	[echo test 3]
+
+}
+
 sandbox test_greater_than
 
 map {
-	test_event: @greater_than
+	test_event2: @greater_than
 	}
 
 service greater_than {
@@ -185,7 +205,7 @@ service greater_than {
 sandbox test_greater_than_or_equal
 
 map {
-	test_event : @greater_than_or_equal
+	test_event2 : @greater_than_or_equal
 	}
 
 service greater_than_or_equal {
@@ -203,7 +223,7 @@ service greater_than_or_equal {
 sandbox test_less_than
 
 map {
-	test_event: @less_than
+	test_event2: @less_than
 	}
 
 service less_than {
@@ -222,7 +242,7 @@ service less_than {
 sandbox test_less_than_or_equal
 
 map {
-	test_event: @less_than_or_equal
+	test_event2: @less_than_or_equal
 	}
 
 service less_than_or_equal {
@@ -240,7 +260,7 @@ service less_than_or_equal {
 sandbox test_addition
 
 map {
-	test_event : @addition
+	test_event3 : @addition
 	}
 
 service addition {
@@ -264,7 +284,7 @@ service addition {
 sandbox test_subtraction
 
 map {
-	test_event : @subtraction
+	test_event3 : @subtraction
 }
 
 service subtraction {
@@ -288,7 +308,7 @@ service subtraction {
 sandbox test_reference1
 
 map {
-	test_event : @test
+	test_event2 : @test
 }
 
 service test {
@@ -300,7 +320,7 @@ service test {
 sandbox test_reference2
 
 map {
-	test_event: @test
+	test_event2: @test
 }
 
 service test {
@@ -314,7 +334,7 @@ service test {
 sandbox test_left_shift
 
 map {
-	test_event : @test
+	test_event3 : @test
 }
 
 service test {
@@ -331,7 +351,7 @@ service test {
 sandbox test_right_shift
 
 map {
-	test_event : @test
+	test_event3 : @test
 }
 
 service test {
@@ -348,7 +368,7 @@ service test {
 sandbox test_jump_statement
 
 map {
-	test_event : @test
+	test_event3 : @test
 }
 
 service test {

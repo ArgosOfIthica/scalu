@@ -1,6 +1,6 @@
 import src.model.structure as model
 import src.model.universe as universe
-
+from operator import xor
 
 def handle_instruction(global_object, compute, statement):
 	operator_map = {'copy' : icopy,
@@ -11,7 +11,9 @@ def handle_instruction(global_object, compute, statement):
 				'add' : iadd,
 				'subtract' : isubtract,
 				'left_shift' : ileft_shift,
-				'right_shift' : iright_shift}
+				'right_shift' : iright_shift,
+				'bitwise_xor' :ibitwise_xor
+				}
 	uni = global_object.universe
 	if statement.output not in uni.constructs:
 		var = universe.variable(global_object, statement.output)
@@ -315,6 +317,43 @@ class ibitwise_or(instruction):
 		self.execute_beta(bit, false_branch_compute)
 		return false_branch_compute
 
+class ibitwise_xor(instruction):
+
+	def compile(self):
+		if self.alpha_is_constant() and self.beta_is_constant():
+			for bit in range(int(self.statement.output.word_size)):
+				if xor(bool(self.alpha.bool_string[bit] == '1'), bool(self.beta.bool_string[bit]) == '1'):
+					self.identity_compute.extend(self.output.set_true[bit].alias)
+				else:
+					self.identity_compute.extend(self.output.set_false[bit].alias)
+		elif self.alpha_is_constant() or self.beta_is_constant():
+			constant, nonconstant = self.determine_constants()
+			for bit in range(int(self.statement.output.word_size)):
+				if constant.bool_string[bit] == '1':
+				        self.set_true_return(self.uni.false, bit)
+                                        self.set_false_return(self.uni.true, bit)
+                                        self.identity_compute.extend(nonconstant.bits[bit]).
+				elif constant.bool_string[bit] == '0':
+					self.set_true_return(self.uni.true, bit)
+					self.set_false_return(self.uni.false, bit)
+					self.identity_compute.extend(nonconstant.bits[bit])
+		else:
+			for bit in range(int(self.statement.output.word_size)):
+				self.set_true_branch(bit)
+				self.set_false_branch(bit)
+				self.execute_alpha(bit)
+
+	def set_false_branch(self, bit):
+		false_branch = self.compile_false_branch(bit)
+		set_false = self.uni.host_def(self.identity_compute, 'code')
+		self.uni.set_var(set_false, self.uni.false, false_branch)
+
+	def compile_false_branch(self, bit):
+		false_branch_compute = self.uni.new_def('code')
+		self.set_true_return(self.uni.true, bit, false_branch_compute)
+		self.set_false_return(self.uni.false, bit, false_branch_compute)
+		self.execute_beta(bit, false_branch_compute)
+		return false_branch_compute
 
 class ileft_shift(instruction):
 
