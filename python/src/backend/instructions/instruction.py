@@ -330,9 +330,9 @@ class ibitwise_xor(instruction):
 			constant, nonconstant = self.determine_constants()
 			for bit in range(int(self.statement.output.word_size)):
 				if constant.bool_string[bit] == '1':
-				        self.set_true_return(self.uni.false, bit)
-                                        self.set_false_return(self.uni.true, bit)
-                                        self.identity_compute.extend(nonconstant.bits[bit]).
+					self.set_true_return(self.uni.false, bit)
+					self.set_false_return(self.uni.true, bit)
+					self.identity_compute.extend(nonconstant.bits[bit])
 				elif constant.bool_string[bit] == '0':
 					self.set_true_return(self.uni.true, bit)
 					self.set_false_return(self.uni.false, bit)
@@ -348,12 +348,24 @@ class ibitwise_xor(instruction):
 		set_false = self.uni.host_def(self.identity_compute, 'code')
 		self.uni.set_var(set_false, self.uni.false, false_branch)
 
+	def set_true_branch(self, bit):
+		true_branch = self.compile_true_branch(bit)
+		set_true = self.uni.host_def(self.identity_compute, 'code')
+		self.uni.set_var(set_true, self.uni.true, true_branch)
+
 	def compile_false_branch(self, bit):
 		false_branch_compute = self.uni.new_def('code')
 		self.set_true_return(self.uni.true, bit, false_branch_compute)
 		self.set_false_return(self.uni.false, bit, false_branch_compute)
 		self.execute_beta(bit, false_branch_compute)
 		return false_branch_compute
+
+	def compile_true_branch(self, bit):
+		true_branch_compute = self.uni.new_def('code')
+		self.set_true_return(self.uni.false, bit, true_branch_compute)
+		self.set_false_return(self.uni.true, bit, true_branch_compute)
+		self.execute_beta(bit, true_branch_compute)
+		return true_branch_compute
 
 class ileft_shift(instruction):
 
