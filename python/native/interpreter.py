@@ -6,6 +6,8 @@ class native_console():
     def __init__(self):
         self.aliases = dict()
         self.output_buffer = str()
+        self.assignment_count = 0
+        self.execution_count = 0
 
     def parse_input(self, program):
         lines = re.split('\n',program)
@@ -38,6 +40,7 @@ class native_console():
             key = commands[1]
             value = commands[2]
             self.aliases[key] = value
+            self.assignment_count += 1
         elif commands[0] == 'alias' and not is_outer:
             key = commands[1]
             if len(commands) > 2:
@@ -45,10 +48,12 @@ class native_console():
             else:
                 value = ''
             self.aliases[key] = value
+            self.assignment_count += 1
         elif commands[0] == 'echo':
             self.output_buffer += '\n' + ' '.join(commands[1:])
         else:
             self.execute(line)
+            self.execution_count += 1
     
     def execute(self, custom_command):
         value = self.aliases[custom_command]
@@ -56,7 +61,11 @@ class native_console():
         for command in subcommands:
             self.parse_line(command)
 
-
+    def stats(self):
+        counts = '\nAliases : ' + str(len(self.aliases))
+        counts += '\nAssignments : ' + str(self.assignment_count)
+        counts += '\nExecutions : ' + str(self.execution_count)
+        return counts
 
 
                 
