@@ -80,6 +80,15 @@ class TestOperators(unittest.TestCase):
                                                     }'''
         self.compiler.text_compile(program)
 
+    def test_bitwise_xor(self):
+        program = self.blueprint_two_chain + '''{a = 7 b = 5 
+                                                    c = 7 ^ 5
+                                                    c = a ^ 5
+                                                    c = 7 ^ b
+                                                    c = a ^ b
+                                                    }'''
+        self.compiler.text_compile(program)
+
     def test_full_if(self):
         program = self.blueprint_two_chain + '{ a = 6 if (a == 5) {a = ?4 @true_branch} else {a = ?6 @false_branch}} service true_branch { [echo this is true] } service false_branch { [echo this is false]}'
         self.compiler.text_compile(program)

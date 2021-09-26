@@ -164,6 +164,34 @@ service bitwise_or {
     if (c == d) {[echo passed]} else {[echo failed]}
 }
 
+map {
+    test_event : @bitwise_xor
+    }
+
+service bitwise_xor {
+    [echo running bitwise_xor test]
+    [echo test 1]
+    a = 10
+    b = 12
+    c = (a ^ b)
+    if (c == 6) {[echo passed]} else {[echo failed]}
+    [echo test 2]
+    c = (b ^ a)
+    if (c == 6) {[echo passed]} else {[echo failed]}
+    [echo test 3]
+    d = (c ^ (a ^ b))
+    if (d == 0) {[echo passed]} else {[echo failed]}
+    [echo test 4]
+    c = 23 ^ 69
+    d = 69 ^ 23
+    z = ?c
+    y = ?d
+    direction = ?10
+    if (c == 82) {[echo passed]} else {[echo failed]}
+    [echo test 5]
+    if (c == d) {[echo passed]} else {[echo failed]}
+}
+
 sandbox test_greater_than
 
 map {
