@@ -322,7 +322,9 @@ class ibitwise_xor(instruction):
     def compile(self):
         if self.alpha_is_constant() and self.beta_is_constant():
             for bit in range(int(self.statement.output.word_size)):
-                if xor(bool(self.alpha.bool_string[bit] == '1'), bool(self.beta.bool_string[bit]) == '1'):
+                alpha_bool = self.alpha.bool_string[bit] == '1'
+                beta_bool = self.beta.bool_string[bit] == '1'
+                if xor(alpha_bool, beta_bool):
                     self.identity_compute.extend(self.output.set_true[bit].alias)
                 else:
                     self.identity_compute.extend(self.output.set_false[bit].alias)

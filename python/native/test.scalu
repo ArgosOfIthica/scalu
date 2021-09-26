@@ -184,9 +184,6 @@ service bitwise_xor {
     [echo test 4]
     c = 23 ^ 69
     d = 69 ^ 23
-    z = ?c
-    y = ?d
-    direction = ?10
     if (c == 82) {[echo passed]} else {[echo failed]}
     [echo test 5]
     if (c == d) {[echo passed]} else {[echo failed]}
