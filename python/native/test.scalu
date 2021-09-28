@@ -135,6 +135,13 @@ service bitwise_and {
     if (c == 5) {[echo passed]} else {[echo failed]}
     [echo test 5]
     if (c == d) {[echo passed]} else {[echo failed]}
+    [echo test 6]
+    c = 23
+    d = c & 69
+    a = 69 & c
+    if (d == 5) {[echo passed]} else {[echo failed]}
+    [echo test 7]
+    if (a == d) {[echo passed]} else {[echo failed]}
 }
 
 sandbox test_bitwise_or
@@ -162,6 +169,13 @@ service bitwise_or {
     if (c == 87) {[echo passed]} else {[echo failed]}
     [echo test 5]
     if (c == d) {[echo passed]} else {[echo failed]}
+    [echo test 6]
+    c = 23
+    d = c | 69
+    a = 69 | c
+    if (d == 87) {[echo passed]} else {[echo failed]}
+    [echo test 7]
+    if (a == d) {[echo passed]} else {[echo failed]}
 }
 
 map {
@@ -187,6 +201,13 @@ service bitwise_xor {
     if (c == 82) {[echo passed]} else {[echo failed]}
     [echo test 5]
     if (c == d) {[echo passed]} else {[echo failed]}
+    [echo test 6]
+    c = 23
+    d = c ^ 69
+    a = 69 ^ c
+    if (d == 82) {[echo passed]} else {[echo failed]}
+    [echo test 7]
+    if (a == d) {[echo passed]} else {[echo failed]}
 }
 
 sandbox test_greater_than
