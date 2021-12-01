@@ -100,13 +100,17 @@ def replace_words(replacement_map, cfg):
             words.append(word)
     words = ''.join(words)
     line_split = re.split('\n', words)
-    line_split = list(dict.fromkeys(line_split))
+    purged_split = list()
+    for split in line_split:
+        element_list = to_tuple_list(split)
+        if len(element_list) == 0 or (element_list[0][0] != element_list[0][1]):
+            purged_split.append(split)
+    line_split = list(dict.fromkeys(purged_split))
     return '\n'.join(line_split)
 
 
 def deduplicate(cfg):
     count = 0
-    redundant_heads = list()
     running = True
     while count < 500:
         count += 1
@@ -128,6 +132,12 @@ def deduplicate_instance(cfg):
         else:
             head_map[ele[HEAD]] = unique_tails[ele[TAIL]]
     new_cfg = replace_words(head_map, cfg)
+    tuple_list = to_tuple_list(new_cfg)
+    replacement_map = dict()
+    for ele in tuple_list:
+        if re.match('^%\w*$', ele[TAIL]) and re.match('^%\w*$', ele[HEAD]):
+            replacement_map[ele[HEAD]] = ele[TAIL]
+    new_cfg = replace_words(replacement_map, new_cfg)
     return new_cfg
 
 
