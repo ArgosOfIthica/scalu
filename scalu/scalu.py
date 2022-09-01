@@ -22,6 +22,3 @@ def scalu(program, properties):
         comp = compiler.compiler()
         output = comp.compile(program)
         return output
-
-if __name__ == "__main__":
-    main()

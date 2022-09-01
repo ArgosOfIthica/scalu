@@ -20,7 +20,7 @@ def test():
 def test_interpreter(verbose=True):
     con = native_console()
     program = ''
-    with open('native/test.scalu', 'r') as file:
+    with open('scalu/native/test.scalu', 'r') as file:
         program = file.read()
     program = compiler.compiler().text_compile(program)
     result = con.parse_input(program).parse_input('$test_event').pop_output_buffer()
