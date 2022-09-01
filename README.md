@@ -29,6 +29,15 @@ Linux users may need to run: <br>
 
 The output will be located in a new directory called ```scalu_out```. Copy these into your configuration files; the exact location of these files will depend on platform and game.
 
+
+## Standalone Install
+scalu can also be used outside of the project directory. To do this, run:
+
+```python -m pip install --user .```
+
+Linux users may need to run:
+```python3 -m pip install --user .```
+
 ## Documentation
 
 You can find documentation in the Github wiki at https://github.com/ArgosOfIthica/scalu/wiki
