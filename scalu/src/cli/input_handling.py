@@ -1,26 +1,35 @@
 from pathlib import Path
 
-# verify and return list of files in a directory
-def dir_list(input_directory):
-    if not input_directory.exists():
-        input_directory.mkdir()
-    files = list(input_directory.glob('**/*.scalu'))
+
+def glob_list(dir):
+    return list(dir.glob('**/*.scalu'))
+
+# find and return a list of scalu files from a list of paths
+def get_files(input):
+    files = []
+
+    for f in input:
+        path = Path(f)
+        if path.is_dir():
+            files += glob_list(path)
+        elif path.is_file():
+            files.append(path)
+        else:
+            raise Exception("{} doesn't exist or is not a valid input!".format(f))
+
     return files
 
 def handle(input):
-    files = []
+    # use scalu_in/ in the current directory by default
     if not input:
-        # use scalu_in/ in current directory by default
-        input_directory = Path('scalu_in/')
-        files = dir_list(input_directory)
-    elif Path(input).is_dir():
-        input_directory = Path(input)
-        files = dir_list(input_directory)
-    else:
-        # just read file when input is not a directory
+        input = 'scalu_in/'
         if not Path(input).exists():
-            raise Exception("{} doesn't exist!".format(input))
-        files.append(Path(input))
+            Path(input).mkdir()
+    # input needs to always be a list for get_files()
+    if type(input) != list:
+        input = input.split()
+
+    files = get_files(input)
 
     string_blob = ''
     for f in files:

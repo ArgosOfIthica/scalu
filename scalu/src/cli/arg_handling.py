@@ -20,6 +20,7 @@ def handle():
             action='store',
             default='',
             dest='input',
+            nargs='+',
             help='specify input files/directories'
             )
     parser.add_argument(
