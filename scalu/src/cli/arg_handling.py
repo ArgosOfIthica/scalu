@@ -1,8 +1,6 @@
 import argparse
 
 def handle():
-    prop = properties()
-
     parser = argparse.ArgumentParser(
             description="an event-based programming language and compiler \
                 targeting config files in Valve's Source Engine",
@@ -14,7 +12,6 @@ def handle():
             choices=['compile', 'test'],
             help='set the mode',
             nargs=1,
-            type=str
             )
     parser.add_argument(
             '--input',
@@ -39,16 +36,4 @@ def handle():
     if not args:
         raise Exception('scalu must be provided with a command to run: compile, test, etc')
 
-    prop.mode = args.mode[0]
-    prop.input = args.input
-    prop.output_dir = args.output_dir
-
-    return prop
-
-
-class properties():
-
-    def __init__(self):
-        self.mode = ''
-        self.input = ''
-        self.output_dir = ''
+    return args
