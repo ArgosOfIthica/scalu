@@ -30,6 +30,14 @@ def handle():
             dest='output_dir',
             help='specify output directory'
             )
+    parser.add_argument(
+        '--noremove',
+        '-n',
+        action='store_false',
+        default=False,
+        dest='remove',
+        help='don\'t remove files from output directory when compiling'
+    )
 
     args = parser.parse_args()
 

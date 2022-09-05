@@ -10,7 +10,7 @@ def main():
     if args.mode[0] == 'compile':
         file_input = input_handler.handle(args.input)
         text_output = scalu(file_input, args)
-        output_handler.handle(text_output, args.output_dir)
+        output_handler.handle(text_output, args.output_dir, args.remove)
     elif args.mode[0] == 'test':
         testing.test()
 
