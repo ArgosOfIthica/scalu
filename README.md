@@ -30,13 +30,26 @@ Linux users may need to run: <br>
 The output will be located in a new directory called ```scalu_out```. Copy these into your configuration files; the exact location of these files will depend on platform and game.
 
 
-## Standalone Install
+### Standalone Install
 scalu can also be used outside of the project directory. To do this, run:
 
 ```python -m pip install --user .```
 
 Linux users may need to run:
 ```python3 -m pip install --user .```
+
+## Usage
+The scalu compiler allows you to change some of its default behavior with optional arguments. For example:
+
+To specify input files and directories, you can use the `--input` flag:
+
+```scalu compile --input /path/to/directory example.scalu```
+
+To specify an output directory, you can use the `--output` flag:
+
+```scalu compile --output /path/to/output/folder```
+
+By default, the compiler will also remove all files in output directory. To disable this behavior, you can use the `--noremove` flag.
 
 ## Documentation
 
