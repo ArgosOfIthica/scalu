@@ -34,7 +34,7 @@ def handle():
         '--noremove',
         '-n',
         action='store_false',
-        default=False,
+        default=True,
         dest='remove',
         help='don\'t remove files from output directory when compiling'
     )
