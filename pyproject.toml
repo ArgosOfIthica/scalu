@@ -1,0 +1,27 @@
+[build-system]
+requires = ["flit_core >=3.2,<4"]
+build-backend = "flit_core.buildapi"
+
+[project]
+name = "scalu"
+version = "1.1.1"
+description = "an event-based programming language and compiler targeting config files in Valve's Source Engine"
+authors = [
+    {name = "ArgosOfIthica", email = "argosofithica@gmail.com"}
+]
+readme = "README.md"
+requires-python = ">=3.6"
+classifiers = [
+    "License :: OSI Approved :: GNU Affero General Public License v3 or later (AGPLv3+)",
+    "Operating System :: OS Independent",
+    "Topic :: Software Development",
+    "Topic :: Software Development :: Code Generators",
+    "Topic :: Software Development :: Compilers",
+    "Programming Language :: Other Scripting Engines"
+]
+
+[project.urls]
+Home = "https://github.com/ArgosOfIthica/scalu"
+
+[project.scripts]
+scalu = "scalu.scalu:main"
