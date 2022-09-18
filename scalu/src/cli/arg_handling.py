@@ -38,6 +38,26 @@ def handle():
         dest='remove',
         help='don\'t remove files from output directory when compiling'
     )
+    parser.add_argument(
+        '--eventprefix',
+        '-ep',
+        action='store',
+        default='$',
+        nargs='?',
+        const='',
+        dest='eventprefix',
+        help='specify the event prefix'
+    )
+    parser.add_argument(
+        '--aliasprefix',
+        '-ap',
+        action='store',
+        default='%',
+        nargs='?',
+        const='',
+        dest='aliasprefix',
+        help='specify the prefix used for internal aliases'
+    )
 
     args = parser.parse_args()
 

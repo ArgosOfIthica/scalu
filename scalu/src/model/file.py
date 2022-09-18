@@ -1,14 +1,16 @@
 import math
+import scalu.src.cli.arg_handling as arg_handler
 
 class file_container():
 
     def __init__(self, global_object, main_text):
+        args = arg_handler.handle()
         self.buffers()
         self.files = list()
         self.host_files = self.create_host_files('scalu', main_text)
         for event in global_object.maps.maps:
             if event.file is not None:
-                new_file = cfg_file(event.file, '$' + event.string)
+                new_file = cfg_file(event.file, args.eventprefix + event.string)
                 self.files.append(new_file)
 
     def buffers(self):

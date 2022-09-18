@@ -1,4 +1,7 @@
 import math
+import scalu.src.cli.arg_handling as arg_handler
+
+args = arg_handler.handle()
 
 class universe():
 
@@ -157,7 +160,7 @@ class picker():
 
 
     def new_alias(self):
-        RESERVED_PREFIX = '%'
+        RESERVED_PREFIX = args.aliasprefix
         revolutions = int(math.log(self.current_use, len(self.symbols))) + 1
         new_alias = list()
         for x in range(0, revolutions):
