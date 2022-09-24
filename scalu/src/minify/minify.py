@@ -143,11 +143,11 @@ def deduplicate_instance(cfg):
 
 class alias_blob():
 
-    def __init__(self, uni=None):
+    def __init__(self, uni):
         self.CONSOLE_MAX_BUFFER = 510 #determined by engine
         self.alias_tuples = tuple()
         self.alias_convert = dict()
-        self.pick = universe.picker()
+        self.pick = uni.picker.reset()
         if uni is not None:
             for alias in uni.known_aliases:
                 if alias.type == 'event':
