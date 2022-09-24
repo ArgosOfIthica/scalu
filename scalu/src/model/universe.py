@@ -1,11 +1,11 @@
 import math
 import scalu.src.cli.arg_handling as arg_handler
 
-args = arg_handler.handle()
 
 class universe():
 
     def __init__(self):
+        self.args = arg_handler.handle()
         self.computations = list()
         self.vars = list()
         self.known_aliases = list()
@@ -142,7 +142,8 @@ class variable():
 
 class picker():
 
-    def __init__(self):
+    def __init__(self, args):
+        self.args = args
         self.symbols = list()
         self.current_use = 1
         lower_case_letters = range(97,123)
@@ -160,7 +161,7 @@ class picker():
 
 
     def new_alias(self):
-        RESERVED_PREFIX = args.aliasprefix
+        RESERVED_PREFIX = self.args.aliasprefix
         revolutions = int(math.log(self.current_use, len(self.symbols))) + 1
         new_alias = list()
         for x in range(0, revolutions):
@@ -170,6 +171,10 @@ class picker():
         new_alias = RESERVED_PREFIX + new_alias
         self.current_use += 1
         return new_alias
+
+    def reset(self):
+        self.current_use = 1
+        return self
 
 def is_computation(arg):
     return isinstance(arg, computation)
