@@ -10,7 +10,7 @@ class universe():
         self.vars = list()
         self.known_aliases = list()
         self.alias_to_def = dict()
-        self.picker = picker()
+        self.picker = picker(self.args)
         self.constructs = dict()
         self.constant_constructs = list()
         self.initialized = False
