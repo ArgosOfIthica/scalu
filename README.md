@@ -19,13 +19,13 @@ To run scalu, you will need Python 3.6 or later installed on your system. Create
 
 If you do not have git installed, you can simply download the project from Github and unpack it in a directory of your choice. Once that is done, you should have a running scalu compiler.
 
-Input files go in the ```scalu_in``` directory. To compile them, go to the ```python``` directory and run: <br>
+Input files go in the ```scalu_in``` directory. To compile them, go to the root directory and run: <br>
 
-```python scalu.py compile``` <br>
+```python scalu -m compile``` <br>
 
 Linux users may need to run: <br>
 
-```python3 scalu.py compile``` <br>
+```python3 scalu -m compile``` <br>
 
 The output will be located in a new directory called ```scalu_out```. Copy these into your configuration files; the exact location of these files will depend on platform and game.
 
