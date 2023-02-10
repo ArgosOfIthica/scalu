@@ -36,6 +36,8 @@ class native_console():
     def parse_line(self, line, is_outer=False):
         commands = re.split('(".*"|\s)',line)
         commands = self.clean_commands(commands)
+        if len(commands) == 0:
+            return
         if commands[0] == 'alias' and is_outer:
             key = commands[1]
             value = commands[2]

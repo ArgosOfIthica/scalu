@@ -1,6 +1,18 @@
 sandbox std
 map {
 boot: @stdinit
+coutint: @coutint
+bitshift_right: @bitshift_right
+bitshift_left: @bitshift_left
+multiply: @multiply
+divide: @divide
+modulo: @modulo
+rng: @rng
+entropy_rng: @entropy_rng
+coutchar: @coutchar
+coutchar_limited: @coutchar_limited
+
+
 }
 service stdinit {
 	input = 0

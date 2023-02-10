@@ -409,3 +409,73 @@ service test {
     a = 6
     jump (a) { {[echo failed]} {[echo failed]}  {[echo passed]} {[echo failed]}} 
 }
+
+sandbox test_std_multiply
+
+map {
+    test_event: @test
+}
+
+service test {
+    [echo testing std multiply]
+    [echo test 1]
+    std.input = 2
+    std.input2 = 3
+    [$multiply]
+    if (std.output == 6) {[echo passed]} else {[echo failed]}
+    [echo test 2]
+    std.input = 5
+    std.input2 = 0
+    [$multiply]
+    if (std.output == 0) {[echo passed]} else {[echo failed]}
+    [echo test 3]
+    std.input = 3
+    std.input2 = 4
+    [$multiply]
+    if (std.output == 14) {[echo failed]} else {[echo passed]}
+    [echo test 4]
+    std.input = 0
+    std.input2 = 4
+    [$multiply]
+    if (std.output == 0) {[echo passed]} else {[echo failed]}
+    [echo test 5]
+    std.input = 1
+    std.input2 = 15
+    [$multiply]
+    if (std.output == 15) {[echo passed]} else {[echo failed]}
+}
+
+sandbox test_std_divide
+
+map {
+    test_event: @test
+}
+
+service test {
+    [echo testing std divide]
+    [echo test 1]
+    std.input = 6
+    std.input2 = 2
+    [$divide]
+    if (std.output == 3) {[echo passed]} else {[echo failed]}
+    [echo test 2]
+    std.input = 5
+    std.input2 = 0
+    [$divide]
+    if (std.output == 0) {[echo passed]} else {[echo failed]}
+    [echo test 3]
+    std.input = 7
+    std.input2 = 3
+    [$divide]
+    if (std.output == 2) {[echo passed]} else {[echo failed]}
+    [echo test 4]
+    std.input = 0
+    std.input2 = 4
+    [$divide]
+    if (std.output == 0) {[echo passed]} else {[echo failed]}
+    [echo test 5]
+    std.input = 15
+    std.input2 = 1
+    [$multiply]
+    if (std.output == 15) {[echo passed]} else {[echo failed]}
+}

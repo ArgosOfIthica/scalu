@@ -23,8 +23,10 @@ def test_interpreter(verbose=True):
     con = native_console()
     program = ''
     with open('scalu/native/test.scalu', 'r') as file:
-        program = file.read()
-    program = compiler.compiler().text_compile(program)
+        test_program = file.read()
+    with open('scalu/native/std.scalu', 'r') as file:
+        std_program = file.read()
+    program = compiler.compiler().text_compile(test_program + std_program)
     result = con.parse_input(program).parse_input(args.eventprefix + 'test_event').pop_output_buffer()
     result += con.stats()
     print(result)
