@@ -55,15 +55,13 @@ def handle_jump(global_object, compute, statement):
 def generate_var(global_object, arg):
         uni = global_object.universe
         if model.is_constant(arg):
-            conlist = [x.value for x in uni.constant_constructs]
-            unilist = [x for x in uni.constant_constructs]
-            if arg.value in conlist:
-                var = unilist[conlist.index(arg.value)]
-                uni.constructs[arg] = var
-            else:
-                var = universe.variable(global_object, arg)
-                uni.constant_constructs.append(var)
-                uni.constructs[arg] = var
+            for con in uni.constant_constructs:
+                if arg.value == con.value and arg.word_size == con.word_size:
+                    uni.constructs[arg] = con
+                    break
+            var = universe.variable(global_object, arg)
+            uni.constant_constructs.append(var)
+            uni.constructs[arg] = var
         else:
             var = universe.variable(global_object, arg)
             uni.constructs[arg] = var

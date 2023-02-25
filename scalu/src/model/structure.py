@@ -1,6 +1,7 @@
 
 import scalu.src.frontend.utility.utility as utility
 import scalu.src.model.universe as universe
+import math as math
 
 
 class rd_obj():
@@ -10,6 +11,9 @@ class rd_obj():
         self.declared = False
 
     def declaration_collision(self):
+        pass
+
+    def validate_specific(self):
         pass
 
 class rd_list(list):
@@ -60,6 +64,7 @@ class rd_list(list):
         for obj in self:
             if not obj.declared:
                 raise Exception(obj.name + ' has not been declared')
+            obj.validate_specific()
 
 class global_object():
 
@@ -121,6 +126,14 @@ class sandbox(rd_obj):
         rd_obj.__init__(self)
         self.variables = rd_list().setup(variable)
         self.services = rd_list().setup(service)
+        self.min_word_size = '2'
+        self.max_word_size = '8'
+    
+    def validate_specific(self):
+        for variable in self.variables:
+            self.min_word_size = str(max(int(self.min_word_size), int(variable.min_word_size)))
+        for variable in self.variables:
+            variable.word_size = self.min_word_size
 
 class variable(rd_obj):
 
@@ -130,10 +143,12 @@ class variable(rd_obj):
         self.type = 'int'
         self.value = '0'
         self.word_size = '8'
+        self.min_word_size = '2'
 
     def set_value(self, value):
         if int(value) < 2**int(self.word_size) and int(value) >= 0:
             self.value = value
+            self.min_word_size = utility.calc_min_word_size(self.min_word_size, value)
         else:
             raise Exception('illegal value declaration:' + value + ' . Number not within bounds of the word size')
 
@@ -205,6 +220,10 @@ class jump_statement():
     def __init__(self):
         self.var = None
         self.services = list()
+
+    def update_word(self):
+        service_count = len(self.services)
+        self.var.min_word_size = utility.calc_min_word_size(self.var.min_word_size, service_count - 1)
 
 class operator():
 

@@ -121,6 +121,7 @@ class variable():
         debug = False
         uni = global_object.universe
         self.value = var.value
+        self.word_size = var.word_size
         self.bool_string = get_bin(var.value, var.word_size)
         self.bits = list()
         self.set_true = list()

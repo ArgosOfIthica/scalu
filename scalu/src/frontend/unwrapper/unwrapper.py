@@ -8,8 +8,10 @@ def unwrap(global_object):
         for service in sandbox.services:
             sequence_out = list()
             for statement in service.sequence:
+                for var in temporary_vars:
+                    var.used = False
                 new_sequencing = None
-                unwrapped = unwrapped_element(temporary_vars)
+                unwrapped = unwrapped_element(temporary_vars, sandbox.min_word_size)
                 if model.is_assignment(statement):
                     new_sequencing = unwrapped.unwrap_assignment(statement)
                 else:
@@ -20,11 +22,10 @@ def unwrap(global_object):
 
 class unwrapped_element():
 
-    def __init__(self, temporary_vars):
+    def __init__(self, temporary_vars, word_size):
         self.instr_order = list()
         self.temps = temporary_vars
-        self.var_counter = 0
-
+        self.word_size = word_size
 
     def unwrap_assignment(self, assignment):
         if model.is_variable(assignment.arg[0]):
@@ -51,14 +52,13 @@ class unwrapped_element():
             return item
 
     def generate_temporary_variable(self):
-        if self.var_counter < len(self.temps) :
-            temp = self.temps[self.var_counter]
-            self.var_counter += 1
-            return temp
-        else:
-            temp = model.variable()
-            temp.name = '_temp' + str(self.var_counter)
-            self.temps.append(temp)
-            self.var_counter += 1
-            return temp
-
+        for temp in self.temps:
+            if (temp.word_size == self.word_size) and not temp.used:
+                temp.used = True
+                return temp
+        temp = model.variable()
+        temp.name = '_temp' + str(len(self.temps))
+        temp.word_size = self.word_size
+        temp.used = True
+        self.temps.append(temp)
+        return temp

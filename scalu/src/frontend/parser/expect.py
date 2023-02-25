@@ -157,6 +157,7 @@ def expect_jump(consumer):
     while consumer.is_not_end_block():
         new_jump.services.append(expect_service_block(consumer, False))
     consumer.consume('}')
+    new_jump.update_word()
     return new_jump
 
 
@@ -215,6 +216,8 @@ def expect_assignment_identifier(consumer):
         sandbox = consumer.current_sandbox
     else:
         sandbox = consumer.global_object.sandbox.reference(sandbox)
+        sandbox.min_word_size = sandbox.max_word_size
+        consumer.current_sandbox.min_word_size = consumer.current_sandbox.max_word_size
     identifier = consumer.use_if_name()
     var = sandbox.variables.reference(identifier)
     if not var.declared:
@@ -253,6 +256,8 @@ def expect_value(consumer):
         sandbox = consumer.current_sandbox
     else:
         sandbox = consumer.global_object.sandbox.reference(sandbox)
+        sandbox.min_word_size = sandbox.max_word_size
+        consumer.current_sandbox.min_word_size = consumer.current_sandbox.max_word_size
     value = consumer.token()
     consumer.consume()
     if utility.token_is_name(value):
@@ -276,6 +281,8 @@ def expect_conditional(consumer):
 def expect_unop(consumer):
     new_unop = model.unary_operator()
     new_unop.identity = consumer.retrieve_and_use_unary_identity()
+    if new_unop.identity in consumer.word_sensitive_operators:
+        consumer.current_sandbox.min_word_size = consumer.current_sandbox.max_word_size
     new_unop.arg[0] = expect_expression(consumer)
     return new_unop
 
@@ -284,6 +291,8 @@ def expect_binop(consumer, chain):
     new_binop = model.binary_operator()
     new_binop.arg[0] = chain
     new_binop.identity = consumer.retrieve_and_use_binary_identity()
+    if new_binop.identity in consumer.word_sensitive_operators:
+        consumer.current_sandbox.min_word_size = consumer.current_sandbox.max_word_size
     new_binop.arg[1] = expect_expression(consumer)
     return new_binop
 

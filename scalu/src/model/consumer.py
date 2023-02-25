@@ -23,7 +23,8 @@ class consumer():
         '-' : 'subtract',
         '<<': 'left_shift',
         '>>': 'right_shift',
-        '^': 'bitwise_xor'
+        '^': 'bitwise_xor',
+        '?+': 'fast_add'
         }
         self.unary_symbol_map = {
         '!' : 'bitwise_neg',
@@ -37,6 +38,7 @@ class consumer():
         '>=' : 'greater_than_or_equal',
         '<=' : 'less_than_or_equal'
         }
+        self.word_sensitive_operators = ['add', 'left_shift', 'bitwise_neg']
 
     #token functions
 
