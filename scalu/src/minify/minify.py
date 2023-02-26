@@ -12,12 +12,16 @@ def minify(cfg_string, uni):
     output_text = reallocate(output_text, blob)
     output_text = clean_output(output_text)
     output_text = deduplicate(output_text)
+    output_text = write_once_reduction(output_text)
+    output_text = clean_output(output_text)
     return output_text
 
 def clean_output(output_text):
     output_text = re.sub(';(\s*)\"', '"', output_text)
     output_text = re.sub('\";', '"', output_text)
     output_text = re.sub('\n{2,}', '\n', output_text)
+    output_text = re.sub(';{2,}', ';', output_text)
+    output_text = re.sub('\";', '"', output_text)
     return output_text
 
 def minify_names(blob):
@@ -140,6 +144,20 @@ def deduplicate_instance(cfg):
     new_cfg = replace_words(replacement_map, new_cfg)
     return new_cfg
 
+
+def write_once_reduction(cfg):
+    all_vars = re.findall('(%[a-z0-9]*)', cfg)
+    unique_vars = list(set(all_vars))
+    for var in unique_vars:
+        outer_assignments = re.findall('(alias ' + var + ' \")', cfg)
+        if len(outer_assignments) > 0:
+            continue
+        assignments = re.findall('alias '+ var + ' (%[a-z0-9]*)', cfg)
+        if len(assignments) == 1:
+            cfg = re.sub('alias ' + var + ' ' + assignments[0], '', cfg)
+            cfg = re.sub(';' + var + '\"', ';'+assignments[0]+'"', cfg)
+            cfg = re.sub(';' + var + ';', ';'+assignments[0]+';', cfg)
+    return cfg
 
 class alias_blob():
 
