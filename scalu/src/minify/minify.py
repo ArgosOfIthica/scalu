@@ -14,14 +14,16 @@ def minify(cfg_string, uni):
     output_text = deduplicate(output_text)
     output_text = write_once_reduction(output_text)
     output_text = clean_output(output_text)
+    output_text = inline_reduction(output_text)
+    #print(output_text)
     return output_text
 
 def clean_output(output_text):
     output_text = re.sub(';(\s*)\"', '"', output_text)
-    output_text = re.sub('\";', '"', output_text)
+    output_text = output_text.replace('";', '"')
     output_text = re.sub('\n{2,}', '\n', output_text)
     output_text = re.sub(';{2,}', ';', output_text)
-    output_text = re.sub('\";', '"', output_text)
+    output_text = output_text.replace('";', '"')
     return output_text
 
 def minify_names(blob):
@@ -51,7 +53,7 @@ def split_tail_word(tail):
 
 
 def reallocate(output_text, blob):
-    split_lines = re.split('\n', output_text)
+    split_lines = output_text.split('\n')
     line = 0
     while True:
         if len(split_lines[line]) > blob.CONSOLE_MAX_BUFFER:
@@ -66,7 +68,7 @@ def reallocate(output_text, blob):
 
 
 def compute_reallocation(text, blob):
-    command_split = re.split(';', text)
+    command_split = text.split(';')
     line_count = math.ceil(len(text) / blob.CONSOLE_MAX_BUFFER) + 1
     new_aliases = blob.pick.new_alias_list(line_count)
     lines = [''] * line_count
@@ -103,7 +105,7 @@ def replace_words(replacement_map, cfg):
         else:
             words.append(word)
     words = ''.join(words)
-    line_split = re.split('\n', words)
+    line_split = words.split('\n')
     purged_split = list()
     for split in line_split:
         element_list = to_tuple_list(split)
@@ -154,10 +156,25 @@ def write_once_reduction(cfg):
             continue
         assignments = re.findall('alias '+ var + ' (%[a-z0-9]*)', cfg)
         if len(assignments) == 1:
-            cfg = re.sub('alias ' + var + ' ' + assignments[0], '', cfg)
-            cfg = re.sub(';' + var + '\"', ';'+assignments[0]+'"', cfg)
-            cfg = re.sub(';' + var + ';', ';'+assignments[0]+';', cfg)
+            cfg = cfg.replace('alias ' + var + ' ' + assignments[0], '')
+            cfg = cfg.replace(';' + var + '"', ';'+assignments[0]+'"')
+            cfg = cfg.replace(';' + var + ';', ';'+assignments[0]+';')
     return cfg
+
+def inline_reduction(cfg):
+    split_lines = cfg.split('\n')
+    new_lines = list()
+    for line in split_lines:
+        execs = re.findall(';(%[a-z0-9]*)(?:\"|;)', line)
+        if len(execs) > 0:
+            for execute in execs:
+                assigns = re.findall('alias ' + execute + ' (%[a-z0-9]*);', line)
+                if len(assigns) > 0:
+                    #line = line.replace(';' + execute + ';', ';' + assigns[len(assigns)-1] + ';') TODO: Find out why this does not work
+                    line = line.replace(';' + execute + '"', ';' + assigns[len(assigns)-1] + '"')
+        new_lines.append(line)
+    new_output = '\n'.join(new_lines)
+    return new_output
 
 class alias_blob():
 

@@ -10,7 +10,7 @@ class native_console():
         self.execution_count = 0
 
     def parse_input(self, program):
-        lines = re.split('\n',program)
+        lines = program.split('\n')
         for line in lines:
             self.parse_line(line, True)
         return self
@@ -59,7 +59,7 @@ class native_console():
     
     def execute(self, custom_command):
         value = self.aliases[custom_command]
-        subcommands = re.split(';', value)
+        subcommands = value.split(';')
         for command in subcommands:
             self.parse_line(command)
 
