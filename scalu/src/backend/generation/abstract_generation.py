@@ -31,11 +31,10 @@ def build_bindings(global_object):
             uni.root.extend(model.bind(event.key, event_compute))
 
 def build_events(global_object):
-    args = arg_handler.handle()
     uni = global_object.universe
     for event in global_object.maps.maps:
         event_def = uni.new_def('event')
-        build_event_prefix(event, event_def, args.eventprefix)
+        build_event_prefix(event, event_def)
         if event.string == 'boot':
             uni.root.extend(event_def.alias)
         uni.constructs[event] = event_def
@@ -46,13 +45,12 @@ def build_events(global_object):
             else:
                 event_def.extend(uni.constructs[service_call.identifier].alias)
 
-def build_event_prefix(event, event_def, eventprefix):
-        if event.string[0] == '+':
-            event_def.alias.string = '+' + eventprefix + event.string[1:]
-        elif event.string[0] == '-':
-            event_def.alias.string = '-' + eventprefix + event.string[1:]
-        else:
-            event_def.alias.string = eventprefix + event.string
+def build_event_prefix(event, event_def):
+    args = arg_handler.handle()
+    if event.string[0] == '+' or event.string[0] == '-':
+        event_def.alias.string = event.string[0] + args.eventprefix + event.string[1:]
+    else:
+        event_def.alias.string = args.eventprefix + event.string
 
 def prebuild_service(global_object, service):
     uni = global_object.universe

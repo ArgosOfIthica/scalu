@@ -155,11 +155,7 @@ class picker():
             self.symbols.append(chr(x))
 
     def new_alias_list(self, count):
-        alias_list = list()
-        for alias in range(count):
-            alias_list.append(self.new_alias())
-        return alias_list
-
+        return tuple(self.new_alias() for alias in range(count))
 
     def new_alias(self):
         RESERVED_PREFIX = self.args.aliasprefix

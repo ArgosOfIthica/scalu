@@ -87,7 +87,13 @@ def compute_reallocation(text, blob):
 
 
 def to_tuple_list(cfg_string):
-    return list(re.findall('alias\s(\S+)\s\"(.*)\"', cfg_string))
+    return tuple(new_tuple_pattern().findall(cfg_string))
+
+def compiled_tuple_list(tuple_pattern, cfg_string):
+    return tuple(tuple_pattern.findall(cfg_string))
+
+def new_tuple_pattern():
+    return re.compile('alias\s(\S+)\s\"(.*)\"')
 
 def minify_word(word, alias_convert):
     if word in alias_convert:
@@ -95,8 +101,9 @@ def minify_word(word, alias_convert):
     else:
         return word
 
-def replace_words(replacement_map, cfg):
+def replace_words(replacement_map, cfg, cache):
     words = list()
+    tuple_pattern = cache[0]
     split_cfg = split_tail_word(cfg)
     for word in split_cfg:
         if word in replacement_map:
@@ -106,29 +113,34 @@ def replace_words(replacement_map, cfg):
     words = ''.join(words)
     line_split = words.split('\n')
     purged_split = list()
+    tuple_pattern = cache[0]
     for split in line_split:
-        element_list = to_tuple_list(split)
+        element_list = compiled_tuple_list(tuple_pattern, split)
         if len(element_list) == 0 or (element_list[0][0] != element_list[0][1]):
             purged_split.append(split)
-    line_split = list(dict.fromkeys(purged_split))
+    line_split = tuple(dict.fromkeys(purged_split))
     return '\n'.join(line_split)
 
 
 def deduplicate(cfg):
     count = 0
     running = True
+    word_pattern = re.compile('^%\w*$')
+    cache = [new_tuple_pattern(), word_pattern]
     while count < 500:
         count += 1
-        new_cfg = deduplicate_instance(cfg)
+        new_cfg = deduplicate_instance(cfg, cache)
         if len(new_cfg) == len(cfg):
             return cfg
         cfg = new_cfg
     return cfg
 
-def deduplicate_instance(cfg):
+def deduplicate_instance(cfg, cache):
     HEAD = 0
     TAIL = 1
-    tuple_list = to_tuple_list(cfg)
+    tuple_pattern = cache[0]
+    word_pattern = cache[1]
+    tuple_list = compiled_tuple_list(tuple_pattern, cfg)
     unique_tails = dict()
     head_map = dict()
     for ele in tuple_list:
@@ -136,19 +148,19 @@ def deduplicate_instance(cfg):
             unique_tails[ele[TAIL]] = ele[HEAD]
         else:
             head_map[ele[HEAD]] = unique_tails[ele[TAIL]]
-    new_cfg = replace_words(head_map, cfg)
-    tuple_list = to_tuple_list(new_cfg)
+    new_cfg = replace_words(head_map, cfg, cache)
+    tuple_list = compiled_tuple_list(tuple_pattern, new_cfg)
     replacement_map = dict()
     for ele in tuple_list:
-        if re.match('^%\w*$', ele[TAIL]) and re.match('^%\w*$', ele[HEAD]):
+        if word_pattern.match(ele[TAIL]) and word_pattern.match(ele[HEAD]):
             replacement_map[ele[HEAD]] = ele[TAIL]
-    new_cfg = replace_words(replacement_map, new_cfg)
+    new_cfg = replace_words(replacement_map, new_cfg, cache)
     return new_cfg
 
 
 def write_once_reduction(cfg):
     all_vars = re.findall('(%[a-z0-9]*)', cfg)
-    unique_vars = list(set(all_vars))
+    unique_vars = tuple(set(all_vars))
     for var in unique_vars:
         outer_assignments = re.findall('(alias ' + var + ' \")', cfg)
         if len(outer_assignments) > 0:
@@ -163,8 +175,9 @@ def write_once_reduction(cfg):
 def inline_reduction(cfg):
     split_lines = cfg.split('\n')
     new_lines = list()
+    exec_pattern = re.compile(';(%[a-z0-9]*)(?:\"|;)')
     for line in split_lines:
-        execs = re.findall(';(%[a-z0-9]*)(?:\"|;)', line)
+        execs = exec_pattern.findall(line)
         if len(execs) > 0:
             for execute in execs:
                 assigns = re.findall('alias ' + execute + ' (%[a-z0-9]*);', line)
