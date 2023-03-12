@@ -15,7 +15,6 @@ def minify(cfg_string, uni):
     output_text = write_once_reduction(output_text)
     output_text = clean_output(output_text)
     output_text = inline_reduction(output_text)
-    #print(output_text)
     return output_text
 
 def clean_output(output_text):

@@ -1,29 +1,18 @@
 sandbox std
 map {
-boot: @stdinit
-coutint: @coutint
+print: @print
 bitshift_right: @bitshift_right
 bitshift_left: @bitshift_left
 multiply: @multiply
 divide: @divide
-modulo: @modulo
 rng: @rng
 entropy_rng: @entropy_rng
-coutchar: @coutchar
-
-
+char: @char
 }
-service stdinit {
-	input = 0
-	input2 = 0
-	output = 0
-	rng = 0
-	i = 0
-	loopnum = 0
-}
+
 
 /* int to render = input */	
-service coutint {
+service print {
 	jump (input) { {[echo 0]} {[echo 1]} {[echo 2]} {[echo 3]} {[echo 4]} {[echo 5]} {[echo 6]} {[echo 7]} {[echo 8]} {[echo 9]} {[echo 10]} {[echo 11]} {[echo 12]} {[echo 13]} {[echo 14]} {[echo 15]} {[echo 16]} {[echo 17]} {[echo 18]} {[echo 19]} {[echo 20]} {[echo 21]} {[echo 22]} {[echo 23]} {[echo 24]} {[echo 25]} {[echo 26]} {[echo 27]} {[echo 28]} {[echo 29]} {[echo 30]} {[echo 31]} {[echo 32]} {[echo 33]} {[echo 34]} {[echo 35]} {[echo 36]} {[echo 37]} {[echo 38]} {[echo 39]} {[echo 40]} {[echo 41]} {[echo 42]} {[echo 43]} {[echo 44]} {[echo 45]} {[echo 46]} {[echo 47]} {[echo 48]} {[echo 49]} {[echo 50]} {[echo 51]} {[echo 52]} {[echo 53]} {[echo 54]} {[echo 55]} {[echo 56]} {[echo 57]} {[echo 58]} {[echo 59]} {[echo 60]} {[echo 61]} {[echo 62]} {[echo 63]} {[echo 64]} {[echo 65]} {[echo 66]} {[echo 67]} {[echo 68]} {[echo 69]} {[echo 70]} {[echo 71]} {[echo 72]} {[echo 73]} {[echo 74]} {[echo 75]} {[echo 76]} {[echo 77]} {[echo 78]} {[echo 79]} {[echo 80]} {[echo 81]} {[echo 82]} {[echo 83]} {[echo 84]} {[echo 85]} {[echo 86]} {[echo 87]} {[echo 88]} {[echo 89]} {[echo 90]} {[echo 91]} {[echo 92]} {[echo 93]} {[echo 94]} {[echo 95]} {[echo 96]} {[echo 97]} {[echo 98]} {[echo 99]} {[echo 100]} {[echo 101]} {[echo 102]} {[echo 103]} {[echo 104]} {[echo 105]} {[echo 106]} {[echo 107]} {[echo 108]} {[echo 109]} {[echo 110]} {[echo 111]} {[echo 112]} {[echo 113]} {[echo 114]} {[echo 115]} {[echo 116]} {[echo 117]} {[echo 118]} {[echo 119]} {[echo 120]} {[echo 121]} {[echo 122]} {[echo 123]} {[echo 124]} {[echo 125]} {[echo 126]} {[echo 127]} {[echo 128]} {[echo 129]} {[echo 130]} {[echo 131]} {[echo 132]} {[echo 133]} {[echo 134]} {[echo 135]} {[echo 136]} {[echo 137]} {[echo 138]} {[echo 139]} {[echo 140]} {[echo 141]} {[echo 142]} {[echo 143]} {[echo 144]} {[echo 145]} {[echo 146]} {[echo 147]} {[echo 148]} {[echo 149]} {[echo 150]} {[echo 151]} {[echo 152]} {[echo 153]} {[echo 154]} {[echo 155]} {[echo 156]} {[echo 157]} {[echo 158]} {[echo 159]} {[echo 160]} {[echo 161]} {[echo 162]} {[echo 163]} {[echo 164]} {[echo 165]} {[echo 166]} {[echo 167]} {[echo 168]} {[echo 169]} {[echo 170]} {[echo 171]} {[echo 172]} {[echo 173]} {[echo 174]} {[echo 175]} {[echo 176]} {[echo 177]} {[echo 178]} {[echo 179]} {[echo 180]} {[echo 181]} {[echo 182]} {[echo 183]} {[echo 184]} {[echo 185]} {[echo 186]} {[echo 187]} {[echo 188]} {[echo 189]} {[echo 190]} {[echo 191]} {[echo 192]} {[echo 193]} {[echo 194]} {[echo 195]} {[echo 196]} {[echo 197]} {[echo 198]} {[echo 199]} {[echo 200]} {[echo 201]} {[echo 202]} {[echo 203]} {[echo 204]} {[echo 205]} {[echo 206]} {[echo 207]} {[echo 208]} {[echo 209]} {[echo 210]} {[echo 211]} {[echo 212]} {[echo 213]} {[echo 214]} {[echo 215]} {[echo 216]} {[echo 217]} {[echo 218]} {[echo 219]} {[echo 220]} {[echo 221]} {[echo 222]} {[echo 223]} {[echo 224]} {[echo 225]} {[echo 226]} {[echo 227]} {[echo 228]} {[echo 229]} {[echo 230]} {[echo 231]} {[echo 232]} {[echo 233]} {[echo 234]} {[echo 235]} {[echo 236]} {[echo 237]} {[echo 238]} {[echo 239]} {[echo 240]} {[echo 241]} {[echo 242]} {[echo 243]} {[echo 244]} {[echo 245]} {[echo 246]} {[echo 247]} {[echo 248]} {[echo 249]} {[echo 250]} {[echo 251]} {[echo 252]} {[echo 253]} {[echo 254]} {[echo 255]}}
 }
 
@@ -39,50 +28,50 @@ service bitshift_left {
 
 /* multiplicand = input, multiplier = input2, product = output */ 
 service multiply {
-	if (loopnum == 0) {
-		output = 0
+	output = 0
+	if input2 > input {
+		temp = input2
+		temp2 = input
 	}
-	if (input2 > 0) {
-		i = (input2 & 1)
-		if (i == 1) {
-			output = output + input
+	else {
+		temp = input
+		temp2 = input2
+	}
+	@multiply2
+}
+
+service multiply2 {
+	if temp2 != 0 {
+		temp3 = temp2 & 1
+		if temp3 == 1 {
+			output = output + temp
 		}
-		i = (input << 1)
-		input = i
-		i = (input2 >> 1)
-		input2 = i
-		loopnum = 1
-		@multiply
-	} else {
-		loopnum = 0
+		temp = temp << 1
+		temp2 = temp2 >> 1
+		@multiply2
 	}
 }
 
-/* dividend = input, divisor = input2, quotient = output */
+/* dividend = input, divisor = input2, quotient = output, remainder = output2 */
 service divide {
-	if (loopnum == 0) {
-		output = 0
-	}
-	if (input2 != 0) {
-		if (input >= input2) {
-			input = input - input2
-			output = output + 1
-			loopnum = 1
-			@divide
-		} else {
-			loopnum = 0
-			remainder = input
-		}	
-	} else {
-		output = 0
-		[echo Division by 0 detected! Output reset to 0]
-	}	
+	output = 0
+	temp = input
+	temp2 = input2
+	@divide2
 }
 
-/* dividend = input, divisor = input2, quotient = output */
-service modulo {
-	@divide
-	output = remainder
+service divide2 {
+	if (temp2 != 0) {
+		if (temp >= temp2) {
+			temp = temp - temp2
+			output = output + 1
+			@divide2
+		} else {
+			output2 = temp
+		}
+	} else {
+		output = 0 /* clamp to zero */
+	}
 }
 		
 /* rng value = rng */
@@ -98,9 +87,6 @@ service entropy_rng {
 }
 
 /* char to render = input */
-service coutchar {
-	jump (input) { {[echo space]} {[echo !]} {[echo '']} {[echo #]} {[echo $]} {[echo %]} {[echo &]} {[echo ']} {[echo (]} {[echo )]} {[echo *]} {[echo +]} {[echo ,]} {[echo -]} {[echo .]} {[echo /]} {[echo 0]} {[echo 1]} {[echo 2]} {[echo 3]} {[echo 4]} {[echo 5]} {[echo 6]} {[echo 7]} {[echo 8]} {[echo 9]} {[echo :]} {[echo semicolon]} {[echo <]} {[echo =]} {[echo >]} {[echo ?]} {[echo @]} {[echo A]} {[echo B]} {[echo C]} {[echo D]}{[echo E]}{[echo F]} {[echo G]} {[echo H]} {[echo I]} {[echo J]} {[echo K]} {[echo L]} {[echo M]} {[echo N]} {[echo O]} {[echo P]} {[echo Q]} {[echo R]} {[echo S]} {[echo T]} {[echo U]} {[echo V]} {[echo W]} {[echo X]} {[echo Y]} {[echo Z]} {[echo open_bracket]} {[echo \]} {[echo closing_bracket]} {[echo ^]} {[echo _]} {[echo `]} {[echo a]} {[echo b]} {[echo c]} {[echo d]} {[echo e]} {[echo f]} {[echo g]} {[echo h]} {[echo i]} {[echo j]} {[echo k]} {[echo l]} {[echo m]} {[echo n]} {[echo o]} {[echo p]} {[echo q]} {[echo r]} {[echo s]} {[echo t]} {[echo u]} {[echo v]} {[echo w]} {[echo x]} {[echo y]} {[echo z]} {[echo {]} {[echo |]} {[echo }]} {[echo ~]}} 
-	}
-
-/* wait table, wait1-wait1000 */
-service wait1 {[wait]} service wait2 {@wait1 @wait1} service wait3 {@wait2 @wait1} service wait4 {@wait2 @wait2} service wait5 {@wait4 @wait1} service wait6 {@wait3 @wait3} service wait7 {@wait6 @wait1} service wait8 {@wait4 @wait4} service wait9 {@wait8 @wait1} service wait10 {@wait5 @wait5} service wait11 {@wait6 @wait5} service wait12 {@wait6 @wait6} service wait13 {@wait12 @wait1} service wait14 {@wait7 @wait7} service wait15 {@wait7 @wait8} service wait16 {@wait8 @wait8} service wait17 {@wait16 @wait1} service wait18 {@wait9 @wait9} service wait19 {@wait10 @wait9} service wait20 { @wait10 @wait10 } service wait21 { @wait20 @wait1 } service wait22 { @wait11 @wait11 } service wait23 { @wait22 @wait1 } service wait24 { @wait15 @wait9 } service wait25 { @wait15 @wait10 } service wait26 { @wait13 @wait13 } service wait27 { @wait13 @wait14 } service wait28 { @wait14 @wait14 } service wait29 { @wait28 @wait1 } service wait30 {@wait15 @wait15} service wait31 {@wait30 @wait1} service wait32 {@wait16 @wait16} service wait33 {@wait32 @wait1} service wait34 {@wait30 @wait4} service wait35 {@wait30 @wait5} service wait36 {@wait18 @wait18} service wait37 {@wait30 @wait7} service wait38 {@wait37 @wait1} service wait39 {@wait30 @wait9} service wait40 {@wait20 @wait20} service wait41 { @wait40 @wait1 } service wait42 { @wait40 @wait2 } service wait43 { @wait40 @wait3 } service wait44 { @wait22 @wait22 } service wait45 { @wait40 @wait5 } service wait46 { @wait40 @wait6 } service wait47 { @wait40 @wait7 } service wait48 { @wait24 @wait24 } service wait49 {@wait40 @wait9} service wait50 {@wait25 @wait25} service wait51 {@wait50 @wait1} service wait52 {@wait50 @wait2} service wait53 {@wait50 @wait3} service wait54 {@wait50 @wait4} service wait55 {@wait50 @wait5} service wait56 {@wait50 @wait6} service wait57 {@wait50 @wait7} service wait58 {@wait50 @wait8} service wait59 {@wait50 @wait9} service wait60 {@wait30 @wait30} service wait61 {@wait60 @wait1} service wait62 {@wait60 @wait2} service wait63 {@wait60 @wait3} service wait64 {@wait32 @wait32} service wait65 {@wait60 @wait5} service wait66 {@wait33 @wait33} service wait67 {@wait60 @wait7} service wait68 {@wait34 @wait34} service wait69 {@wait60 @wait9} service wait70 {@wait30 @wait40} service wait71 {@wait70 @wait1} service wait72 {@wait70 @wait2} service wait73 {@wait70 @wait3} service wait74 {@wait70 @wait4} service wait75 {@wait70 @wait5} service wait76 {@wait70 @wait6} service wait77 {@wait70 @wait7} service wait78 {@wait70 @wait8} service wait79 {@wait70 @wait9} service wait80 {@wait40 @wait40} service wait81 {@wait80 @wait1} service wait82 {@wait41 @wait41} service wait83 {@wait80 @wait3} service wait84 {@wait42 @wait42} service wait85 {@wait80 @wait5} service wait86 {@wait80 @wait6} service wait87 {@wait80 @wait7} service wait88 {@wait44 @wait44} service wait89 {@wait80 @wait9} service wait90 {@wait40 @wait50} service wait91 {@wait90 @wait1} service wait92 {@wait90 @wait2} service wait93 {@wait90 @wait3} service wait94 {@wait90 @wait4} service wait95 {@wait90 @wait5} service wait96 {@wait90 @wait6} service wait97 {@wait90 @wait7} service wait98 {@wait90 @wait8} service wait99 {@wait90 @wait9} service wait100 {@wait50 @wait50} service wait200 {@wait100 @wait100} service wait300 {@wait200 @wait100} service wait400 {@wait200 @wait200} service wait500 {@wait300 @wait200} service wait600 {@wait300 @wait300} service wait700 {@wait400 @wait300} service wait800 {@wait400 @wait400} service wait900 {@wait500 @wait400} service wait1000 {@wait500 @wait500}
+service char {
+	jump (input) { {[echo space]} {[echo !]} {[echo '']} {[echo #]} {[echo $]} {[echo %]} {[echo &]} {[echo ']} {[echo (]} {[echo )]} {[echo *]} {[echo +]} {[echo ,]} {[echo -]} {[echo .]} {[echo /]} {[echo 0]} {[echo 1]} {[echo 2]} {[echo 3]} {[echo 4]} {[echo 5]} {[echo 6]} {[echo 7]} {[echo 8]} {[echo 9]} {[echo :]} {[echo semicolon]} {[echo <]} {[echo =]} {[echo >]} {[echo ?]} {[echo @]}   {[echo open_bracket]} {[echo \]} {[echo closing_bracket]} {[echo ^]} {[echo _]} {[echo `]} {[echo a]} {[echo b]} {[echo c]} {[echo d]} {[echo e]} {[echo f]} {[echo g]} {[echo h]} {[echo i]} {[echo j]} {[echo k]} {[echo l]} {[echo m]} {[echo n]} {[echo o]} {[echo p]} {[echo q]} {[echo r]} {[echo s]} {[echo t]} {[echo u]} {[echo v]} {[echo w]} {[echo x]} {[echo y]} {[echo z]} {[echo {]} {[echo |]} {[echo }]} {[echo ~]}} 
+}

@@ -383,7 +383,7 @@ class ileft_shift(instruction):
                     elif self.alpha.bool_string[bit + shift] == '0':
                         self.identity_compute.extend(self.output.set_false[bit].alias)
         elif self.beta_is_constant():
-            for bit in reversed(range(int(self.statement.output.word_size))):
+            for bit in range(int(self.statement.output.word_size)):
                 if bit > int(self.statement.output.word_size) - 1 - shift:
                     self.identity_compute.extend(self.output.set_false[bit].alias)
                 else:
