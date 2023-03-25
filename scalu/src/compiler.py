@@ -1,15 +1,18 @@
 import scalu.src.preprocess.preprocess as preprocess
 import scalu.src.frontend.frontend as frontend_manager
 import scalu.src.backend.backend as backend_manager
+import scalu.src.preprocess.macro as preprocess_manager
 
 class compiler():
 
     def compile(self, program):
-        enriched_syntax_tree = frontend_manager.compile(program)
+        expanded_program = preprocess_manager.compile(program)
+        enriched_syntax_tree = frontend_manager.compile(expanded_program)
         compiled_file_directives = backend_manager.compile(enriched_syntax_tree)
         return compiled_file_directives
 
     def text_compile(self, program):
+        expanded_program = preprocess_manager.compile(program)
         enriched_syntax_tree = frontend_manager.compile(program)
         compiled_file_directives = backend_manager.compile(enriched_syntax_tree)
         text_blob = ''

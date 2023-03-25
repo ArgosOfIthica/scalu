@@ -17,6 +17,6 @@ class TestPreprocess(unittest.TestCase):
         self.assertEqual(preprocess.preprocess(program_text), program_text)
 
     def test_macro_declare(self):
-        program_text = '#deep #my_macro banana banana #save hello'
+        program_text = '#def var #my_macro banana banana #save hello'
         self.assertEqual(preprocess.preprocess(program_text), 
         'hello')

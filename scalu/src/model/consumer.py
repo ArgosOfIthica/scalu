@@ -24,7 +24,7 @@ class consumer():
         '<<': 'left_shift',
         '>>': 'right_shift',
         '^': 'bitwise_xor',
-        '?+': 'fast_add'
+        '+?': 'fast_add'
         }
         self.unary_symbol_map = {
         '!' : 'bitwise_neg',
