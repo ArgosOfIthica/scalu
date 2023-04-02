@@ -58,6 +58,14 @@ def handle():
         dest='aliasprefix',
         help='specify the prefix used for internal aliases'
     )
+    parser.add_argument(
+        '--debug',
+        '-dbg',
+        action='store_true',
+        default=False,
+        dest='debug',
+        help='run in debug mode'
+    )
 
     args = parser.parse_args()
 
@@ -65,3 +73,5 @@ def handle():
         raise Exception('scalu must be provided with a command to run: compile, test, etc')
 
     return args
+
+args = handle()

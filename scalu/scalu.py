@@ -6,7 +6,7 @@ import scalu.src.cli.output_handling as output_handler
 
 
 def main():
-    args = arg_handler.handle()
+    args = arg_handler.args
     if args.mode[0] == 'compile':
         file_input = input_handler.handle(args.input)
         text_output = scalu(file_input, args)
