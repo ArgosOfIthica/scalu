@@ -18,6 +18,7 @@ def clean_output(output_text):
     output_text = re.sub(';(\s*)\"', '"', output_text)
     output_text = re.sub('\";', '"', output_text)
     output_text = re.sub('\n{2,}', '\n', output_text)
+    output_text = re.sub('(?<!\\\)\\\]', ']', output_text)
     return output_text
 
 def minify_names(blob):
