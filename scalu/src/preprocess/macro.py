@@ -4,17 +4,15 @@ import re
 
 def compile(program):
     engine = MacroEngine()
-    engine.setup()
+    engine.reset()
     return engine.run(program)
 
 class MacroEngine():
 
-    def __init__(self):
+    def reset(self):
         self.variables = dict()
-        self.functions = dict()
-    
-    def setup(self):
-        self.reset()
+        self.templates = dict()
+        self.run_preamble()
 
     def run(self, program):
         return re.sub('(?:#def |#write |#reset )[\w\W]*?##', lambda match: self.process(match), program)
@@ -22,14 +20,17 @@ class MacroEngine():
     def process(self, match):
         macro = match.group(0)
         macro = macro.split()
-        macro = self.outer_function(macro)
+        return self.outer_function(macro)
+    
+    def clean(self, macro):
+        return ' '.join(macro[1:]).rstrip('#')
 
     def outer_function(self, macro):
         if macro[0] == '#def':
             self.define(macro[1:])
             return ''
         elif macro[0] == '#write':
-            return self.write(strip(macro[1:], '#'))
+            return self.write(self.clean(macro))
         elif macro[0] == '#reset':
             self.reset()
             return ''
@@ -37,11 +38,11 @@ class MacroEngine():
     def define(self, macro):
         macro_type = macro[0]
         if macro_type == 'var':
-            self.expect_var(macro[:1])
+            self.expect_var(macro[1:])
         elif macro_type == 'template':
-            self.expect_template(macro[:1])
+            self.expect_template(macro[1:])
         elif macro_type == 'generate':
-            self.expect_generate(macro[:1])
+            self.expect_generate(macro[1:])
         else:
             raise Exception('invalid macro type')
     
@@ -52,26 +53,20 @@ class MacroEngine():
         pass
 
     def write(self, macro):
-        return self.variables.get(macro, '')
-    
-    def reset(self):
-        self.variables = dict()
-        self.functions = dict()
-        self.run_preamble()
+        output = self.expand_vars(macro)
+        return output
             
     def expect_var(self, macro):
         name = macro[0]
-        return re.sub('#[a-zA-Z0-9]+', lambda match: self.expand_vars(match), ' '.join(macro))
+        value = self.expand_vars(self.clean(macro))
+        self.variables[name] = value
     
-    def expand_vars(self, match):
+    def expand_vars(self, macro):
+        return re.sub('#[a-zA-Z0-9_\-]+', lambda match: self.expand_var(match), macro)
+    
+    def expand_var(self, match):
         macro = match.group(0)
-        return self.get_var(strip(macro, '#'))
-
-    def get_var(self, var_name):
-        if var_name in variables:
-            return self.variables[var_name]
-        else:
-            return ''
+        return self.variables.get(macro.strip('#'), '')
 
     def verify(test_word, verify_word):
         if (test_word != verify_word):
@@ -80,9 +75,10 @@ class MacroEngine():
     def run_preamble(self):
         preamble = '''
         #def var scalu_version 1.1.1##
-        #def var machine '''+ platform.machine() +'''##
-        #def var system '''+ platform.system() +'''##
-        #def var python_implementation '''+ platform.python_implementation() +'''##
-        #def var python_version '''+ platform.python_version() +'''##
+        #def var scalu_machine '''+ platform.machine() +'''##
+        #def var scalu_system '''+ platform.system() +'''##
+        #def var scalu_language python3##
+        #def var scalu_python_implementation '''+ platform.python_implementation() +'''##
+        #def var scalu_python_version '''+ platform.python_version() +'''##
         '''
         self.run(preamble)
