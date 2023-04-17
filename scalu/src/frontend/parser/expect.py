@@ -185,7 +185,7 @@ def expect_call(consumer):
 def expect_source_call(consumer):
     new_source_call = model.source_call()
     consumer.consume('[')
-    new_source_call.arg[0] = consumer.token()
+    new_source_call.arg[0] = consumer.token().replace("\]", "]")
     new_source_call.identifier = '[' + consumer.token() + ']'
     consumer.consume()
     consumer.consume(']')
