@@ -8,6 +8,8 @@ divide: @divide
 rng: @rng
 entropy_rng: @entropy_rng
 char: @char
+pow: @pow
+sqrt: @sqrt
 }
 
 
@@ -73,7 +75,63 @@ service divide2 {
 		output = 0 /* clamp to zero */
 	}
 }
-		
+
+/* base = input, exponent = input2, product = output */
+service pow {
+	if (input2 == 0) {
+		output = 1
+	}
+	else {
+		temp5 = input2
+		input2 = input 		/* For calling multiply service in pow2 */
+		@pow2
+	}
+}
+
+service pow2 {
+	if (temp5 == 1) {
+		output = input
+	} else {
+		@multiply
+		input = output
+		temp5 = temp5 - 1
+		@pow2
+	}
+}
+
+/* num to find sq of = input, floor(sqrt) = output */
+service sqrt {
+	output = 0
+	temp2 = 1 << 6 /* The second from top bit is set */
+	temp3 = 0
+	temp4 = input
+	@sqrt2
+}
+
+service sqrt2 {
+	if (temp4 < temp2) {
+		temp2 = temp2 >> 2
+		@sqrt2
+	} else {
+		@sqrt3
+	}
+}
+
+service sqrt3 {
+	if (temp2 != 0) {
+		temp3 = output + temp2
+		if (temp4 < temp3) {
+			output = output >> 1
+		}
+		else {
+			temp4 = temp4 - (output + temp2)
+			output = (output >> 1) + temp2
+		}
+		temp2 = temp2 >> 2
+		@sqrt3
+	}
+}
+
 /* rng value = rng */
 service rng {
     rng = rng + 1
