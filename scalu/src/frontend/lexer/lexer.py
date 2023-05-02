@@ -12,7 +12,7 @@ class token():
         self.line = line
 
 def split_on_word(program):
-    return re.split('(\/\*[\s\S]*?\*\/|\[[\s\S]*?\]|-\w+|\+\w+|>>|<<|<=|>=|!=|==|\W)', program)
+    return re.split('(\/\*[\s\S]*?\*\/|\[[\s\S]*?(?<!\\\)\]|-\w+|\+\w+|>>|<<|<=|>=|!=|==|\W)', program)
     #this regex splits on comments, console blocks, negative events, positive events, and various operators
 
 def to_tokens(split_program):

@@ -31,7 +31,7 @@ def build_bindings(global_object):
             uni.root.extend(model.bind(event.key, event_compute))
 
 def build_events(global_object):
-    args = arg_handler.handle()
+    args = arg_handler.args
     uni = global_object.universe
     for event in global_object.maps.maps:
         event_def = uni.new_def('event')
