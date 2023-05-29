@@ -25,3 +25,8 @@ class TestPreprocess(unittest.TestCase):
         program_text = '#def var my_var is a string###write this #my_var##'
         self.assertEqual(macro.compile(program_text),
         'this is a string')
+    
+    def test_total_reset(self):
+        program_text = '#def var my_var test_string###reset ###write #my_var##'
+        self.assertEqual(macro.compile(program_text),
+        '')
