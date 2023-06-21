@@ -11,6 +11,7 @@ class MacroEngine():
 
     def reset(self):
         self.variables = dict()
+        self.variables['empty'] = ''
         self.templates = dict()
         self.run_preamble()
 
@@ -23,14 +24,14 @@ class MacroEngine():
         return self.outer_function(macro)
     
     def clean(self, macro):
-        return ' '.join(macro[1:]).rstrip('#')
+        return ' '.join(macro).rstrip('#')
 
     def outer_function(self, macro):
         if macro[0] == '#def':
             self.define(macro[1:])
             return ''
         elif macro[0] == '#write':
-            return self.write(self.clean(macro))
+            return self.write(self.clean(macro[1:]))
         elif macro[0] == '#reset':
             self.reset()
             return ''
@@ -49,17 +50,23 @@ class MacroEngine():
     def expect_template(macro):
         pass
     
-    def expect_generate(macro):
-        pass
+    def expect_generate(self, macro):
+        name = macro[0]
+        template = macro[1]
+        modifier = macro[2]
+        argument = self.expand_vars(self.clean(macro[3:]))
+        if modifier == 'special':
+            result = self.special_template(template, argument)
+            self.variables[name] = result
+
+    def expect_var(self, macro):
+        name = macro[0]
+        value = self.expand_vars(self.clean(macro[1:]))
+        self.variables[name] = value
 
     def write(self, macro):
         output = self.expand_vars(macro)
         return output
-            
-    def expect_var(self, macro):
-        name = macro[0]
-        value = self.expand_vars(self.clean(macro))
-        self.variables[name] = value
     
     def expand_vars(self, macro):
         return re.sub('#[a-zA-Z0-9_\-]+', lambda match: self.expand_var(match), macro)
@@ -82,3 +89,12 @@ class MacroEngine():
         #def var scalu_python_version '''+ platform.python_version() +'''##
         '''
         self.run(preamble)
+    
+    def special_template(self, template, argument):
+        if template == 'range':
+            ranges = argument.split()
+            ranges = [int(x) for x in ranges]
+            result = list(range(ranges[0], ranges[1], ranges[2]))
+            result = [str(x) for x in result]
+            result = ' '.join(result)
+            return result

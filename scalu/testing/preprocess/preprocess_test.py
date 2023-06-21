@@ -30,3 +30,8 @@ class TestPreprocess(unittest.TestCase):
         program_text = '#def var my_var test_string###reset ###write #my_var##'
         self.assertEqual(macro.compile(program_text),
         '')
+    
+    def test_generate_range(self):
+        program_text = '#def generate i9 range special 0 9 1## #write #i9##'
+        self.assertEqual(macro.compile(program_text),
+        ' 0 1 2 3 4 5 6 7 8')
