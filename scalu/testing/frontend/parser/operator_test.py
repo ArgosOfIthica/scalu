@@ -119,6 +119,15 @@ class TestOperators(unittest.TestCase):
                                                     }'''
         self.compiler.text_compile(program)
 
+    def test_fast_addition(self):
+        program = self.blueprint_two_chain + '''{a = 7 b = 5 
+                                                    c = 7 +? 5
+                                                    c = a +? 5
+                                                    c = 7 +? b
+                                                    c = a +? b
+                                                    }'''
+        self.compiler.text_compile(program)
+
     def test_subtraction(self):
         program = self.blueprint_two_chain + '''{a = 7 b = 5 
                                                     c = 7 - 5

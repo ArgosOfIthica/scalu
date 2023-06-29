@@ -9,6 +9,7 @@ def handle_instruction(global_object, compute, statement):
                 'bitwise_or' : ibitwise_or,
                 'bitwise_and' : ibitwise_and,
                 'add' : iadd,
+                'fast_add' : iadd,
                 'subtract' : isubtract,
                 'left_shift' : ileft_shift,
                 'right_shift' : iright_shift,
