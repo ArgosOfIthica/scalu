@@ -68,6 +68,25 @@ service inequality {
     if (23 != 23) {[echo failed]} else {[echo passed]}
 }
 
+sandbox test_elif
+
+map {
+    test_event : @elif
+}
+
+service elif {
+    a = 6
+    [echo running elif tests]
+    [echo test 1]
+    if (a != 5) {[echo passed]} elif (a == 6) {[echo failed]}
+    [echo test 2]
+    if (a == 5) {[echo failed]} elif (a == 6) {[echo passed]}
+    [echo test 3]
+    if (a == 2) {[echo failed]} elif (a == 3) {[echo failed]} else {[echo passed]}
+    [echo test 4]
+    if (a == 7) {[echo failed]} elif (a == 8) {[echo failed]} elif (a == 6) {[echo passed] [echo test 5]} if (a == 6){[echo passed]} else {[echo failed]}
+}
+
 sandbox test_copy
 
 map {

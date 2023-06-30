@@ -91,11 +91,7 @@ def expect_service_block(consumer, named=True):
         consumer.consume('service')
         new_block = consumer.current_sandbox.services.declare(consumer.use_if_name())
     else:
-        new_block = model.service()
-        new_block.name = ''
-        new_block.is_anonymous = True
-        new_block.declared = True
-        consumer.current_sandbox.services.append(new_block)
+        new_block = empty_service(consumer)
     consumer.consume('{')
     while consumer.is_not_end_block():
         if consumer.is_variable_assignment() or consumer.is_sandboxed_assignment():
@@ -126,9 +122,12 @@ def empty_service(consumer):
     consumer.current_sandbox.services.append(new_block)
     return new_block
 
-def expect_if(consumer):
+def expect_if(consumer, is_elif=False):
     new_if = model.if_statement()
-    consumer.consume('if')
+    if is_elif:
+        consumer.consume('elif')
+    else:
+        consumer.consume('if')
     if consumer.is_subexpression():
         consumer.consume('(')
         new_if.condition = expect_conditional(consumer)
@@ -136,10 +135,13 @@ def expect_if(consumer):
     else:
         new_if.condition = expect_conditional(consumer)
     new_if.true_service = expect_service_block(consumer, False)
-    if consumer.is_else():
+    if consumer.is_elif():
+        new_if.false_service = empty_service(consumer)
+        new_elif = expect_if(consumer, True)
+        new_if.false_service.sequence.append(new_elif)
+    elif consumer.is_else():
         consumer.consume('else')
         new_if.false_service = expect_service_block(consumer, False)
-
     else:
         new_if.false_service = empty_service(consumer)
     return new_if

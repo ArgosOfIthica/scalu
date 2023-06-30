@@ -109,6 +109,9 @@ class consumer():
 
     def is_if(self):
         return self.token() == 'if'
+    
+    def is_elif(self):
+        return self.token() == 'elif'
 
     def is_jump(self):
         return self.token() == 'jump'
