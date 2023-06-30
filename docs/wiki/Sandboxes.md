@@ -27,8 +27,3 @@ b = my_sandbox.a /* this will compile */
 
 Sandboxes contain file blocks, map blocks, bind blocks, and service blocks.
 
-[Files](https://github.com/ArgosOfIthica/scalu/wiki/Files) <br>
-[Binds](https://github.com/ArgosOfIthica/scalu/wiki/Binds) <br>
-[Maps](https://github.com/ArgosOfIthica/scalu/wiki/Maps-and-Events) <br>
-[Services](https://github.com/ArgosOfIthica/scalu/wiki/Services) <br>
-
