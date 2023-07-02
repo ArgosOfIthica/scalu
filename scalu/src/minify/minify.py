@@ -78,9 +78,9 @@ def compute_reallocation(text, blob, override_line_count=0):
         if line == 0:
             lines[0] = ';'.join(command_split[:proportion]) + ';' + new_aliases[0] + '"'
         elif line == line_count - 1:
-            lines[line] = 'alias ' + new_aliases[line - 1] + '"' + ';'.join(command_split[proportion * line:proportion * (line + 1)]) + '"'
+            lines[line] = 'alias ' + new_aliases[line - 1] + ' "' + ';'.join(command_split[proportion * line:proportion * (line + 1)]) + '"'
         else:
-            lines[line] = 'alias ' + new_aliases[line - 1] + '"' + ';'.join(command_split[proportion * line:proportion * (line + 1)]) + ';' + new_aliases[line] + '"'
+            lines[line] = 'alias ' + new_aliases[line - 1] + ' "' + ';'.join(command_split[proportion * line:proportion * (line + 1)]) + ';' + new_aliases[line] + '"'
         if len(lines[line]) > blob.CONSOLE_MAX_BUFFER:
             return compute_reallocation(text, blob, override_line_count + 1)
     return lines

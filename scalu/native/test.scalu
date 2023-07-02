@@ -471,7 +471,6 @@ service test {
     std.input2 = 3
     [$multiply]
     if (std.output == 6) {[echo passed]} else {[echo failed]}
-    /*
     [echo test 2]
     std.input = 5
     std.input2 = 0
@@ -492,7 +491,6 @@ service test {
     std.input2 = 15
     [$multiply]
     if (std.output == 15) {[echo passed]} else {[echo failed]}
-    */
 }
 
 sandbox test_std_divide
