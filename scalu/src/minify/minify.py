@@ -66,23 +66,23 @@ def reallocate(output_text, blob):
 
 
 
-def compute_reallocation(text, blob):
+def compute_reallocation(text, blob, override_line_count=0):
+    text = text.rstrip('"')
     command_split = text.split(';')
-    line_count = math.ceil(len(text) / blob.CONSOLE_MAX_BUFFER) + 1
-    new_aliases = blob.pick.new_alias_list(line_count)
+    command_count = len(command_split)
+    line_count = math.ceil(len(text) / blob.CONSOLE_MAX_BUFFER) + override_line_count
+    new_aliases = blob.pick.new_alias_list(line_count - 1)
+    proportion = math.ceil(command_count/line_count)
     lines = [''] * line_count
-    command = 0
-    for line in range(len(lines)):
-        if line > 0 and command < len(command_split):
-            lines[line] = 'alias ' + new_aliases[line - 1] + ' "'
-        while(command < len(command_split)):
-            test_line = lines[line] + command_split[command] + ';' + new_aliases[line]
-            if len(test_line) < blob.CONSOLE_MAX_BUFFER:
-                lines[line] = lines[line] + command_split[command] + ';'
-                command += 1
-            else:
-                lines[line] = lines[line] + new_aliases[line] + '"'
-                break
+    for line in range(line_count):
+        if line == 0:
+            lines[0] = ';'.join(command_split[:proportion]) + ';' + new_aliases[0] + '"'
+        elif line == line_count - 1:
+            lines[line] = 'alias ' + new_aliases[line - 1] + '"' + ';'.join(command_split[proportion * line:proportion * (line + 1)]) + '"'
+        else:
+            lines[line] = 'alias ' + new_aliases[line - 1] + '"' + ';'.join(command_split[proportion * line:proportion * (line + 1)]) + ';' + new_aliases[line] + '"'
+        if len(lines[line]) > blob.CONSOLE_MAX_BUFFER:
+            return compute_reallocation(text, blob, override_line_count + 1)
     return lines
 
 

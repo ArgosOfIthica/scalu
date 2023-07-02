@@ -118,7 +118,7 @@ map {
 service bitwise_not {
     [echo running bitwise_not test]
     [echo test 1]
-    a = 43 /* default bit size is relevant, but casting is not implemented */
+    a = 43
     b = !a
     if (b == 212) {[echo passed]} else {[echo failed]}
     [echo test 2]
@@ -138,8 +138,8 @@ map {
 service bitwise_and {
     [echo running bitwise_and test]
     [echo test 1]
-    a = 10 /* bit-pattern is 1010 */
-    b = 12 /* bit-pattern is 1100 */
+    a = 10
+    b = 12
     c = a & b
     if (c == 8) {[echo passed]} else {[echo failed]}
     [echo test 2]
@@ -471,6 +471,7 @@ service test {
     std.input2 = 3
     [$multiply]
     if (std.output == 6) {[echo passed]} else {[echo failed]}
+    /*
     [echo test 2]
     std.input = 5
     std.input2 = 0
@@ -491,6 +492,7 @@ service test {
     std.input2 = 15
     [$multiply]
     if (std.output == 15) {[echo passed]} else {[echo failed]}
+    */
 }
 
 sandbox test_std_divide

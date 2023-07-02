@@ -46,7 +46,7 @@ def handle():
         nargs='?',
         const='',
         dest='eventprefix',
-        help='specify the event prefix'
+        help='Experimental: specify the event prefix'
     )
     parser.add_argument(
         '--aliasprefix',
@@ -56,7 +56,17 @@ def handle():
         nargs='?',
         const='',
         dest='aliasprefix',
-        help='specify the prefix used for internal aliases'
+        help='Experimental: specify the prefix used for internal aliases'
+    )
+    parser.add_argument(
+        '--forcewordsize',
+        '-fw',
+        action='store',
+        default='8',
+        nargs='?',
+        const='',
+        dest='forcewordsize',
+        help='Experimental: force a maximum word size.'
     )
 
     args = parser.parse_args()

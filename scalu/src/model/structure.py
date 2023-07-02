@@ -2,7 +2,10 @@
 import scalu.src.frontend.utility.utility as utility
 import scalu.src.model.universe as universe
 import math as math
+import scalu.src.cli.arg_handling as arg_handler
 
+def get_max_word_size():
+    return arg_handler.handle().forcewordsize
 
 class rd_obj():
 
@@ -127,7 +130,7 @@ class sandbox(rd_obj):
         self.variables = rd_list().setup(variable)
         self.services = rd_list().setup(service)
         self.min_word_size = '2'
-        self.max_word_size = '8'
+        self.max_word_size = get_max_word_size()
     
     def validate_specific(self):
         for variable in self.variables:
@@ -142,7 +145,7 @@ class variable(rd_obj):
         self.name = name
         self.type = 'int'
         self.value = '0'
-        self.word_size = '8'
+        self.word_size = get_max_word_size()
         self.min_word_size = '2'
 
     def set_value(self, value):
