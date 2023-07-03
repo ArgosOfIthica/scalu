@@ -5,12 +5,12 @@ import scalu.src.cli.arg_handling as arg_handler
 class universe():
 
     def __init__(self):
-        self.args = arg_handler.handle()
+        self.args = arg_handler.args
         self.computations = list()
         self.vars = list()
         self.known_aliases = list()
         self.alias_to_def = dict()
-        self.picker = picker(self.args)
+        self.picker = picker()
         self.constructs = dict()
         self.constant_constructs = list()
         self.initialized = False
@@ -118,7 +118,6 @@ def get_bin(value, word_size):
 class variable():
 
     def __init__(self, global_object, var):
-        debug = False
         uni = global_object.universe
         self.value = var.value
         self.word_size = var.word_size
@@ -138,13 +137,13 @@ class variable():
                 uni.root.extend(self.set_true[bit].alias)
             else:
                 raise Exception('is not valid boolean string')
-        if debug:
+        if arg_handler.args.debug:
             print('creating var ' + var.name)
 
 class picker():
 
-    def __init__(self, args):
-        self.args = args
+    def __init__(self):
+        self.args = arg_handler.args
         self.symbols = list()
         self.current_use = 1
         lower_case_letters = range(97,123)

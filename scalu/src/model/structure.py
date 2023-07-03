@@ -5,7 +5,7 @@ import math as math
 import scalu.src.cli.arg_handling as arg_handler
 
 def get_max_word_size():
-    return arg_handler.handle().forcewordsize
+    return arg_handler.args.forcewordsize
 
 class rd_obj():
 

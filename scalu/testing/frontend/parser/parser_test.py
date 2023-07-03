@@ -87,6 +87,15 @@ class TestParsing(unittest.TestCase):
         program = self.blueprint_two_chain + '{ a = 7 [echo test_console_command_in_service] }'
         self.compiler.text_compile(program)
 
+    def test_console_command_escaping(self):
+        program = self.blueprint_two_chain + '{ a = 7 [echo test_console_command_escaping\]] }'
+        self.compiler.text_compile(program)
+
+    @unittest.expectedFailure
+    def test_console_command_escaped_end(self):
+        program = self.blueprint_two_chain + '{ a = 7 [echo test_console_command_escaped_end\] }'
+        self.compiler.text_compile(program)
+
     def test_service_call(self):
         program = self.blueprint_two_chain + '{ a = 3 @test_service2} service test_service2 { [echo old input was] a = ?a [echo new ouput is] a = ?5 }'
         self.compiler.text_compile(program)

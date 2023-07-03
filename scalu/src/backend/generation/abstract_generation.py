@@ -46,7 +46,7 @@ def build_events(global_object):
                 event_def.extend(uni.constructs[service_call.identifier].alias)
 
 def build_event_prefix(event, event_def):
-    args = arg_handler.handle()
+    args = arg_handler.args
     if event.string[0] == '+' or event.string[0] == '-':
         event_def.alias.string = event.string[0] + args.eventprefix + event.string[1:]
     else:

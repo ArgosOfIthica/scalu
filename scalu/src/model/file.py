@@ -4,7 +4,7 @@ import scalu.src.cli.arg_handling as arg_handler
 class file_container():
 
     def __init__(self, global_object, main_text):
-        args = arg_handler.handle()
+        args = arg_handler.args
         self.buffers()
         self.files = list()
         self.host_files = self.create_host_files('scalu', main_text)

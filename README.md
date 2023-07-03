@@ -21,11 +21,11 @@ If you do not have git installed, you can simply download the project from Githu
 
 Input files go in the ```scalu_in``` directory. To compile them, go to the root directory and run: <br>
 
-```python scalu -m compile``` <br>
+```python -m scalu compile``` <br>
 
 Linux users may need to run: <br>
 
-```python3 scalu -m compile``` <br>
+```python3 -m scalu compile``` <br>
 
 The output will be located in a new directory called ```scalu_out```. Copy these into your configuration files; the exact location of these files will depend on platform and game.
 
