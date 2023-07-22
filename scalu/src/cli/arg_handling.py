@@ -40,7 +40,6 @@ def handle():
     )
     parser.add_argument(
         '--eventprefix',
-        '-ep',
         action='store',
         default='$',
         nargs='?',
@@ -50,7 +49,6 @@ def handle():
     )
     parser.add_argument(
         '--aliasprefix',
-        '-ap',
         action='store',
         default='%',
         nargs='?',
@@ -60,7 +58,6 @@ def handle():
     )
     parser.add_argument(
         '--forcewordsize',
-        '-fw',
         action='store',
         default='8',
         nargs='?',
@@ -69,12 +66,20 @@ def handle():
         help='Experimental: force a maximum word size.'
     )
     parser.add_argument(
+        '--enablemacros',
+        action='store',
+        default=False,
+        nargs='?',
+        const='',
+        dest='enablemacros',
+        help='Unstable: enable compile time macros.'
+    )
+    parser.add_argument(
         '--debug',
-        '-dbg',
         action='store_true',
         default=False,
         dest='debug',
-        help='run in debug mode'
+        help='Unused: run in debug mode'
     )
 
     args = parser.parse_args()

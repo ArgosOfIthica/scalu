@@ -1,11 +1,15 @@
 
 import platform
 import re
+import scalu.src.cli.arg_handling as arg_handler
 
 def compile(program):
     engine = MacroEngine()
     engine.reset()
-    return engine.run(program)
+    if arg_handler.args.enablemacros or arg_handler.args.mode[0] == 'test':
+        return engine.run(program)
+    else:
+        return program
 
 class MacroEngine():
 
