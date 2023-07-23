@@ -37,7 +37,7 @@ def visualize_subexpression(arg, indentation_level=0):
         print(indent + 'PYTHON STRING: (' + '"' + arg + '")')
     elif model.is_variable(arg) and not model.is_constant(arg):
         print(indent + 'SCALU VARIABLE: "' + arg.name + '"')
-    elif model.is_constant(arg):
+    elif model.is_variable(arg) and arg.is_constant:
         print(indent + 'SCALU CONSTANT: "' + arg.value + '"')
     elif model.is_binary_operator(arg):
         print(indent + 'BINARY OPERATOR: "' + arg.identity + '" WITH ARGS:')

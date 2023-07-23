@@ -119,26 +119,49 @@ class variable():
 
     def __init__(self, global_object, var):
         uni = global_object.universe
+        self.uni = uni
         self.value = var.value
         self.word_size = var.word_size
+        self.is_constant = var.is_constant
         self.bool_string = get_bin(var.value, var.word_size)
         self.bits = list()
         self.set_true = list()
         self.set_false = list()
-        for bit in range(int(var.word_size)):
-            self.bits.append( uni.new_var())
-            self.set_true.append(uni.new_def('set_true'))
-            uni.set_var(self.set_true[bit], self.bits[bit], uni.true)
-            self.set_false.append(uni.new_def('set_false'))
-            uni.set_var(self.set_false[bit], self.bits[bit], uni.false)
-            if self.bool_string[bit] == '0':
-                uni.root.extend(self.set_false[bit].alias)
-            elif self.bool_string[bit] == '1':
-                uni.root.extend(self.set_true[bit].alias)
-            else:
-                raise Exception('is not valid boolean string')
+        if not self.is_constant:
+            for bit in range(int(var.word_size)):
+                self.bits.append( uni.new_var())
+                self.set_true.append(uni.new_def('set_true'))
+                uni.set_var(self.set_true[bit], self.bits[bit], uni.true)
+                self.set_false.append(uni.new_def('set_false'))
+                uni.set_var(self.set_false[bit], self.bits[bit], uni.false)
+                if self.bool_string[bit] == '0':
+                    uni.root.extend(self.set_false[bit].alias)
+                elif self.bool_string[bit] == '1':
+                    uni.root.extend(self.set_true[bit].alias)
+                else:
+                    raise Exception('is not valid boolean string')
+        else:
+            for bit in range(int(var.word_size)):
+                if self.bool_string[bit] == '0':
+                    self.bits.append(uni.false)
+                elif self.bool_string[bit] == '1':
+                    self.bits.append(uni.true)
+                else:
+                    raise Exception('is not valid boolean string')
         if arg_handler.args.debug:
             print('creating var ' + var.name)
+    
+    def get_bit(self, index):
+        if index < len(self.bool_string):
+            return self.bool_string[index]
+        else:
+            return '0'
+    
+    def get_bit_alias(self, index):
+        if index < len(self.bits):
+            return self.bits[index]
+        else:
+            return self.uni.false
 
 class picker():
 

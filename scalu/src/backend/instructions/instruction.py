@@ -55,7 +55,7 @@ def handle_jump(global_object, compute, statement):
 
 def generate_var(global_object, arg):
         uni = global_object.universe
-        if model.is_constant(arg):
+        if arg.is_constant:
             for con in uni.constant_constructs:
                 if arg.value == con.value and arg.word_size == con.word_size:
                     uni.constructs[arg] = con
@@ -109,7 +109,7 @@ class jump():
         else:
             compute.extend(self.compile_service('1' + branch_state))
             compute.extend(self.compile_service('0' + branch_state))
-        vb_alias = self.var_compute.bits[self.word_size - len(branch_state) - 1]
+        vb_alias = self.var_compute.get_bit_alias(self.word_size - len(branch_state) - 1)
         compute.extend(vb_alias)
         return compute.alias
 
@@ -155,22 +155,22 @@ class instruction():
     def execute_alpha(self, bit, compute_for=None):
         if compute_for == None:
             compute_for = self.identity_compute
-        exec_vb_alias = self.alpha.bits[bit]
+        exec_vb_alias = self.alpha.get_bit_alias(bit)
         compute_for.extend(exec_vb_alias)
         return exec_vb_alias
 
     def execute_beta(self, bit, compute_for=None):
         if compute_for == None:
             compute_for = self.identity_compute
-        exec_vb_alias = self.beta.bits[bit]
+        exec_vb_alias = self.beta.get_bit_alias(bit)
         compute_for.extend(exec_vb_alias)
         return exec_vb_alias
 
     def alpha_is_constant(self):
-        return model.is_constant(self.statement.arg[0])
+        return self.statement.arg[0].is_constant
 
     def beta_is_constant(self):
-        return model.is_constant(self.statement.arg[1])
+        return self.statement.arg[1].is_constant
 
     def determine_constants(self):
         constant = None
@@ -191,9 +191,9 @@ class icopy(instruction):
     def compile(self):
         if self.alpha_is_constant():
             for bit in range(int(self.statement.output.word_size)):
-                if self.alpha.bool_string[bit] == '0':
+                if self.alpha.get_bit(bit) == '0':
                     self.identity_compute.extend(self.output.set_false[bit].alias)
-                elif self.alpha.bool_string[bit] == '1':
+                elif self.alpha.get_bit(bit) == '1':
                     self.identity_compute.extend(self.output.set_true[bit].alias)
         else:
             for bit in range(int(self.statement.output.word_size)):
@@ -233,9 +233,9 @@ class ibitwise_neg(instruction):
     def compile(self):
         if self.alpha_is_constant():
             for bit in range(int(self.statement.output.word_size)):
-                if self.alpha.bool_string[bit] == '0':
+                if self.alpha.get_bit(bit) == '0':
                     self.identity_compute.extend(self.output.set_true[bit].alias)
-                elif self.alpha.bool_string[bit] == '1':
+                elif self.alpha.get_bit(bit) == '1':
                     self.identity_compute.extend(self.output.set_false[bit].alias)
         else:
             for bit in range(int(self.statement.output.word_size)):
@@ -248,19 +248,19 @@ class ibitwise_and(instruction):
     def compile(self):
         if self.alpha_is_constant() and self.beta_is_constant():
             for bit in range(int(self.statement.output.word_size)):
-                if self.alpha.bool_string[bit] == '0' or self.beta.bool_string[bit] == '0':
+                if self.alpha.get_bit(bit) == '0' or self.beta.get_bit(bit) == '0':
                     self.identity_compute.extend(self.output.set_false[bit].alias)
                 else:
                     self.identity_compute.extend(self.output.set_true[bit].alias)
         elif self.alpha_is_constant() or self.beta_is_constant():
             constant, nonconstant = self.determine_constants()
             for bit in range(int(self.statement.output.word_size)):
-                if constant.bool_string[bit] == '0':
+                if constant.get_bit(bit) == '0':
                     self.identity_compute.extend(self.output.set_false[bit].alias)
-                elif constant.bool_string[bit] == '1':
+                elif constant.get_bit(bit) == '1':
                     self.set_true_return(self.uni.true, bit)
                     self.set_false_return(self.uni.false, bit)
-                    self.identity_compute.extend(nonconstant.bits[bit])
+                    self.identity_compute.extend(nonconstant.get_bit_alias(bit))
         else:
             for bit in range(int(self.statement.output.word_size)):
                 self.set_true_branch(bit)
@@ -285,19 +285,19 @@ class ibitwise_or(instruction):
     def compile(self):
         if self.alpha_is_constant() and self.beta_is_constant():
             for bit in range(int(self.statement.output.word_size)):
-                if self.alpha.bool_string[bit] == '1' or self.beta.bool_string[bit] == '1':
+                if self.alpha.get_bit(bit) == '1' or self.beta.get_bit(bit) == '1':
                     self.identity_compute.extend(self.output.set_true[bit].alias)
                 else:
                     self.identity_compute.extend(self.output.set_false[bit].alias)
         elif self.alpha_is_constant() or self.beta_is_constant():
             constant, nonconstant = self.determine_constants()
             for bit in range(int(self.statement.output.word_size)):
-                if constant.bool_string[bit] == '1':
+                if constant.get_bit(bit) == '1':
                     self.identity_compute.extend(self.output.set_true[bit].alias)
-                elif constant.bool_string[bit] == '0':
+                elif constant.get_bit(bit) == '0':
                     self.set_true_return(self.uni.true, bit)
                     self.set_false_return(self.uni.false, bit)
-                    self.identity_compute.extend(nonconstant.bits[bit])
+                    self.identity_compute.extend(nonconstant.get_bit_alias(bit))
         else:
             for bit in range(int(self.statement.output.word_size)):
                 self.set_true_return(self.uni.true, bit)
@@ -321,8 +321,8 @@ class ibitwise_xor(instruction):
     def compile(self):
         if self.alpha_is_constant() and self.beta_is_constant():
             for bit in range(int(self.statement.output.word_size)):
-                alpha_bool = self.alpha.bool_string[bit] == '1'
-                beta_bool = self.beta.bool_string[bit] == '1'
+                alpha_bool = self.alpha.get_bit(bit)== '1'
+                beta_bool = self.beta.get_bit(bit) == '1'
                 if xor(alpha_bool, beta_bool):
                     self.identity_compute.extend(self.output.set_true[bit].alias)
                 else:
@@ -330,14 +330,14 @@ class ibitwise_xor(instruction):
         elif self.alpha_is_constant() or self.beta_is_constant():
             constant, nonconstant = self.determine_constants()
             for bit in range(int(self.statement.output.word_size)):
-                if constant.bool_string[bit] == '1':
+                if constant.get_bit(bit) == '1':
                     self.set_true_return(self.uni.false, bit)
                     self.set_false_return(self.uni.true, bit)
-                    self.identity_compute.extend(nonconstant.bits[bit])
-                elif constant.bool_string[bit] == '0':
+                    self.identity_compute.extend(nonconstant.get_bit_alias(bit))
+                elif constant.get_bit(bit) == '0':
                     self.set_true_return(self.uni.true, bit)
                     self.set_false_return(self.uni.false, bit)
-                    self.identity_compute.extend(nonconstant.bits[bit])
+                    self.identity_compute.extend(nonconstant.get_bit_alias(bit))
         else:
             for bit in range(int(self.statement.output.word_size)):
                 self.set_true_branch(bit)
@@ -379,9 +379,9 @@ class ileft_shift(instruction):
                 if bit > int(self.statement.output.word_size) - 1 - shift:
                     self.identity_compute.extend(self.output.set_false[bit].alias)
                 else:
-                    if self.alpha.bool_string[bit + shift] == '1':
+                    if self.alpha.get_bit(bit + shift) == '1':
                         self.identity_compute.extend(self.output.set_true[bit].alias)
-                    elif self.alpha.bool_string[bit + shift] == '0':
+                    elif self.alpha.get_bit(bit + shift) == '0':
                         self.identity_compute.extend(self.output.set_false[bit].alias)
         elif self.beta_is_constant():
             for bit in range(int(self.statement.output.word_size)):
@@ -405,9 +405,9 @@ class iright_shift(instruction):
                 if bit < shift:
                     self.identity_compute.extend(self.output.set_false[bit].alias)
                 else:
-                    if self.alpha.bool_string[bit - shift] == '1':
+                    if self.alpha.get_bit(bit - shift) == '1':
                         self.identity_compute.extend(self.output.set_true[bit].alias)
-                    elif self.alpha.bool_string[bit - shift] == '0':
+                    elif self.alpha.get_bit(bit - shift) == '0':
                         self.identity_compute.extend(self.output.set_false[bit].alias)
         elif self.beta_is_constant():
             for bit in reversed(range(int(self.statement.output.word_size))):
@@ -428,9 +428,9 @@ class arithmetic_instruction(instruction):
         self.uni.set_var(self.identity_compute, self.carry_bit, self.uni.false)
         for bit in reversed(range(int(self.statement.output.word_size))):
             if self.alpha_is_constant():
-                if self.alpha.bool_string[bit] == '0':
+                if self.alpha.get_bit(bit) == '0':
                     self.identity_compute.extend(self.compile_branch(bit, '0'))
-                elif self.alpha.bool_string[bit] == '1':
+                elif self.alpha.get_bit(bit) == '1':
                     self.identity_compute.extend(self.compile_branch(bit, '1'))
             else:
                 self.identity_compute.extend(self.subbranch(bit, '1'))
@@ -456,9 +456,9 @@ class arithmetic_instruction(instruction):
         compute = self.uni.new_def('code')
         if len(branch_state) == 1:
             if self.beta_is_constant():
-                if self.beta.bool_string[bit] == '0':
+                if self.beta.get_bit(bit) == '0':
                     compute.extend(self.compile_branch(bit, branch_state + '0'))
-                elif self.beta.bool_string[bit] == '1':
+                elif self.beta.get_bit(bit) == '1':
                     compute.extend(self.compile_branch(bit, branch_state + '1'))
             else:
                 compute.extend(self.subbranch(bit, branch_state + '1'))

@@ -222,6 +222,7 @@ def expect_assignment_identifier(consumer):
         consumer.current_sandbox.min_word_size = consumer.current_sandbox.max_word_size
     identifier = consumer.use_if_name()
     var = sandbox.variables.reference(identifier)
+    var.new_declaration()
     if not var.declared:
         return sandbox.variables.declare(identifier)
     else:
@@ -265,8 +266,9 @@ def expect_value(consumer):
     if utility.token_is_name(value):
         return sandbox.variables.reference(value)
     elif utility.token_is_numeric(value):
-        v_const = sandbox.variables.reference(value, model.constant)
+        v_const = sandbox.variables.reference(value)
         v_const.set_value(value)
+        v_const.is_constant = True
         v_const.declared = True
         return v_const
     else:
