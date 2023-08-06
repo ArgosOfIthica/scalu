@@ -38,7 +38,7 @@ class consumer():
         '>=' : 'greater_than_or_equal',
         '<=' : 'less_than_or_equal'
         }
-        self.word_sensitive_operators = ['add', 'left_shift', 'bitwise_neg']
+        self.word_sensitive_operators = ['add', 'left_shift', 'right_shift', 'bitwise_neg']
 
     #token functions
 
