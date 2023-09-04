@@ -1,3 +1,4 @@
 __pycache__/
+.mypy_cache
 scalu_in/
 scalu_out/

@@ -1,55 +1,55 @@
 import re
+from typing import List
 
-def tokenize(program):
-    split_program = split_on_word(program)
-    tokens = to_tokens(split_program)
-    return tokens
+class Token():
 
-class token():
-
-    def __init__(self, value, line):
+    def __init__(self, value: str, line: int):
         self.value = value
         self.line = line
 
-def split_on_word(program):
-    return re.split('(\/\*[\s\S]*?\*\/|\[[\s\S]*?(?<!\\\)\]|-\w+|\+\w+|\+\?|>>|<<|<=|>=|!=|==|\W)', program)
-    #this regex splits on comments, console blocks, negative events, positive events, and various operators
 
-def to_tokens(split_program):
-    tokens = list()
-    newline_count = 1
-    for token_string in split_program:
-        if token_string == '\n':
-            newline_count += 1
-        elif token_string.isspace() or token_string == '':
-            pass
-        elif token_string[0] == '[':
-            newline_count += tokenize_source_call(tokens, token_string)
-        elif token_string[0] == '/' and token_string[1] == '*':
-            newline_count += tokenize_comments(tokens, token_string)
-        else:
-            tokens.append(token(token_string, newline_count))
-    return tokens
+class Tokenizer():
 
-def tokenize_source_call(tokens, token_string):
-    newline_count = 0
-    for char in token_string:
-        if char == '\n':
-            newline_count += 1
-    new_token = token(token_string[0], newline_count)
-    tokens.append(new_token)
-    new_token = token(token_string[1:-1], newline_count)
-    tokens.append(new_token)
-    new_token = token(token_string[-1], newline_count)
-    tokens.append(new_token)
-    return newline_count
+    def __init__(self):
+        self.tokens: List[Token] = list()
+        self.newline_count: int = 1
 
-def tokenize_comments(tokens, token_string):
-    newline_count = 0
-    for i in range(len(token_string)):
-        if token_string[i] == '\n':
-            newline_count += 1
-    if token_string[-1] != '/' or token_string[-2] != '*':
-        raise Exception('Comment was not terminated. Last valid token is """' + tokens[-1].value + '""" at line ' + tokens[-1].line)
-    return newline_count
+    def tokenize(self, program: str) -> List[Token]:
+        split_program = self.split_on_word(program)
+        self.to_tokens(split_program)
+        return self.tokens
 
+    def split_on_word(self, program: str) -> List[str]:
+        return re.split('(\/\*[\s\S]*?\*\/|\[[\s\S]*?(?<!\\\)\]|-\w+|\+\w+|\+\?|>>|<<|<=|>=|!=|==|\W)', program)
+        #this regex splits on comments, console blocks, negative events, positive events, and various operators
+
+    def to_tokens(self, split_program: List[str]):
+        for token_string in split_program:
+            if token_string == '\n':
+                self.newline_count += 1
+            elif token_string.isspace() or token_string == '':
+                pass
+            elif token_string[0] == '[':
+                self.tokenize_source_call(token_string)
+            elif token_string[0] == '/' and token_string[1] == '*':
+                self.tokenize_comments(token_string)
+            else:
+                self.tokens.append(Token(token_string, self.newline_count))
+
+    def tokenize_source_call(self, token_string: str):
+        for char in token_string:
+            if char == '\n':
+                self.newline_count += 1
+        open_bracket = Token(token_string[0], self.newline_count)
+        self.tokens.append(open_bracket)
+        content = Token(token_string[1:-1], self.newline_count)
+        self.tokens.append(content)
+        close_bracket = Token(token_string[-1], self.newline_count)
+        self.tokens.append(close_bracket)
+
+    def tokenize_comments(self, token_string: str):
+        for i in range(len(token_string)):
+            if token_string[i] == '\n':
+                self.newline_count += 1
+        if token_string[-1] != '/' or token_string[-2] != '*':
+            raise Exception('Comment was not terminated. Last valid token is """' + self.tokens[-1].value + '""" at line ' + str(self.tokens[-1].line))
