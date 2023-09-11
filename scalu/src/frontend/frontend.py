@@ -1,5 +1,5 @@
 import scalu.src.frontend.lexer.lexer as lexer
-import scalu.src.frontend.parser.parser as parser
+import scalu.src.frontend.parser.expect as parser
 import scalu.src.visualize.visualize as visualize
 import scalu.src.frontend.unwrapper.unwrapper as unwrapper
 import scalu.src.cli.arg_handling as arg_handler

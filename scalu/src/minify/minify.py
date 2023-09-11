@@ -1,7 +1,6 @@
 
 import re
 import math
-import scalu.src.model.universe as universe
 
 def minify(cfg_string, uni):
     blob = alias_blob(uni)
@@ -102,7 +101,7 @@ def minify_word(word, alias_convert):
         return word
 
 def replace_words(replacement_map, cfg, cache):
-    words = list()
+    words = []
     tuple_pattern = cache[0]
     split_cfg = split_tail_word(cfg)
     for word in split_cfg:
@@ -112,7 +111,7 @@ def replace_words(replacement_map, cfg, cache):
             words.append(word)
     words = ''.join(words)
     line_split = words.split('\n')
-    purged_split = list()
+    purged_split = []
     tuple_pattern = cache[0]
     for split in line_split:
         element_list = compiled_tuple_list(tuple_pattern, split)
@@ -124,7 +123,6 @@ def replace_words(replacement_map, cfg, cache):
 
 def deduplicate(cfg):
     count = 0
-    running = True
     word_pattern = re.compile('^%\w*$')
     cache = [new_tuple_pattern(), word_pattern]
     while count < 500:
@@ -141,8 +139,8 @@ def deduplicate_instance(cfg, cache):
     tuple_pattern = cache[0]
     word_pattern = cache[1]
     tuple_list = compiled_tuple_list(tuple_pattern, cfg)
-    unique_tails = dict()
-    head_map = dict()
+    unique_tails = {}
+    head_map = {}
     for ele in tuple_list:
         if ele[TAIL] not in unique_tails:
             unique_tails[ele[TAIL]] = ele[HEAD]
@@ -150,7 +148,7 @@ def deduplicate_instance(cfg, cache):
             head_map[ele[HEAD]] = unique_tails[ele[TAIL]]
     new_cfg = replace_words(head_map, cfg, cache)
     tuple_list = compiled_tuple_list(tuple_pattern, new_cfg)
-    replacement_map = dict()
+    replacement_map = {}
     for ele in tuple_list:
         if word_pattern.match(ele[TAIL]) and word_pattern.match(ele[HEAD]):
             replacement_map[ele[HEAD]] = ele[TAIL]
@@ -174,7 +172,7 @@ def write_once_reduction(cfg):
 
 def inline_reduction(cfg):
     split_lines = cfg.split('\n')
-    new_lines = list()
+    new_lines = []
     exec_pattern = re.compile(';(%[a-z0-9]*)(?:\"|;)')
     for line in split_lines:
         execs = exec_pattern.findall(line)
@@ -193,7 +191,7 @@ class alias_blob():
     def __init__(self, uni):
         self.CONSOLE_MAX_BUFFER = 510 #determined by engine
         self.alias_tuples = tuple()
-        self.alias_convert = dict()
+        self.alias_convert = {}
         self.pick = uni.picker.reset()
         if uni is not None:
             for alias in uni.known_aliases:

@@ -6,17 +6,13 @@ class universe():
 
     def __init__(self):
         self.args = arg_handler.args
-        self.computations = list()
-        self.vars = list()
-        self.known_aliases = list()
-        self.alias_to_def = dict()
+        self.computations = []
+        self.vars = []
+        self.known_aliases = []
+        self.alias_to_def = {}
         self.picker = picker()
-        self.constructs = dict()
-        self.constant_constructs = list()
-        self.initialized = False
-
-    def initialize(self):
-        self.initialized = True
+        self.constructs = {}
+        self.constant_constructs = []
         self.true = self.new_var()
         self.false = self.new_var()
         self.root = self.new_def('root')
@@ -28,8 +24,6 @@ class universe():
         return new_alias
 
     def new_def(self, alias_type):
-        if not self.initialized:
-            self.initialize()
         alias_string = self.picker.new_alias()
         new_alias = alias(alias_string, alias_type)
         new_computation = definition(new_alias)
@@ -76,7 +70,7 @@ class computation():
 
     def __init__(self, alias_object):
         self.alias = alias_object
-        self.commands = list()
+        self.commands = []
 
     def extend(self, command):
         self.commands.append(command)
@@ -124,9 +118,9 @@ class variable():
         self.word_size = var.word_size
         self.is_constant = var.is_constant
         self.bool_string = get_bin(var.value, var.word_size)
-        self.bits = list()
-        self.set_true = list()
-        self.set_false = list()
+        self.bits = []
+        self.set_true = []
+        self.set_false = []
         if not self.is_constant:
             for bit in range(int(var.word_size)):
                 self.bits.append( uni.new_var())
@@ -150,13 +144,13 @@ class variable():
                     raise Exception('is not valid boolean string')
         if arg_handler.args.debug:
             print('creating var ' + var.name)
-    
+
     def get_bit(self, index):
         if index < len(self.bool_string):
             return self.bool_string[index]
         else:
             return '0'
-    
+
     def get_bit_alias(self, index):
         if index < len(self.bits):
             return self.bits[index]
@@ -167,7 +161,7 @@ class picker():
 
     def __init__(self):
         self.args = arg_handler.args
-        self.symbols = list()
+        self.symbols = []
         self.current_use = 1
         lower_case_letters = range(97,123)
         numbers = range(48,58)
@@ -182,7 +176,7 @@ class picker():
     def new_alias(self):
         RESERVED_PREFIX = self.args.aliasprefix
         revolutions = int(math.log(self.current_use, len(self.symbols))) + 1
-        new_alias = list()
+        new_alias = []
         for x in range(0, revolutions):
             selected = int((self.current_use / int((len(self.symbols) ** x)) % len(self.symbols)))
             new_alias = [self.symbols[selected]] + new_alias

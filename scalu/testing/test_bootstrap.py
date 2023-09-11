@@ -1,10 +1,9 @@
-
+import unittest
 from scalu.testing.frontend.parser.parser_test import TestParsing
 from scalu.testing.frontend.parser.operator_test import TestOperators
 from scalu.testing.preprocess.preprocess_test import TestPreprocess
-import scalu.src.compiler as compiler
+from scalu.src import compiler
 from scalu.native.interpreter import native_console
-import unittest
 import scalu.src.cli.arg_handling as arg_handler
 
 def test():

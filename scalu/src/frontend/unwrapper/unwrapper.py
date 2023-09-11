@@ -1,12 +1,11 @@
 
 import scalu.src.model.structure as model
-import copy
 
 def unwrap(global_object):
-    temporary_vars = list()
+    temporary_vars = []
     for sandbox in global_object.sandbox:
         for service in sandbox.services:
-            sequence_out = list()
+            sequence_out = []
             for statement in service.sequence:
                 for var in temporary_vars:
                     var.used = False
@@ -23,7 +22,7 @@ def unwrap(global_object):
 class unwrapped_element():
 
     def __init__(self, temporary_vars, word_size):
-        self.instr_order = list()
+        self.instr_order = []
         self.temps = temporary_vars
         self.word_size = word_size
 
@@ -40,10 +39,10 @@ class unwrapped_element():
 
     def unwrap(self, item, output_variable):
         item.output = output_variable
-        item.arg = [self.unwrap_transform(arg, output_variable) for arg in item.arg]
+        item.arg = [self.unwrap_transform(arg) for arg in item.arg]
         self.instr_order.append(item)
 
-    def unwrap_transform(self, item, output_variable):
+    def unwrap_transform(self, item):
         if not model.is_variable(item):
             new_output_variable = self.generate_temporary_variable()
             self.unwrap(item, new_output_variable)

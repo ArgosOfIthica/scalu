@@ -1,10 +1,12 @@
 import scalu.src.model.structure as model
 import scalu.src.frontend.utility.utility as utility
 import scalu.src.model.consumer as consume
-import re
+
+Consumer = consume.Consumer
+Sandbox = model.Sandbox
 
 def parse(tokens):
-    consumer_obj = consume.consumer(tokens)
+    consumer_obj = consume.Consumer(tokens)
     return global_context(consumer_obj)
 
 
@@ -12,16 +14,15 @@ def global_context(consumer):
     new_global_object = model.global_object()
     consumer.global_object = new_global_object
     while consumer.is_sandbox():
-        new_sandbox = expect_sandbox(consumer)
+        expect_sandbox(consumer)
     if consumer.token() == '':
         new_global_object.resolve()
         new_global_object.current_sandbox = None
         return new_global_object
-    else:
-        consume.parsing_error(consumer)
+    consume.parsing_error(consumer)
 
 
-def expect_sandbox(consumer):
+def expect_sandbox(consumer: Consumer) -> Sandbox:
     consumer.consume('sandbox')
     new_sandbox = consumer.global_object.sandbox.declare(consumer.token())
     consumer.current_sandbox = new_sandbox
@@ -29,13 +30,13 @@ def expect_sandbox(consumer):
     while consumer.is_block():
         block_type = consumer.token()
         if block_type == 'service':
-            new_block = expect_service_block(consumer)
+            expect_service_block(consumer)
         elif block_type == 'map':
-            new_block = expect_map_block(consumer)
+            expect_map_block(consumer)
         elif block_type == 'bind':
-            new_block = expect_bind_block(consumer)
+            expect_bind_block(consumer)
         elif block_type == 'file':
-            new_block = expect_file_block(consumer)
+            expect_file_block(consumer)
         else:
             consume.parsing_error(consumer, 'invalid block type error')
     return new_sandbox
@@ -225,8 +226,7 @@ def expect_assignment_identifier(consumer):
     var.new_declaration()
     if not var.declared:
         return sandbox.variables.declare(identifier)
-    else:
-        return var
+    return var
 
 def expect_p_expression(consumer):
     consumer.consume('(')
@@ -265,14 +265,13 @@ def expect_value(consumer):
     consumer.consume()
     if utility.token_is_name(value):
         return sandbox.variables.reference(value)
-    elif utility.token_is_numeric(value):
+    if utility.token_is_numeric(value):
         v_const = sandbox.variables.reference(value)
         v_const.set_value(value)
         v_const.is_constant = True
         v_const.declared = True
         return v_const
-    else:
-        consume.parsing_error(consumer, 'invalid variable error')
+    consume.parsing_error(consumer, 'invalid variable error')
 
 def expect_conditional(consumer):
     new_cond = model.conditional()
@@ -299,5 +298,3 @@ def expect_binop(consumer, chain):
         consumer.current_sandbox.min_word_size = consumer.current_sandbox.max_word_size
     new_binop.arg[1] = expect_expression(consumer)
     return new_binop
-
-

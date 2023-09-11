@@ -4,8 +4,8 @@ import re
 class native_console():
     
     def __init__(self):
-        self.aliases = dict()
-        self.output_buffer = str()
+        self.aliases = {}
+        self.output_buffer = ''
         self.assignment_count = 0
         self.execution_count = 0
 
@@ -17,7 +17,7 @@ class native_console():
 
     def pop_output_buffer(self):
         temp = self.output_buffer
-        self.output_buffer = str()
+        self.output_buffer = ''
         return temp
 
     def clean_commands(self, commands):

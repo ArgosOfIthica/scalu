@@ -4,7 +4,7 @@ import scalu.src.model.universe as universe
 class emission_queue_obj():
 
     def __init__(self):
-        self.queue = list()
+        self.queue = []
         self.index = 0
 
     def append(self, element):
@@ -47,10 +47,10 @@ def emit_aliased_computation(computation_target, uni, emission_queue):
 def emit_computation(command, uni, emission_queue):
     emit_string = ''
     if universe.is_var(command):
-            if len(command.commands) > 1:
-                raise Exception('malformed variable definition')
-            emit_string += 'alias ' + command.alias.identity + ' ' + command.commands[0].identity + ';'
-            emission_queue.append(command.commands[0])
+        if len(command.commands) > 1:
+            raise Exception('malformed variable definition')
+        emit_string += 'alias ' + command.alias.identity + ' ' + command.commands[0].identity + ';'
+        emission_queue.append(command.commands[0])
     elif universe.is_alias(command) and command in uni.vars:
         emit_string += command.identity + ';'
     elif universe.is_source_command(command):

@@ -18,7 +18,7 @@ class TestPreprocess(unittest.TestCase):
 
     def test_macro_write(self):
         program_text = '#write #scalu_language##'
-        self.assertEqual(macro.compile(program_text), 
+        self.assertEqual(macro.compile(program_text),
         'python3')
 
     def test_macro_def(self):

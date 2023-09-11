@@ -1,7 +1,6 @@
 
 import scalu.src.frontend.utility.utility as utility
 import scalu.src.model.universe as universe
-import math as math
 import scalu.src.cli.arg_handling as arg_handler
 
 def get_max_word_size():
@@ -72,10 +71,9 @@ class rd_list(list):
 class global_object():
 
     def __init__(self):
-        self.sandbox = rd_list().setup(sandbox)
+        self.sandbox = rd_list().setup(Sandbox)
         self.maps = map_collection()
         self.universe = universe.universe()
-        self.universe.initialize()
 
     def resolve(self):
         self.sandbox.validate()
@@ -87,7 +85,7 @@ class global_object():
 class map_collection():
 
     def __init__(self):
-        self.maps = list()
+        self.maps = []
 
     def add(self, event):
         if self.non_colliding_keys(event) and self.non_colliding_files(event):
@@ -123,7 +121,7 @@ class map_collection():
             old_event.file = new_event.file
         old_event.services = old_event.services + new_event.services
 
-class sandbox(rd_obj):
+class Sandbox(rd_obj):
 
     def __init__(self):
         rd_obj.__init__(self)
@@ -141,7 +139,7 @@ class sandbox(rd_obj):
     
     def optimize_assignments(self):
         for service in self.services:
-            new_sequence = list()
+            new_sequence = []
             for element in service.sequence:
                 if is_assignment(element) and element.identifier.declaration_count == 1 and is_variable(element.arg[0]) and element.arg[0].is_constant:
                     element.identifier.is_constant = True
@@ -176,7 +174,7 @@ class service(rd_obj):
 
     def __init__(self):
         rd_obj.__init__(self)
-        self.sequence = list()
+        self.sequence = []
         self.is_anonymous = False
 
 class event():
@@ -185,7 +183,7 @@ class event():
         self.string = string
         self.key = None
         self.file = None
-        self.services = list()
+        self.services = []
 
     def add_key(self, key_string):
         if self.key == None:
@@ -204,7 +202,7 @@ class statement():
 
     def __init__(self):
         self.identifier = ''
-        self.arg = list()
+        self.arg = []
 
 class assignment(statement):
 
@@ -233,7 +231,7 @@ class jump_statement():
 
     def __init__(self):
         self.var = None
-        self.services = list()
+        self.services = []
 
     def update_word(self):
         service_count = len(self.services)
@@ -244,18 +242,21 @@ class operator():
     def __init__(self):
         identity = ''
         output = ''
-        arg = list()
+        arg = []
 
-class unary_operator(operator):
+class UnconditionalOperator(operator):
+    pass
+
+class unary_operator(UnconditionalOperator):
 
     def __init__(self):
-        operator.__init__(self)
+        super().__init__()
         self.arg = [None]
 
-class binary_operator(operator):
+class binary_operator(UnconditionalOperator):
 
     def __init__(self):
-        operator.__init__(self)
+        super().__init__()
         self.arg =  [None] * 2
 
 class conditional(operator):
@@ -279,17 +280,14 @@ def is_unary_operator(arg):
 def is_binary_operator(arg):
     return isinstance(arg, binary_operator)
 
+def is_unconditional_operator(arg):
+    return isinstance(arg, UnconditionalOperator)
+
 def is_variable(arg):
     return isinstance(arg, variable)
 
-def is_literal_value(arg):
-    return isinstance(arg, literal_value)
-
 def is_source_call(arg):
     return isinstance(arg, source_call)
-
-def is_key(arg):
-    return isinstance(arg, key)
 
 def is_if_statement(arg):
     return isinstance(arg, if_statement)

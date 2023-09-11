@@ -11,7 +11,7 @@ class Token():
 class Tokenizer():
 
     def __init__(self):
-        self.tokens: List[Token] = list()
+        self.tokens: List[Token] = []
         self.newline_count: int = 1
 
     def tokenize(self, program: str) -> List[Token]:

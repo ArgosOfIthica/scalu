@@ -9,7 +9,7 @@ def parsing_error(parser, error_message=''):
                 context_string += parser.token(i) + ' '
     raise Exception(error_message + '::: did not expect token """' + parser.token() + '""",  # ' + str(parser.count) + ' ::: ...' + context_string + ' """' + parser.token() + '""" ... at line ' + str(parser.current_line()))
 
-class consumer():
+class Consumer():
 
     def __init__(self, tokens):
         self.current_sandbox = None
@@ -59,10 +59,6 @@ class consumer():
         else:
             self.count += 1
 
-    def maybe_consume(self, maybe_token):
-            if maybe_token == self.token():
-                consume(maybe_token)
-
     def token_is_name(self):
         return utility.token_is_name(self.token())
 
@@ -109,7 +105,7 @@ class consumer():
 
     def is_if(self):
         return self.token() == 'if'
-    
+
     def is_elif(self):
         return self.token() == 'elif'
 
