@@ -1,7 +1,4 @@
-<img src="https://img.shields.io/github/issues/ArgosOfIthica/scalu" alt="issues shield">   
-<img src="https://img.shields.io/github/license/ArgosOfIthica/scalu" alt="license shield"> 
-<img src="https://img.shields.io/github/repo-size/ArgosOfIthica/scalu" alt="size shield"> 
-<img src="https://img.shields.io/github/v/release/ArgosOfIthica/scalu" alt="release shield"> </p>
+<img src="https://img.shields.io/github/issues/ArgosOfIthica/scalu" alt="issues shield">   <img src="https://img.shields.io/github/license/ArgosOfIthica/scalu" alt="license shield"> <img src="https://img.shields.io/github/repo-size/ArgosOfIthica/scalu" alt="size shield"> <img src="https://img.shields.io/github/v/release/ArgosOfIthica/scalu" alt="release shield"> </p>
 <p align="center">
 <img src="/assets/logo.png" alt="scalu logo" width="400">
 
