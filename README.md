@@ -1,4 +1,3 @@
-[![Liberapay](https://img.shields.io/liberapay/receives/Argos.svg?logo=liberapay&style=flat-square)](https://liberapay.com/Argos/)
 <img src="https://img.shields.io/github/issues/ArgosOfIthica/scalu" alt="issues shield">   
 <img src="https://img.shields.io/github/license/ArgosOfIthica/scalu" alt="license shield"> 
 <img src="https://img.shields.io/github/repo-size/ArgosOfIthica/scalu" alt="size shield"> 
